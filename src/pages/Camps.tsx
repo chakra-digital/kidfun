@@ -1,11 +1,10 @@
-
 import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, MapPin, User } from "lucide-react";
 
 // Mock data for camps
 const mockCamps = [

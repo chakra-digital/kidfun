@@ -1,13 +1,11 @@
-
 import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
-import { MapPin, Plus, Calendar, List, User } from "lucide-react";
+import { MapPin, Plus, Calendar, List, User, Star } from "lucide-react";
 
-// Mock data for activities
 const mockActivities = [
   {
     id: "activity1",
@@ -114,7 +112,6 @@ const Activities = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        {/* Hero Section */}
         <section className="bg-gradient-to-r from-camps-primary to-camps-accent text-white py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center">
@@ -128,7 +125,6 @@ const Activities = () => {
           </div>
         </section>
 
-        {/* Filter Section */}
         <div className="border-b sticky top-16 bg-white z-40">
           <div className="container mx-auto py-4">
             <div className="flex items-center space-x-4 overflow-x-auto pb-2 hide-scrollbar">
@@ -155,7 +151,6 @@ const Activities = () => {
           </div>
         </div>
 
-        {/* Activities Grid */}
         <section className="py-10">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold mb-6">Popular Activities</h2>
@@ -172,7 +167,6 @@ const Activities = () => {
           </div>
         </section>
 
-        {/* Benefits Section */}
         <section className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
