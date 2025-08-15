@@ -181,6 +181,44 @@ const Index = () => {
                 Find trusted providers, book with confidence, and create unforgettable experiences
               </p>
               
+              {/* Category Buttons */}
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                <Button 
+                  variant="default" 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                >
+                  Summer Camps
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                >
+                  Activities
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                >
+                  Tutors
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                >
+                  Sports
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                >
+                  After School
+                </Button>
+              </div>
             </div>
           </div>
         </section>
@@ -195,7 +233,7 @@ const Index = () => {
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Nearby</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {nearbyMockData.map((item) => (
                 <CampCard key={item.id} {...item} />
               ))}
@@ -212,7 +250,7 @@ const Index = () => {
         <section className="py-8 md:py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Featured Camps & Activities</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {mockCamps.map((camp) => (
                 <CampCard key={camp.id} {...camp} />
               ))}

@@ -62,7 +62,7 @@ const CampCard = ({
         </div>
 
         {/* Card Content */}
-        <div className="p-4">
+        <div className="p-3">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center space-x-1 text-sm text-gray-600">
               <MapPin className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ const CampCard = ({
             </div>
           </div>
 
-          <h3 className="font-medium text-lg mb-1 text-camps-dark">{title}</h3>
+          <h3 className="font-medium text-base mb-1 text-camps-dark line-clamp-2">{title}</h3>
 
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <Calendar className="h-3.5 w-3.5 mr-1" />
