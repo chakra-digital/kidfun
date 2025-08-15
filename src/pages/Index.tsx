@@ -6,13 +6,17 @@ import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, Calendar, Star } from "lucide-react";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
+import soccerKidsImage from "@/assets/soccer-kids-action.jpg";
+import artsCraftsImage from "@/assets/arts-crafts-kids.jpg";
+import swimmingKidsImage from "@/assets/swimming-kids.jpg";
+import scienceKidsImage from "@/assets/science-kids.jpg";
 
 // Mock data for camps and activities
 const mockCamps = [
   {
     id: "camp1",
     title: "Wilderness Adventure Camp",
-    image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: swimmingKidsImage,
     location: "Boulder, Colorado",
     price: 80,
     priceUnit: "day",
@@ -27,7 +31,7 @@ const mockCamps = [
   {
     id: "camp2",
     title: "Tech Innovators STEM Camp",
-    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: scienceKidsImage,
     location: "San Francisco, CA",
     price: 95,
     priceUnit: "day",
@@ -56,7 +60,7 @@ const mockCamps = [
   {
     id: "activity2",
     title: "Creative Arts & Crafts Workshop",
-    image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: artsCraftsImage,
     location: "Austin, TX",
     price: 35,
     priceUnit: "session",
@@ -70,7 +74,7 @@ const mockCamps = [
   {
     id: "camp3",
     title: "Summer Sports Academy",
-    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: soccerKidsImage,
     location: "Chicago, IL",
     price: 75,
     priceUnit: "day",
@@ -102,7 +106,7 @@ const nearbyMockData = [
   {
     id: "nearby1",
     title: "Soccer Skills Academy",
-    image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: soccerKidsImage,
     location: "2.5 miles away",
     price: 40,
     priceUnit: "session",
