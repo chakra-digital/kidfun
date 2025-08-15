@@ -181,44 +181,6 @@ const Index = () => {
                 Find trusted providers, book with confidence, and create unforgettable experiences
               </p>
               
-              {/* Category Buttons */}
-              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
-                <Button 
-                  variant="default" 
-                  size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg"
-                >
-                  Summer Camps
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  Activities
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-purple-500 hover:bg-purple-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  Tutors
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  Sports
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-pink-500 hover:bg-pink-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  After School
-                </Button>
-              </div>
             </div>
           </div>
         </section>
