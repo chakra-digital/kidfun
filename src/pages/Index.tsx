@@ -5,6 +5,7 @@ import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, Calendar, Star } from "lucide-react";
+import heroImage from "@/assets/kids-soccer-hero.jpg";
 
 // Mock data for camps and activities
 const mockCamps = [
@@ -110,28 +111,63 @@ const Index = () => {
       <Navbar />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-camps-primary to-camps-secondary text-white py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Find the Perfect Camp or Activity for Your Child
+        <section 
+          className="relative text-white py-20 overflow-hidden"
+          style={{
+            backgroundImage: `url(${heroImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                Kids camps, activities, tutors, sports and more
               </h1>
-              <p className="text-xl mb-8">
-                Discover trusted, certified camps and activities designed for kids to learn, play, and grow.
+              <p className="text-xl mb-8 text-white/90">
+                Find trusted providers, book with confidence, and create unforgettable experiences
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <div className="relative w-full sm:w-auto">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Where are you looking?"
-                    className="pl-10 pr-4 py-3 rounded-full w-full sm:w-64 text-camps-dark"
-                    value={searchLocation}
-                    onChange={(e) => setSearchLocation(e.target.value)}
-                  />
-                </div>
-                <Button size="lg" className="rounded-full w-full sm:w-auto">
-                  Explore Options
+              
+              {/* Category Buttons */}
+              <div className="flex flex-wrap justify-center gap-4 mb-8">
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="bg-white text-gray-900 hover:bg-white/90 rounded-full px-8 py-3 font-semibold"
+                >
+                  Summer Camps
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                >
+                  Activities
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                >
+                  Tutors
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                >
+                  Sports
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                >
+                  After School
                 </Button>
               </div>
             </div>
