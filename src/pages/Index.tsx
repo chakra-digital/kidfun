@@ -5,7 +5,7 @@ import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, Calendar, Star } from "lucide-react";
-import heroImage from "@/assets/kids-soccer-hero.jpg";
+import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 
 // Mock data for camps and activities
 const mockCamps = [
@@ -98,6 +98,51 @@ const mockCamps = [
   },
 ];
 
+const nearbyMockData = [
+  {
+    id: "nearby1",
+    title: "Soccer Skills Academy",
+    image: "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    location: "2.5 miles away",
+    price: 40,
+    priceUnit: "session",
+    rating: 4.9,
+    reviewCount: 156,
+    dates: "Weekdays 4-6pm",
+    availability: "Available",
+    type: "activity" as const,
+    age: "6-12"
+  },
+  {
+    id: "nearby2",
+    title: "Math & Science Tutoring",
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    location: "1.8 miles away",
+    price: 65,
+    priceUnit: "hour",
+    rating: 4.8,
+    reviewCount: 89,
+    dates: "Flexible scheduling",
+    availability: "3 spots left",
+    type: "activity" as const,
+    age: "8-16"
+  },
+  {
+    id: "nearby3",
+    title: "Art & Design Workshop",
+    image: "https://images.unsplash.com/photo-1544013778-5f85b6e579be?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    location: "3.2 miles away",
+    price: 45,
+    priceUnit: "session",
+    rating: 4.7,
+    reviewCount: 72,
+    dates: "Saturdays 10am-12pm",
+    availability: "Available",
+    type: "activity" as const,
+    age: "7-14"
+  }
+];
+
 const Index = () => {
   const [activeFilter, setActiveFilter] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
@@ -112,7 +157,7 @@ const Index = () => {
       <main className="flex-grow">
         {/* Hero Section */}
         <section 
-          className="relative text-white py-20 overflow-hidden"
+          className="relative text-white py-16 md:py-24 overflow-hidden min-h-[70vh] flex items-center"
           style={{
             backgroundImage: `url(${heroImage})`,
             backgroundSize: 'cover',
@@ -121,51 +166,51 @@ const Index = () => {
           }}
         >
           {/* Overlay for better text readability */}
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/30"></div>
           
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <div className="container mx-auto px-4 relative z-10 w-full">
+            <div className="max-w-5xl mx-auto text-center">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight">
                 Kids camps, activities, tutors, sports and more
               </h1>
-              <p className="text-xl mb-8 text-white/90">
+              <p className="text-lg md:text-xl mb-8 md:mb-10 text-white/90 max-w-3xl mx-auto">
                 Find trusted providers, book with confidence, and create unforgettable experiences
               </p>
               
               {/* Category Buttons */}
-              <div className="flex flex-wrap justify-center gap-4 mb-8">
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                 <Button 
                   variant="secondary" 
                   size="lg" 
-                  className="bg-white text-gray-900 hover:bg-white/90 rounded-full px-8 py-3 font-semibold"
+                  className="bg-white text-gray-900 hover:bg-white/90 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base"
                 >
                   Summer Camps
                 </Button>
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
                 >
                   Activities
                 </Button>
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
                 >
                   Tutors
                 </Button>
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
                 >
                   Sports
                 </Button>
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-8 py-3 font-semibold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
                 >
                   After School
                 </Button>
@@ -181,17 +226,34 @@ const Index = () => {
         />
 
         {/* Featured Camps and Activities */}
-        <section className="py-10">
+        <section className="py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold mb-6">Featured Camps & Activities</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Featured Camps & Activities</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {mockCamps.map((camp) => (
                 <CampCard key={camp.id} {...camp} />
               ))}
             </div>
-            <div className="mt-10 text-center">
+            <div className="mt-8 md:mt-10 text-center">
               <Button variant="outline" size="lg" className="rounded-full">
                 Show More Options
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Nearby Section */}
+        <section className="py-8 md:py-12 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Nearby</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {nearbyMockData.map((item) => (
+                <CampCard key={item.id} {...item} />
+              ))}
+            </div>
+            <div className="mt-8 md:mt-10 text-center">
+              <Button variant="outline" size="lg" className="rounded-full">
+                View All Nearby
               </Button>
             </div>
           </div>
