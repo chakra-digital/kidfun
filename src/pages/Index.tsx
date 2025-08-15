@@ -165,52 +165,52 @@ const Index = () => {
             backgroundRepeat: 'no-repeat'
           }}
         >
-          {/* Overlay for better text readability */}
-          <div className="absolute inset-0 bg-black/30"></div>
+          {/* Stronger overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/50"></div>
           
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-5xl mx-auto text-center">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg">
                 Kids camps, activities, tutors, sports and more
               </h1>
-              <p className="text-lg md:text-xl mb-8 md:mb-10 text-white/90 max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl mb-8 md:mb-10 text-white/95 max-w-3xl mx-auto drop-shadow-md">
                 Find trusted providers, book with confidence, and create unforgettable experiences
               </p>
               
               {/* Category Buttons */}
               <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                 <Button 
-                  variant="secondary" 
+                  variant="default" 
                   size="lg" 
-                  className="bg-white text-gray-900 hover:bg-white/90 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg"
                 >
                   Summer Camps
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant="secondary" 
                   size="lg" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
+                  className="bg-green-500 hover:bg-green-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
                 >
                   Activities
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant="secondary" 
                   size="lg" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
+                  className="bg-purple-500 hover:bg-purple-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
                 >
                   Tutors
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant="secondary" 
                   size="lg" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
+                  className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
                 >
                   Sports
                 </Button>
                 <Button 
-                  variant="outline" 
+                  variant="secondary" 
                   size="lg" 
-                  className="border-2 border-white text-white hover:bg-white hover:text-gray-900 rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base transition-all duration-200"
+                  className="bg-pink-500 hover:bg-pink-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
                 >
                   After School
                 </Button>
@@ -225,25 +225,8 @@ const Index = () => {
           activeFilter={activeFilter}
         />
 
-        {/* Featured Camps and Activities */}
-        <section className="py-8 md:py-12">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Featured Camps & Activities</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {mockCamps.map((camp) => (
-                <CampCard key={camp.id} {...camp} />
-              ))}
-            </div>
-            <div className="mt-8 md:mt-10 text-center">
-              <Button variant="outline" size="lg" className="rounded-full">
-                Show More Options
-              </Button>
-            </div>
-          </div>
-        </section>
-
         {/* Nearby Section */}
-        <section className="py-8 md:py-12 bg-gray-50">
+        <section className="py-8 md:py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Nearby</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -254,6 +237,23 @@ const Index = () => {
             <div className="mt-8 md:mt-10 text-center">
               <Button variant="outline" size="lg" className="rounded-full">
                 View All Nearby
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Camps and Activities */}
+        <section className="py-8 md:py-12 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Featured Camps & Activities</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {mockCamps.map((camp) => (
+                <CampCard key={camp.id} {...camp} />
+              ))}
+            </div>
+            <div className="mt-8 md:mt-10 text-center">
+              <Button variant="outline" size="lg" className="rounded-full">
+                Show More Options
               </Button>
             </div>
           </div>
