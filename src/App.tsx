@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import CampDetail from "./pages/CampDetail";
 import ProviderProfile from "./pages/ProviderProfile";
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/camp/:id" element={<CampDetail />} />
             <Route path="/activity/:id" element={<CampDetail />} />
             <Route path="/provider/:id" element={<ProviderProfile />} />

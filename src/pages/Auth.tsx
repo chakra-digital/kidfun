@@ -34,11 +34,20 @@ const Auth = () => {
         if (event === 'SIGNED_IN' && session?.user) {
           // Defer navigation to prevent deadlocks
           setTimeout(() => {
+            // Check if this is a new signup (has user_type in metadata)
+            const userType = session.user.user_metadata?.user_type;
+            if (userType) {
+              // New user - redirect to onboarding
+              navigate(`/onboarding?type=${userType}`);
+            } else {
+              // Existing user - redirect to home
+              navigate('/');
+            }
+            
             toast({
               title: "Welcome!",
               description: "Successfully signed in",
             });
-            navigate('/');
           }, 0);
         }
       }
