@@ -37,12 +37,19 @@ const Navbar = () => {
             <div className="h-8 w-16 bg-muted animate-pulse rounded-full" />
           ) : user ? (
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <User className="h-4 w-4" />
-                <span className="text-sm font-medium">
-                  {user.user_metadata?.first_name || user.email}
-                </span>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="rounded-full"
+              >
+                <Link to="/dashboard" className="flex items-center space-x-2">
+                  <User className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    {user.user_metadata?.first_name || user.email}
+                  </span>
+                </Link>
+              </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
