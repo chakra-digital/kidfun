@@ -10,44 +10,43 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-lg mb-4">Support</h3>
             <ul className="space-y-2">
-              <li><Link to="/help" className="text-gray-600 hover:text-camps-primary">Help Center</Link></li>
-              <li><Link to="/safety" className="text-gray-600 hover:text-camps-primary">Safety Information</Link></li>
-              <li><Link to="/cancellation" className="text-gray-600 hover:text-camps-primary">Cancellation Options</Link></li>
-              <li><Link to="/covid" className="text-gray-600 hover:text-camps-primary">COVID-19 Guidelines</Link></li>
+              <li><span className="text-gray-600 cursor-default">Help Center</span></li>
+              <li><span className="text-gray-600 cursor-default">Safety Information</span></li>
+              <li><span className="text-gray-600 cursor-default">Cancellation Options</span></li>
             </ul>
           </div>
           <div>
             <h3 className="font-bold text-lg mb-4">Community</h3>
             <ul className="space-y-2">
-              <li><Link to="/parents" className="text-gray-600 hover:text-camps-primary">Parents Community</Link></li>
-              <li><Link to="/providers" className="text-gray-600 hover:text-camps-primary">Activity Providers</Link></li>
-              <li><Link to="/testimonials" className="text-gray-600 hover:text-camps-primary">Testimonials</Link></li>
+              <li><span className="text-gray-600 cursor-default">Parents Community</span></li>
+              <li><span className="text-gray-600 cursor-default">Activity Providers</span></li>
+              <li><span className="text-gray-600 cursor-default">Testimonials</span></li>
             </ul>
           </div>
           <div>
             <h3 className="font-bold text-lg mb-4">Hosting</h3>
             <ul className="space-y-2">
-              <li><Link to="/hosts" className="text-gray-600 hover:text-camps-primary">Become a Host</Link></li>
-              <li><Link to="/resources" className="text-gray-600 hover:text-camps-primary">Host Resources</Link></li>
-              <li><Link to="/certification" className="text-gray-600 hover:text-camps-primary">Get Certified</Link></li>
+              <li><span className="text-gray-600 cursor-default">Become a Host</span></li>
+              <li><span className="text-gray-600 cursor-default">Host Resources</span></li>
+              <li><span className="text-gray-600 cursor-default">Get Certified</span></li>
             </ul>
           </div>
           <div>
             <h3 className="font-bold text-lg mb-4">About</h3>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-600 hover:text-camps-primary">Our Story</Link></li>
-              <li><Link to="/safety-commitment" className="text-gray-600 hover:text-camps-primary">Safety Commitment</Link></li>
-              <li><Link to="/careers" className="text-gray-600 hover:text-camps-primary">Careers</Link></li>
-              <li><Link to="/press" className="text-gray-600 hover:text-camps-primary">Press</Link></li>
+              <li><span className="text-gray-600 cursor-default">Our Story</span></li>
+              <li><span className="text-gray-600 cursor-default">Safety Commitment</span></li>
+              <li><span className="text-gray-600 cursor-default">Careers</span></li>
+              <li><span className="text-gray-600 cursor-default">Press</span></li>
             </ul>
           </div>
         </div>
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-600 text-sm mb-4 md:mb-0">© 2025 CampFinder, Inc. All rights reserved.</p>
+          <p className="text-gray-600 text-sm mb-4 md:mb-0">© 2025 KidFun, Inc. All rights reserved.</p>
           <div className="flex space-x-6">
-            <Link to="/privacy" className="text-gray-600 hover:text-camps-primary text-sm">Privacy</Link>
-            <Link to="/terms" className="text-gray-600 hover:text-camps-primary text-sm">Terms</Link>
-            <Link to="/sitemap" className="text-gray-600 hover:text-camps-primary text-sm">Sitemap</Link>
+            <span className="text-gray-600 text-sm cursor-default">Privacy</span>
+            <span className="text-gray-600 text-sm cursor-default">Terms</span>
+            <span className="text-gray-600 text-sm cursor-default">Sitemap</span>
           </div>
         </div>
       </div>
