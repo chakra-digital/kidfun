@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,11 @@ const Auth = () => {
   const [userType, setUserType] = useState<"parent" | "provider">("parent");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  
+  // Get tab from URL params (signup/signin)
+  const defaultTab = searchParams.get('tab') || 'signin';
 
   // Auth state management
   useEffect(() => {
@@ -37,18 +41,20 @@ const Auth = () => {
             // Check if this is a new signup (has user_type in metadata)
             const userType = session.user.user_metadata?.user_type;
             if (userType) {
-              // New user - redirect to onboarding
-              navigate(`/onboarding?type=${userType}`);
+              // New user - redirect to onboarding with type
+              console.log("Redirecting to onboarding with type:", userType);
+              navigate(`/onboarding?type=${userType}`, { replace: true });
             } else {
               // Existing user - redirect to home
-              navigate('/');
+              console.log("Redirecting existing user to home");
+              navigate('/', { replace: true });
             }
             
             toast({
               title: "Welcome!",
               description: "Successfully signed in",
             });
-          }, 0);
+          }, 100); // Slightly longer delay to ensure navigation
         }
       }
     );
@@ -205,7 +211,7 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
