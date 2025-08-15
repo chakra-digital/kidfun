@@ -9,7 +9,7 @@ import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 import soccerKidsImage from "@/assets/soccer-kids-action.jpg";
 import artsCraftsImage from "@/assets/arts-crafts-kids.jpg";
 import swimmingKidsImage from "@/assets/swimming-kids.jpg";
-import scienceKidsImage from "@/assets/science-kids.jpg";
+import artDesignImage from "@/assets/art-design-workshop.jpg";
 
 // Mock data for camps and activities
 const mockCamps = [
@@ -31,7 +31,7 @@ const mockCamps = [
   {
     id: "camp2",
     title: "Tech Innovators STEM Camp",
-    image: scienceKidsImage,
+    image: artsCraftsImage,
     location: "San Francisco, CA",
     price: 95,
     priceUnit: "day",
@@ -134,7 +134,7 @@ const nearbyMockData = [
   {
     id: "nearby3",
     title: "Art & Design Workshop",
-    image: "https://images.unsplash.com/photo-1544013778-5f85b6e579be?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: artDesignImage,
     location: "3.2 miles away",
     price: 45,
     priceUnit: "session",
@@ -223,11 +223,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Filter Section */}
-        <FilterBar 
-          onFilterChange={handleFilterChange}
-          activeFilter={activeFilter}
-        />
 
         {/* Nearby Section */}
         <section className="py-8 md:py-12">
