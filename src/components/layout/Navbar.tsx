@@ -1,12 +1,14 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, User } from "lucide-react";
+import { Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const { user, signOut, loading } = useAuth();
 
   return (
     <header className="border-b sticky top-0 z-50 bg-white">
@@ -31,12 +33,46 @@ const Navbar = () => {
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="rounded-full">
-            Log In
-          </Button>
-          <Button variant="default" size="sm" className="rounded-full">
-            Sign Up
-          </Button>
+          {loading ? (
+            <div className="h-8 w-16 bg-muted animate-pulse rounded-full" />
+          ) : user ? (
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <User className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {user.user_metadata?.first_name || user.email}
+                </span>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={signOut}
+                className="rounded-full"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="rounded-full"
+                asChild
+              >
+                <Link to="/auth">Log In</Link>
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="rounded-full"
+                asChild
+              >
+                <Link to="/auth">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
