@@ -13,7 +13,7 @@ const Navbar = () => {
       <div className="container mx-auto flex items-center justify-between py-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <div className="text-2xl">🏃‍♀️</div>
+          <div className="text-2xl transform scale-x-[-1]">🏃‍♀️</div>
           <span className="text-xl font-bold text-camps-dark">KidFun</span>
         </Link>
 
