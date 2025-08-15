@@ -19,10 +19,13 @@ const Onboarding = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading) {
+      setIsLoading(true);
+      return;
+    }
 
     if (!user) {
-      navigate("/auth");
+      navigate("/auth", { replace: true });
       return;
     }
 
@@ -85,7 +88,8 @@ const Onboarding = () => {
     navigate("/");
   };
 
-  if (loading || isLoading) {
+  // Show loading immediately while auth is loading or while fetching profile
+  if (loading || isLoading || !user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center">
         <Card className="w-full max-w-md">
