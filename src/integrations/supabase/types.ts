@@ -14,7 +14,180 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      children: {
+        Row: {
+          age: number
+          allergies: string | null
+          created_at: string
+          first_name: string
+          id: string
+          interests: string[] | null
+          medical_notes: string | null
+          parent_id: string
+          special_needs: string | null
+          updated_at: string
+        }
+        Insert: {
+          age: number
+          allergies?: string | null
+          created_at?: string
+          first_name: string
+          id?: string
+          interests?: string[] | null
+          medical_notes?: string | null
+          parent_id: string
+          special_needs?: string | null
+          updated_at?: string
+        }
+        Update: {
+          age?: number
+          allergies?: string | null
+          created_at?: string
+          first_name?: string
+          id?: string
+          interests?: string[] | null
+          medical_notes?: string | null
+          parent_id?: string
+          special_needs?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      parent_profiles: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          id: string
+          location: string | null
+          preferred_radius: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          id?: string
+          location?: string | null
+          preferred_radius?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          id?: string
+          location?: string | null
+          preferred_radius?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
+      provider_profiles: {
+        Row: {
+          age_groups: string[] | null
+          amenities: string[] | null
+          background_check_verified: boolean | null
+          base_price: number | null
+          business_name: string
+          capacity: number | null
+          created_at: string
+          description: string | null
+          id: string
+          insurance_verified: boolean | null
+          license_number: string | null
+          location: string
+          pricing_model: string | null
+          specialties: string[] | null
+          updated_at: string
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          age_groups?: string[] | null
+          amenities?: string[] | null
+          background_check_verified?: boolean | null
+          base_price?: number | null
+          business_name: string
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          insurance_verified?: boolean | null
+          license_number?: string | null
+          location: string
+          pricing_model?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          age_groups?: string[] | null
+          amenities?: string[] | null
+          background_check_verified?: boolean | null
+          base_price?: number | null
+          business_name?: string
+          capacity?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          insurance_verified?: boolean | null
+          license_number?: string | null
+          location?: string
+          pricing_model?: string | null
+          specialties?: string[] | null
+          updated_at?: string
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +196,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_type: "parent" | "provider"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +323,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_type: ["parent", "provider"],
+    },
   },
 } as const
