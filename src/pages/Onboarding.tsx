@@ -29,15 +29,8 @@ const Onboarding = () => {
       return;
     }
 
-    // Check if user already has type in metadata and has completed profile
-    const userTypeFromMetadata = user.user_metadata?.user_type;
+    // Get user type from URL params or fetch from profile
     const typeFromUrl = searchParams.get("type") as "parent" | "provider" | null;
-    
-    // If user has type in metadata and no URL param, they've likely completed onboarding
-    if (userTypeFromMetadata && !typeFromUrl) {
-      navigate("/", { replace: true });
-      return;
-    }
     
     if (typeFromUrl) {
       setUserType(typeFromUrl);
