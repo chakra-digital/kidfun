@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Welcome to CampConnect</title>
+        <title>Welcome to KidFun</title>
       </head>
       <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -134,7 +134,7 @@ const handler = async (req: Request): Promise<Response> => {
         </div>
         
         <div style="text-align: center; padding: 20px; color: #718096; font-size: 14px;">
-          <p>© 2024 CampConnect. Connecting families to amazing experiences.</p>
+          <p>© 2024 KidFun. Connecting families to amazing experiences.</p>
           <p style="margin-top: 10px;">
             <a href="#" style="color: #667eea; text-decoration: none; margin: 0 10px;">Unsubscribe</a> |
             <a href="#" style="color: #667eea; text-decoration: none; margin: 0 10px;">Update Preferences</a>

@@ -42,18 +42,18 @@ const handler = async (req: Request): Promise<Response> => {
     let htmlContent = "";
 
     if (email_data.email_action_type === "signup") {
-      subject = "Welcome to CampConnect - Verify Your Email";
+      subject = "Welcome to KidFun - Verify Your Email";
       htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Welcome to CampConnect</title>
+          <title>Welcome to KidFun</title>
         </head>
         <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
           <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Welcome to CampConnect!</h1>
+            <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Welcome to KidFun!</h1>
             <p style="color: #f1f3f4; margin: 10px 0 0 0; font-size: 16px;">Your journey to amazing activities starts here</p>
           </div>
           
@@ -61,7 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
             <h2 style="color: #2d3748; margin-bottom: 20px;">Hi ${firstName}! 👋</h2>
             
             <p style="margin-bottom: 25px; font-size: 16px; line-height: 1.8;">
-              Thanks for joining CampConnect! We're excited to help you discover amazing activities and camps for your children.
+              Thanks for joining KidFun! We're excited to help you discover amazing activities and camps for your children.
             </p>
             
             <p style="margin-bottom: 30px; font-size: 16px; line-height: 1.8;">
@@ -105,13 +105,13 @@ const handler = async (req: Request): Promise<Response> => {
           </div>
           
           <div style="text-align: center; padding: 20px; color: #718096; font-size: 14px;">
-            <p>© 2024 CampConnect. Connecting families to amazing experiences.</p>
+            <p>© 2024 KidFun. Connecting families to amazing experiences.</p>
           </div>
         </body>
         </html>
       `;
     } else if (email_data.email_action_type === "recovery") {
-      subject = "Reset Your CampConnect Password";
+      subject = "Reset Your KidFun Password";
       htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -129,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
             <h2 style="color: #2d3748; margin-bottom: 20px;">Hi ${firstName},</h2>
             
             <p style="margin-bottom: 25px; font-size: 16px; line-height: 1.8;">
-              We received a request to reset your CampConnect password. Click the button below to set a new password:
+              We received a request to reset your KidFun password. Click the button below to set a new password:
             </p>
             
             <div style="text-align: center; margin: 35px 0;">
@@ -161,7 +161,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "CampConnect <onboarding@resend.dev>",
+      from: "KidFun <onboarding@resend.dev>",
       to: [user.email],
       subject: subject,
       html: htmlContent,
