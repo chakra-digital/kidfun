@@ -41,8 +41,9 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Creating Resend instance...");
       const resend = new Resend(resendKey);
       
-      const firstName = user.user_metadata?.first_name || 'there';
-      const confirmationUrl = `${email_data.site_url}/auth/v1/verify?token=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${email_data.redirect_to}`;
+    const firstName = user.user_metadata?.first_name || 'there';
+    // Create the correct verification URL that redirects back to your app
+    const confirmationUrl = `https://vjyzhgwiajobfpumeqvy.supabase.co/auth/v1/verify?token=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=https://kidfun.app/`;
 
       console.log("Sending email to:", user.email);
       const emailResponse = await resend.emails.send({
