@@ -76,11 +76,27 @@ const Onboarding = () => {
     }
   };
 
-  const handleComplete = () => {
-    toast({
-      title: "Welcome to KidFun!",
-      description: "Your profile is complete. Let's find some activities!",
-    });
+  const handleComplete = async () => {
+    try {
+      // Send welcome email after successful onboarding
+      await supabase.functions.invoke('send-welcome-email', {
+        body: { 
+          userId: user?.id,
+          userType: userType 
+        }
+      });
+      
+      toast({
+        title: "Welcome to CampConnect!",
+        description: "Your profile has been set up successfully. Check your email for next steps!",
+      });
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+      toast({
+        title: "Profile Complete!",
+        description: "Your profile has been set up successfully.",
+      });
+    }
     navigate("/");
   };
 
