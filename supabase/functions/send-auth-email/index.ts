@@ -46,14 +46,56 @@ const handler = async (req: Request): Promise<Response> => {
 
       console.log("Sending email to:", user.email);
       const emailResponse = await resend.emails.send({
-        from: "KidFun <onboarding@resend.dev>",
+        from: "KidFun <noreply@kidfun.app>", // Use your verified domain
         to: [user.email],
         subject: "Welcome to KidFun - Verify Your Email",
         html: `
-          <h1>Welcome to KidFun, ${firstName}!</h1>
-          <p>Please verify your email by clicking the link below:</p>
-          <a href="${confirmationUrl}">Verify Email Address</a>
-          <p>If the link doesn't work, copy and paste this URL: ${confirmationUrl}</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to KidFun!</h1>
+              <p style="color: #f1f3f4; margin: 10px 0 0 0; font-size: 16px;">Your journey to amazing activities starts here</p>
+            </div>
+            
+            <div style="background: white; padding: 40px 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <h2 style="color: #2d3748; margin-bottom: 20px;">Hi ${firstName}! 👋</h2>
+              
+              <p style="margin-bottom: 25px; font-size: 16px; line-height: 1.8;">
+                Thanks for joining KidFun! We're excited to help you discover amazing activities and camps for your children.
+              </p>
+              
+              <p style="margin-bottom: 30px; font-size: 16px; line-height: 1.8;">
+                To get started, please verify your email address by clicking the button below:
+              </p>
+              
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${confirmationUrl}" 
+                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                          color: white; 
+                          padding: 16px 32px; 
+                          text-decoration: none; 
+                          border-radius: 8px; 
+                          font-weight: bold; 
+                          font-size: 16px; 
+                          display: inline-block;
+                          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                  Verify Email Address
+                </a>
+              </div>
+              
+              <p style="font-size: 14px; color: #718096; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <a href="${confirmationUrl}" style="color: #667eea; word-break: break-all;">${confirmationUrl}</a>
+              </p>
+              
+              <p style="font-size: 14px; color: #718096; margin-top: 20px;">
+                If you didn't create this account, you can safely ignore this email.
+              </p>
+            </div>
+            
+            <div style="text-align: center; padding: 20px; color: #718096; font-size: 14px;">
+              <p>© 2024 KidFun. Connecting families to amazing experiences.</p>
+            </div>
+          </div>
         `,
       });
       
