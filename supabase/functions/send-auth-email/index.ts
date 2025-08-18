@@ -33,17 +33,41 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // For Auth Hooks, we can validate the request more simply
+    console.log("=== Auth Hook Function Started ===");
+    console.log("Request method:", req.method);
+    console.log("Request headers:", Object.fromEntries(req.headers));
+    
+    // Get the payload
     const payload = await req.text();
-    console.log("Received payload:", payload.substring(0, 200) + "...");
+    console.log("Raw payload received:", payload.substring(0, 500));
     
     // Parse the JSON payload
-    const { user, email_data }: AuthEmailRequest = JSON.parse(payload);
+    let parsedData;
+    try {
+      parsedData = JSON.parse(payload);
+      console.log("Parsed data successfully:", JSON.stringify(parsedData, null, 2));
+    } catch (parseError) {
+      console.error("JSON parse error:", parseError);
+      throw new Error(`Failed to parse JSON: ${parseError.message}`);
+    }
     
-    console.log("Processing auth email for:", user.email, "Type:", email_data.email_action_type);
+    const { user, email_data }: AuthEmailRequest = parsedData;
+    
+    console.log("Processing auth email for:", user?.email, "Type:", email_data?.email_action_type);
+
+    // Validate required data
+    if (!user || !user.email) {
+      throw new Error("Missing user or user email");
+    }
+    
+    if (!email_data || !email_data.email_action_type) {
+      throw new Error("Missing email_data or email_action_type");
+    }
 
     const firstName = user.user_metadata?.first_name || 'there';
     const confirmationUrl = `${email_data.site_url}/auth/v1/verify?token=${email_data.token_hash}&type=${email_data.email_action_type}&redirect_to=${email_data.redirect_to}`;
+
+    console.log("Confirmation URL:", confirmationUrl);
 
     let subject = "";
     let htmlContent = "";
@@ -165,7 +189,12 @@ const handler = async (req: Request): Promise<Response> => {
         </body>
         </html>
       `;
+    } else {
+      throw new Error(`Unknown email action type: ${email_data.email_action_type}`);
     }
+
+    console.log("Attempting to send email with subject:", subject);
+    console.log("RESEND_API_KEY exists:", !!Deno.env.get("RESEND_API_KEY"));
 
     const emailResponse = await resend.emails.send({
       from: "KidFun <onboarding@resend.dev>",
@@ -182,9 +211,17 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
   } catch (error: any) {
-    console.error("Error sending auth email:", error);
+    console.error("=== Error in send-auth-email function ===");
+    console.error("Error type:", typeof error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+    console.error("Full error object:", error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: "Check function logs for more information"
+      }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
