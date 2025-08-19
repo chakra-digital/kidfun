@@ -36,24 +36,30 @@ const Auth = () => {
         setUser(session?.user ?? null);
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Defer navigation to prevent deadlocks
-          setTimeout(() => {
-            // For new users, redirect to onboarding with their selected type
-            const userType = session.user.user_metadata?.user_type;
-            if (userType) {
-              console.log("New user - redirecting to onboarding with type:", userType);
-              navigate(`/onboarding?type=${userType}`, { replace: true });
-            } else {
-              // Existing user - redirect to home
-              console.log("Existing user - redirecting to home");
-              navigate('/', { replace: true });
-            }
-            
-            toast({
-              title: "Welcome!",
-              description: "Successfully signed in",
-            });
-          }, 100);
+          // Check if this is from email verification to avoid double navigation
+          const isFromEmailVerification = window.location.hash.includes('access_token') || 
+                                          window.location.hash.includes('type=recovery');
+          
+          if (!isFromEmailVerification) {
+            // Defer navigation to prevent deadlocks
+            setTimeout(() => {
+              // For new users, redirect to onboarding with their selected type
+              const userType = session.user.user_metadata?.user_type;
+              if (userType) {
+                console.log("New user - redirecting to onboarding with type:", userType);
+                navigate(`/onboarding?type=${userType}`, { replace: true });
+              } else {
+                // Existing user - redirect to home
+                console.log("Existing user - redirecting to home");
+                navigate('/', { replace: true });
+              }
+              
+              toast({
+                title: "Welcome!",
+                description: "Successfully signed in",
+              });
+            }, 100);
+          }
         }
       }
     );
