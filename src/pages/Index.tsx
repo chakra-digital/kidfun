@@ -222,6 +222,7 @@ const Index = () => {
                   variant="default" 
                   size="lg" 
                   className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                  onClick={() => navigate('/camps')}
                 >
                   Summer Camps
                 </Button>
