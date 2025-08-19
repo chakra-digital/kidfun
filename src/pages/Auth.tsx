@@ -36,16 +36,25 @@ const Auth = () => {
         setUser(session?.user ?? null);
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Check if this is from email verification to avoid double navigation
+          // Check if this is from email verification 
           const isFromEmailVerification = window.location.hash.includes('access_token') || 
                                           window.location.hash.includes('type=recovery');
           
-          if (!isFromEmailVerification) {
-            // Defer navigation to prevent deadlocks
-            setTimeout(() => {
-              // For new users, redirect to onboarding with their selected type
-              const userType = session.user.user_metadata?.user_type;
+          // Defer navigation to prevent deadlocks
+          setTimeout(() => {
+            const userType = session.user.user_metadata?.user_type;
+            
+            if (isFromEmailVerification && userType) {
+              // Email verification - redirect to onboarding
+              console.log("Email verification - redirecting to onboarding with type:", userType);
+              navigate(`/onboarding?type=${userType}`, { replace: true });
+              toast({
+                title: "Email verified!",
+                description: "Let's complete your profile setup",
+              });
+            } else if (!isFromEmailVerification) {
               if (userType) {
+                // New user sign-in - redirect to onboarding
                 console.log("New user - redirecting to onboarding with type:", userType);
                 navigate(`/onboarding?type=${userType}`, { replace: true });
               } else {
@@ -58,8 +67,8 @@ const Auth = () => {
                 title: "Welcome!",
                 description: "Successfully signed in",
               });
-            }, 100);
-          }
+            }
+          }, 100);
         }
       }
     );

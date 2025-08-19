@@ -22,7 +22,7 @@ export interface GameifiedProgress {
 
 export const useGameifiedProgress = () => {
   const { user } = useAuth();
-  const { userProfile } = useUserProfile();
+  const { userProfile, parentProfile } = useUserProfile();
   const { children } = useChildren();
   const [savedProviders, setSavedProviders] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -46,22 +46,44 @@ export const useGameifiedProgress = () => {
     checkSavedProviders();
   }, [user]);
 
+  // Check onboarding completion status based on user type
+  const isParent = !!parentProfile;
+  const hasCompletedOnboarding = isParent 
+    ? !!(userProfile?.first_name && userProfile?.last_name && children.length > 0)
+    : !!(userProfile?.first_name && userProfile?.last_name);
+
   const milestones: ProgressMilestone[] = [
     {
-      id: "profile_complete",
-      title: "Complete Your Profile",
-      description: "Add your personal information and preferences",
-      completed: !!(userProfile?.first_name && userProfile?.last_name && userProfile?.phone),
+      id: "account_created",
+      title: "Account Created",
+      description: "Successfully created and verified your KidFun account",
+      completed: !!(userProfile?.first_name && userProfile?.last_name),
       icon: "User",
       points: 10,
     },
     {
-      id: "add_child",
-      title: "Add Your First Child",
-      description: "Create a profile for your child with their interests",
-      completed: children.length > 0,
-      icon: "Heart",
+      id: "onboarding_step1",
+      title: "Set Your Location", 
+      description: "Tell us where you're located and your preferences",
+      completed: hasCompletedOnboarding,
+      icon: "MapPin",
       points: 15,
+    },
+    {
+      id: "onboarding_step2",
+      title: "Emergency Contact",
+      description: "Add emergency contact information for safety",
+      completed: hasCompletedOnboarding,
+      icon: "User", 
+      points: 15,
+    },
+    {
+      id: "onboarding_step3",
+      title: "Child Profiles",
+      description: "Create profiles for your children with their interests",
+      completed: isParent ? (hasCompletedOnboarding && children.length > 0) : hasCompletedOnboarding,
+      icon: "Heart",
+      points: 20,
     },
     {
       id: "save_provider",
@@ -101,13 +123,13 @@ export const useGameifiedProgress = () => {
   const totalPoints = completedMilestones.reduce((sum, m) => sum + m.points, 0);
   const completedCount = completedMilestones.length;
   
-  // Calculate progress: first 2 milestones (profile + child) = 40% of total journey
-  // Remaining 4 milestones = 60% of total journey
+  // Calculate progress: first 4 milestones (onboarding) = 60% of total journey
+  // Remaining milestones = 40% of total journey  
   let progressPercentage = 0;
-  const firstTwoCompleted = Math.min(completedCount, 2);
-  const remainingCompleted = Math.max(0, completedCount - 2);
+  const onboardingCompleted = Math.min(completedCount, 4);
+  const remainingCompleted = Math.max(0, completedCount - 4);
   
-  progressPercentage = (firstTwoCompleted * 20) + (remainingCompleted * 15);
+  progressPercentage = (onboardingCompleted * 15) + (remainingCompleted * 10);
   progressPercentage = Math.min(progressPercentage, 100);
 
   const progress: GameifiedProgress = {
