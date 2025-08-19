@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import AddChildForm from "@/components/children/AddChildForm";
+import { EditChildDialog } from "@/components/children/EditChildDialog";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -117,11 +118,17 @@ const Dashboard = () => {
                 </Link>
               </Button>
               {userType === "parent" && (
-                <Button asChild variant="outline" className="w-full justify-start">
-                  <Link to="/dashboard/children">
-                    <User className="h-4 w-4 mr-2" />
-                    Manage Children
-                  </Link>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    document.getElementById('children-section')?.scrollIntoView({ 
+                      behavior: 'smooth' 
+                    });
+                  }}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Manage Children
                 </Button>
               )}
             </CardContent>
@@ -129,7 +136,7 @@ const Dashboard = () => {
         </div>
 
         {userType === "parent" && (
-          <div className="mt-8">
+          <div id="children-section" className="mt-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -156,9 +163,7 @@ const Dashboard = () => {
                               {child.age} years old
                             </p>
                           </div>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
+                          <EditChildDialog child={child} onChildUpdated={refetchChildren} />
                         </div>
                         
                         {child.interests && child.interests.length > 0 && (

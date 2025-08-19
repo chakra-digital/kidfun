@@ -206,6 +206,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
                       min={0}
                       step={25}
                       className="w-full"
+                      defaultValue={[0, 200]}
                     />
                     <div className="flex justify-between text-sm text-muted-foreground mt-1">
                       <span>${budgetRange[0]}</span>
