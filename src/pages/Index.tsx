@@ -156,35 +156,7 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Check if authenticated user needs onboarding
-  useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      if (!user || loading) return;
-
-      try {
-        // Check if user has completed profile setup
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("first_name, last_name, user_type")
-          .eq("user_id", user.id)
-          .single();
-
-        if (error) {
-          console.error("Error checking profile:", error);
-          return;
-        }
-
-        // If user has no profile data beyond basic info, send to onboarding
-        if (profile?.user_type && (!profile.first_name || !profile.last_name)) {
-          navigate(`/onboarding?type=${profile.user_type}`, { replace: true });
-        }
-      } catch (error) {
-        console.error("Error in onboarding check:", error);
-      }
-    };
-
-    checkOnboardingStatus();
-  }, [user, loading, navigate]);
+  // No onboarding check needed here - Auth component handles it
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter === activeFilter ? "" : filter);

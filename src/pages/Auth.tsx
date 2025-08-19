@@ -38,15 +38,14 @@ const Auth = () => {
         if (event === 'SIGNED_IN' && session?.user) {
           // Defer navigation to prevent deadlocks
           setTimeout(() => {
-            // Check if this is a new signup (has user_type in metadata)
+            // For new users, redirect to onboarding with their selected type
             const userType = session.user.user_metadata?.user_type;
             if (userType) {
-              // New user - redirect to onboarding with type
-              console.log("Redirecting to onboarding with type:", userType);
+              console.log("New user - redirecting to onboarding with type:", userType);
               navigate(`/onboarding?type=${userType}`, { replace: true });
             } else {
               // Existing user - redirect to home
-              console.log("Redirecting existing user to home");
+              console.log("Existing user - redirecting to home");
               navigate('/', { replace: true });
             }
             
@@ -54,7 +53,7 @@ const Auth = () => {
               title: "Welcome!",
               description: "Successfully signed in",
             });
-          }, 100); // Slightly longer delay to ensure navigation
+          }, 100);
         }
       }
     );
