@@ -159,23 +159,9 @@ const Onboarding = () => {
             </p>
           </div>
 
-          {/* Progress & Gamification */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="lg:col-span-2">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-foreground">
-                  Step {currentStep} of {totalSteps}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {Math.round(progressPercentage)}% complete
-                </span>
-              </div>
-              <Progress value={progressPercentage} className="h-2" />
-            </div>
-            
-            <div>
-              <GameifiedProgress progress={progress} compact />
-            </div>
+          {/* Gamified Progress */}
+          <div className="mb-8">
+            <GameifiedProgress progress={progress} compact />
           </div>
 
           {/* Onboarding Content */}

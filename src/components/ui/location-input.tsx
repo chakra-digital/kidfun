@@ -84,10 +84,12 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   };
 
   const handleInputBlur = () => {
-    // Delay to allow suggestion click to register
+    // Only update if user manually typed (not from suggestion click)
     setTimeout(() => {
-      onChange(inputValue);
-    }, 150);
+      if (inputValue !== value) {
+        onChange(inputValue);
+      }
+    }, 200);
   };
 
   const handleClear = () => {
