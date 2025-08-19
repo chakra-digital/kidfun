@@ -11,6 +11,7 @@ import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar } from "lucide-r
 import { Link } from "react-router-dom";
 import AddChildForm from "@/components/children/AddChildForm";
 import { EditChildDialog } from "@/components/children/EditChildDialog";
+import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -60,10 +61,7 @@ const Dashboard = () => {
                 <User className="h-5 w-5" />
                 Profile Information
               </CardTitle>
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
+              <EditProfileDialog />
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

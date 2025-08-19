@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X, MapPin, DollarSign, Clock, User } from "lucide-react";
+import { LocationInput } from "@/components/ui/location-input";
 
 interface ParentOnboardingProps {
   currentStep: number;
@@ -187,11 +188,10 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="location">Your Location</Label>
-                  <Input
-                    id="location"
-                    placeholder="City, State or ZIP code"
+                  <LocationInput
                     value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    onChange={setLocation}
+                    placeholder="Enter city, state, or ZIP code (e.g., Austin, TX or 78745)"
                     className="mt-1"
                   />
                 </div>
