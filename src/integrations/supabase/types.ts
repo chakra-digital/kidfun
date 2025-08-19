@@ -197,6 +197,25 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_public_provider_info: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          age_groups: string[]
+          amenities: string[]
+          base_price: number
+          business_name: string
+          capacity: number
+          created_at: string
+          description: string
+          id: string
+          location: string
+          pricing_model: string
+          specialties: string[]
+          updated_at: string
+          user_id: string
+          years_experience: number
+        }[]
+      }
     }
     Enums: {
       user_type: "parent" | "provider"
