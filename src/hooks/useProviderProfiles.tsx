@@ -15,8 +15,7 @@ interface ProviderProfile {
   pricing_model: string | null;
   years_experience: number | null;
   capacity: number | null;
-  background_check_verified: boolean | null;
-  insurance_verified: boolean | null;
+  // Sensitive fields removed - no longer accessible to parents
   created_at: string;
   updated_at: string;
   // Sensitive fields only available to the provider themselves
@@ -59,27 +58,8 @@ export const useProviderProfiles = (): UseProviderProfilesReturn => {
       let data, fetchError;
 
       if (userProfile.user_type === "parent") {
-        // Parents can only see public, non-sensitive information
-        const result = await supabase
-          .from("provider_profiles")
-          .select(`
-            id,
-            user_id,
-            business_name,
-            location,
-            description,
-            age_groups,
-            specialties,
-            amenities,
-            base_price,
-            pricing_model,
-            years_experience,
-            capacity,
-            background_check_verified,
-            insurance_verified,
-            created_at,
-            updated_at
-          `);
+        // Parents can only see public, non-sensitive information using secure function
+        const result = await supabase.rpc('get_public_provider_info');
         data = result.data;
         fetchError = result.error;
       } else if (userProfile.user_type === "provider") {
@@ -140,27 +120,8 @@ export const usePublicProviderProfiles = (): UseProviderProfilesReturn => {
       setLoading(true);
       setError(null);
 
-      // Fetch only public information for all providers
-      const { data, error: fetchError } = await supabase
-        .from("provider_profiles")
-        .select(`
-          id,
-          user_id,
-          business_name,
-          location,
-          description,
-          age_groups,
-          specialties,
-          amenities,
-          base_price,
-          pricing_model,
-          years_experience,
-          capacity,
-          background_check_verified,
-          insurance_verified,
-          created_at,
-          updated_at
-        `);
+      // Fetch only public information for all providers using secure function
+      const { data, error: fetchError } = await supabase.rpc('get_public_provider_info');
 
       if (fetchError) throw fetchError;
 
