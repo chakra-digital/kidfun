@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, Calendar, Star } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 import soccerKidsImage from "@/assets/soccer-kids-action.jpg";
 import artsCraftsImage from "@/assets/arts-crafts-kids.jpg";
@@ -150,6 +153,38 @@ const nearbyMockData = [
 const Index = () => {
   const [activeFilter, setActiveFilter] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Check if authenticated user needs onboarding
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!user || loading) return;
+
+      try {
+        // Check if user has completed profile setup
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("first_name, last_name, user_type")
+          .eq("user_id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error checking profile:", error);
+          return;
+        }
+
+        // If user has no profile data beyond basic info, send to onboarding
+        if (profile?.user_type && (!profile.first_name || !profile.last_name)) {
+          navigate(`/onboarding?type=${profile.user_type}`, { replace: true });
+        }
+      } catch (error) {
+        console.error("Error in onboarding check:", error);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [user, loading, navigate]);
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter === activeFilter ? "" : filter);
