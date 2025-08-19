@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useGameifiedProgress } from "@/hooks/useGameifiedProgress";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +9,11 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { ParentOnboarding } from "@/components/onboarding/ParentOnboarding";
 import { ProviderOnboarding } from "@/components/onboarding/ProviderOnboarding";
+import { GameifiedProgress } from "@/components/progress/GameifiedProgress";
 
 const Onboarding = () => {
   const { user, loading } = useAuth();
+  const { progress } = useGameifiedProgress();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
@@ -156,17 +159,23 @@ const Onboarding = () => {
             </p>
           </div>
 
-          {/* Progress */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-foreground">
-                Step {currentStep} of {totalSteps}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {Math.round(progressPercentage)}% complete
-              </span>
+          {/* Progress & Gamification */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="lg:col-span-2">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-foreground">
+                  Step {currentStep} of {totalSteps}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {Math.round(progressPercentage)}% complete
+                </span>
+              </div>
+              <Progress value={progressPercentage} className="h-2" />
             </div>
-            <Progress value={progressPercentage} className="h-2" />
+            
+            <div>
+              <GameifiedProgress progress={progress} compact />
+            </div>
           </div>
 
           {/* Onboarding Content */}

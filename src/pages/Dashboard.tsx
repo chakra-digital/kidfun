@@ -2,6 +2,7 @@ import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useChildren } from "@/hooks/useChildren";
+import { useGameifiedProgress } from "@/hooks/useGameifiedProgress";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,11 +13,13 @@ import { Link } from "react-router-dom";
 import AddChildForm from "@/components/children/AddChildForm";
 import { EditChildDialog } from "@/components/children/EditChildDialog";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
+import { GameifiedProgress } from "@/components/progress/GameifiedProgress";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { userProfile, loading } = useUserProfile();
   const { children, loading: childrenLoading, refetch: refetchChildren } = useChildren();
+  const { progress } = useGameifiedProgress();
 
   if (loading) {
     return (
@@ -51,6 +54,11 @@ const Dashboard = () => {
           <p className="text-muted-foreground">
             Manage your {userType === "parent" ? "family" : "business"} profile and activities
           </p>
+        </div>
+
+        {/* Gamified Progress */}
+        <div className="mb-8">
+          <GameifiedProgress progress={progress} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
