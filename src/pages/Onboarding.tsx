@@ -90,7 +90,7 @@ const Onboarding = () => {
       });
       
       toast({
-        title: "Welcome to CampConnect!",
+        title: "Welcome to KidFun!",
         description: "Your profile has been set up successfully. Check your email for next steps!",
       });
     } catch (error) {

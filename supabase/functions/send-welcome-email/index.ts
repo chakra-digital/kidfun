@@ -42,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     const firstName = profile.first_name || 'there';
     const isParent = userType === 'parent';
 
-    const subject = `Welcome to CampConnect, ${firstName}! Your profile is all set 🎉`;
+    const subject = `Welcome to KidFun, ${firstName}! Your profile is all set 🎉`;
     
     const htmlContent = `
       <!DOCTYPE html>
@@ -55,14 +55,14 @@ const handler = async (req: Request): Promise<Response> => {
       <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
           <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">🎉 You're All Set!</h1>
-          <p style="color: #f1f3f4; margin: 10px 0 0 0; font-size: 16px;">Welcome to the CampConnect community</p>
+          <p style="color: #f1f3f4; margin: 10px 0 0 0; font-size: 16px;">Welcome to the KidFun community</p>
         </div>
         
         <div style="background: white; padding: 40px 30px; border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
           <h2 style="color: #2d3748; margin-bottom: 20px;">Congratulations, ${firstName}! 🎊</h2>
           
           <p style="margin-bottom: 25px; font-size: 16px; line-height: 1.8;">
-            Your CampConnect profile is now complete and you're ready to ${isParent ? 'discover amazing activities for your children' : 'showcase your programs to families'}!
+            Your KidFun profile is now complete and you're ready to ${isParent ? 'discover amazing activities for your children' : 'showcase your programs to families'}!
           </p>
           
           ${isParent ? `
@@ -82,9 +82,9 @@ const handler = async (req: Request): Promise<Response> => {
           ` : `
           <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
             <h3 style="color: #92400e; margin-bottom: 15px; font-size: 18px;">🏢 Showcase Your Programs</h3>
-            <p style="margin: 0; color: #92400e;">
-              Your profile is now live! Families can discover your programs and book directly through CampConnect.
-            </p>
+             <p style="margin: 0; color: #92400e;">
+               Your profile is now live! Families can discover your programs and book directly through KidFun.
+             </p>
           </div>
           
           <div style="background: #f3e8ff; border-left: 4px solid #a855f7; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
@@ -128,9 +128,9 @@ const handler = async (req: Request): Promise<Response> => {
             </ul>
           </div>
           
-          <p style="font-size: 16px; color: #4a5568; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-            Questions? Reply to this email or visit our help center. We're here to help you make the most of CampConnect!
-          </p>
+           <p style="font-size: 16px; color: #4a5568; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+             Questions? Reply to this email or visit our help center. We're here to help you make the most of KidFun!
+           </p>
         </div>
         
         <div style="text-align: center; padding: 20px; color: #718096; font-size: 14px;">
@@ -145,7 +145,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "CampConnect <welcome@resend.dev>",
+      from: "KidFun <welcome@resend.dev>",
       to: [profile.email],
       subject: subject,
       html: htmlContent,

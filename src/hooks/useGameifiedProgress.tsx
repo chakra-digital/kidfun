@@ -177,14 +177,8 @@ export const useGameifiedProgress = () => {
   const totalPoints = completedMilestones.reduce((sum, m) => sum + m.points, 0);
   const completedCount = completedMilestones.length;
   
-  // Calculate progress: first 4 milestones (onboarding) = 60% of total journey
-  // Remaining milestones = 40% of total journey  
-  let progressPercentage = 0;
-  const onboardingCompleted = Math.min(completedCount, 4);
-  const remainingCompleted = Math.max(0, completedCount - 4);
-  
-  progressPercentage = (onboardingCompleted * 15) + (remainingCompleted * 10);
-  progressPercentage = Math.min(progressPercentage, 100);
+  // Calculate progress as simple percentage: completed milestones / total milestones * 100
+  const progressPercentage = milestones.length > 0 ? (completedCount / milestones.length) * 100 : 0;
 
   const progress: GameifiedProgress = {
     milestones,
