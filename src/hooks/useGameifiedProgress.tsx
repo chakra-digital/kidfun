@@ -58,17 +58,33 @@ export const useGameifiedProgress = () => {
       id: "account_created",
       title: "Account Created",
       description: "Successfully created and verified your KidFun account",
-      completed: !!(userProfile?.first_name && userProfile?.last_name),
+      completed: !!user, // User exists = account created and verified
       icon: "User",
       points: 10,
     },
     {
-      id: "complete_profile",
-      title: "Complete Your Profile", 
-      description: "Add your personal information and preferences",
-      completed: hasCompletedOnboarding,
-      icon: "Settings",
-      points: 15,
+      id: "personal_info",
+      title: "Add Personal Information",
+      description: "Add your name and contact details",
+      completed: !!(userProfile?.first_name && userProfile?.last_name),
+      icon: "UserCheck",
+      points: 10,
+    },
+    {
+      id: "location_preferences",
+      title: "Set Location & Preferences",
+      description: "Add your location and activity preferences",
+      completed: !!(parentProfile?.location),
+      icon: "MapPin",
+      points: 10,
+    },
+    {
+      id: "emergency_contact",
+      title: "Add Emergency Contact",
+      description: "Provide emergency contact information",
+      completed: !!(parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone),
+      icon: "Phone",
+      points: 10,
     },
     {
       id: "add_child",
@@ -76,7 +92,15 @@ export const useGameifiedProgress = () => {
       description: "Create a profile for your child with their interests",
       completed: children.length > 0,
       icon: "Heart",
-      points: 20,
+      points: 15,
+    },
+    {
+      id: "explore_activities",
+      title: "Explore Activities",
+      description: "Browse available activities and programs",
+      completed: false, // Will be implemented when activity browsing is tracked
+      icon: "Search",
+      points: 10,
     },
     {
       id: "save_provider",
@@ -84,7 +108,7 @@ export const useGameifiedProgress = () => {
       description: "Find and save a provider you're interested in",
       completed: savedProviders > 0,
       icon: "Bookmark",
-      points: 20,
+      points: 15,
     },
     {
       id: "book_activity",
@@ -92,7 +116,15 @@ export const useGameifiedProgress = () => {
       description: "Complete your first booking with a provider",
       completed: false, // Will be implemented when booking system is added
       icon: "Calendar",
-      points: 25,
+      points: 20,
+    },
+    {
+      id: "leave_review",
+      title: "Leave Your First Review",
+      description: "Share feedback about an activity or provider",
+      completed: false, // Will be implemented when review system is added
+      icon: "Star",
+      points: 15,
     },
     {
       id: "invite_friend",
@@ -109,8 +141,16 @@ export const useGameifiedProgress = () => {
       id: "account_created",
       title: "Account Created",
       description: "Successfully created and verified your KidFun account",
-      completed: !!(userProfile?.first_name && userProfile?.last_name),
+      completed: !!user, // User exists = account created and verified
       icon: "User",
+      points: 10,
+    },
+    {
+      id: "personal_info",
+      title: "Add Personal Information",
+      description: "Add your name and contact details",
+      completed: !!(userProfile?.first_name && userProfile?.last_name),
+      icon: "UserCheck",
       points: 10,
     },
     {
@@ -119,7 +159,7 @@ export const useGameifiedProgress = () => {
       description: "Add your business name, location, and description",
       completed: hasCompletedOnboarding,
       icon: "Building",
-      points: 15,
+      points: 10,
     },
     {
       id: "services_specialties",
@@ -127,7 +167,7 @@ export const useGameifiedProgress = () => {
       description: "Define your age groups, specialties, and capacity",
       completed: hasCompletedOnboarding,
       icon: "Users",
-      points: 15,
+      points: 10,
     },
     {
       id: "pricing_model",
@@ -135,7 +175,7 @@ export const useGameifiedProgress = () => {
       description: "Set your pricing model and rates",
       completed: hasCompletedOnboarding,
       icon: "DollarSign",
-      points: 15,
+      points: 10,
     },
     {
       id: "facilities_amenities",
@@ -151,6 +191,14 @@ export const useGameifiedProgress = () => {
       description: "Add your experience and professional credentials",
       completed: hasCompletedOnboarding,
       icon: "Shield",
+      points: 10,
+    },
+    {
+      id: "program_photos",
+      title: "Add Program Photos",
+      description: "Upload photos to showcase your programs",
+      completed: false, // Will be implemented when photo upload is added
+      icon: "Camera",
       points: 15,
     },
     {
@@ -159,7 +207,7 @@ export const useGameifiedProgress = () => {
       description: "Get booked by your first family",
       completed: false, // Will be implemented when booking system is added
       icon: "Calendar",
-      points: 25,
+      points: 20,
     },
     {
       id: "first_review",
@@ -167,7 +215,7 @@ export const useGameifiedProgress = () => {
       description: "Receive feedback from a satisfied family",
       completed: false, // Will be implemented when review system is added
       icon: "Star",
-      points: 20,
+      points: 15,
     },
   ];
 
