@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Building, MapPin, DollarSign, Users, Shield } from "lucide-react";
+import { LocationInput } from "@/components/ui/location-input";
 
 interface ProviderOnboardingProps {
   currentStep: number;
@@ -169,11 +170,10 @@ export const ProviderOnboarding: React.FC<ProviderOnboardingProps> = ({
 
                 <div>
                   <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    placeholder="Street address, City, State"
+                  <LocationInput
                     value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    onChange={setLocation}
+                    placeholder="Enter your business address"
                     className="mt-1"
                   />
                 </div>

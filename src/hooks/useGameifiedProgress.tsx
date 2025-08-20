@@ -52,7 +52,8 @@ export const useGameifiedProgress = () => {
     ? !!(userProfile?.first_name && userProfile?.last_name && children.length > 0)
     : !!(userProfile?.first_name && userProfile?.last_name);
 
-  const milestones: ProgressMilestone[] = [
+  // Different milestone sets for parents vs providers
+  const parentMilestones: ProgressMilestone[] = [
     {
       id: "account_created",
       title: "Account Created",
@@ -62,26 +63,18 @@ export const useGameifiedProgress = () => {
       points: 10,
     },
     {
-      id: "onboarding_step1",
-      title: "Set Your Location", 
-      description: "Tell us where you're located and your preferences",
+      id: "complete_profile",
+      title: "Complete Your Profile", 
+      description: "Add your personal information and preferences",
       completed: hasCompletedOnboarding,
-      icon: "MapPin",
+      icon: "Settings",
       points: 15,
     },
     {
-      id: "onboarding_step2",
-      title: "Emergency Contact",
-      description: "Add emergency contact information for safety",
-      completed: hasCompletedOnboarding,
-      icon: "User", 
-      points: 15,
-    },
-    {
-      id: "onboarding_step3",
-      title: "Child Profiles",
-      description: "Create profiles for your children with their interests",
-      completed: isParent ? (hasCompletedOnboarding && children.length > 0) : hasCompletedOnboarding,
+      id: "add_child",
+      title: "Add Your First Child",
+      description: "Create a profile for your child with their interests",
+      completed: children.length > 0,
       icon: "Heart",
       points: 20,
     },
@@ -109,15 +102,76 @@ export const useGameifiedProgress = () => {
       icon: "Users",
       points: 15,
     },
+  ];
+
+  const providerMilestones: ProgressMilestone[] = [
     {
-      id: "first_message",
-      title: "Send Your First Message",
-      description: "Connect with a provider through messaging",
-      completed: false, // Will be implemented when messaging is added
-      icon: "MessageCircle",
+      id: "account_created",
+      title: "Account Created",
+      description: "Successfully created and verified your KidFun account",
+      completed: !!(userProfile?.first_name && userProfile?.last_name),
+      icon: "User",
       points: 10,
     },
+    {
+      id: "business_info",
+      title: "Business Information",
+      description: "Add your business name, location, and description",
+      completed: hasCompletedOnboarding,
+      icon: "Building",
+      points: 15,
+    },
+    {
+      id: "services_specialties",
+      title: "Services & Specialties",
+      description: "Define your age groups, specialties, and capacity",
+      completed: hasCompletedOnboarding,
+      icon: "Users",
+      points: 15,
+    },
+    {
+      id: "pricing_model",
+      title: "Pricing & Availability",
+      description: "Set your pricing model and rates",
+      completed: hasCompletedOnboarding,
+      icon: "DollarSign",
+      points: 15,
+    },
+    {
+      id: "facilities_amenities",
+      title: "Facilities & Amenities",
+      description: "Highlight your facility features and amenities",
+      completed: hasCompletedOnboarding,
+      icon: "MapPin",
+      points: 10,
+    },
+    {
+      id: "credentials",
+      title: "Credentials & Experience",
+      description: "Add your experience and professional credentials",
+      completed: hasCompletedOnboarding,
+      icon: "Shield",
+      points: 15,
+    },
+    {
+      id: "first_booking",
+      title: "Receive Your First Booking",
+      description: "Get booked by your first family",
+      completed: false, // Will be implemented when booking system is added
+      icon: "Calendar",
+      points: 25,
+    },
+    {
+      id: "first_review",
+      title: "Get Your First Review",
+      description: "Receive feedback from a satisfied family",
+      completed: false, // Will be implemented when review system is added
+      icon: "Star",
+      points: 20,
+    },
   ];
+
+  const milestones = isParent ? parentMilestones : providerMilestones;
 
   const completedMilestones = milestones.filter(m => m.completed);
   const totalPoints = completedMilestones.reduce((sum, m) => sum + m.points, 0);

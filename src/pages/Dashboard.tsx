@@ -82,7 +82,12 @@ const Dashboard = () => {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">User Type</label>
                   <div className="mt-1">
-                    <Badge variant="secondary">{userType}</Badge>
+                    <Badge 
+                      variant={userType === "provider" ? "default" : "secondary"}
+                      className={userType === "provider" ? "bg-primary text-primary-foreground" : ""}
+                    >
+                      {userType === "provider" ? "🏢 Provider" : "👨‍👩‍👧‍👦 Parent"}
+                    </Badge>
                   </div>
                 </div>
                 <div>
@@ -123,7 +128,7 @@ const Dashboard = () => {
                   Find Camps
                 </Link>
               </Button>
-              {userType === "parent" && (
+              {userType === "parent" ? (
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
@@ -135,6 +140,13 @@ const Dashboard = () => {
                 >
                   <User className="h-4 w-4 mr-2" />
                   Manage Children
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full justify-start">
+                  <Link to="/onboarding">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Complete Business Profile
+                  </Link>
                 </Button>
               )}
             </CardContent>

@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Circle, Trophy, Star, User, Heart, Bookmark, Calendar, Users, MessageCircle, MapPin } from "lucide-react";
+import { CheckCircle, Circle, Trophy, Star, User, Heart, Bookmark, Calendar, Users, MessageCircle, MapPin, Settings, Building, DollarSign, Shield } from "lucide-react";
 import { GameifiedProgress as GameifiedProgressType } from "@/hooks/useGameifiedProgress";
 
 interface GameifiedProgressProps {
@@ -18,7 +18,11 @@ const iconMap = {
   Calendar,
   Users,
   MessageCircle,
-  MapPin: MapPin,
+  MapPin,
+  Settings,
+  Building,
+  DollarSign,
+  Shield,
 };
 
 export const GameifiedProgress: React.FC<GameifiedProgressProps> = ({ 
