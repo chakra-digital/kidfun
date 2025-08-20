@@ -202,11 +202,14 @@ export type Database = {
         Returns: {
           age_groups: string[]
           amenities: string[]
+          base_price: number
           business_name: string
+          capacity: number
           created_at: string
           description: string
           id: string
           location: string
+          pricing_model: string
           specialties: string[]
           updated_at: string
           user_id: string

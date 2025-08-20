@@ -11,13 +11,13 @@ interface ProviderProfile {
   age_groups: string[] | null;
   specialties: string[] | null;
   amenities: string[] | null;
+  base_price: number | null;
+  pricing_model: string | null;
   years_experience: number | null;
+  capacity: number | null;
   created_at: string;
   updated_at: string;
-  // Sensitive business data - only available to the provider themselves, not in public view
-  base_price?: number | null;
-  pricing_model?: string | null;
-  capacity?: number | null;
+  // Truly sensitive fields only available to the provider themselves
   license_number?: string | null;
 }
 
