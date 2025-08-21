@@ -49,7 +49,7 @@ export const useGameifiedProgress = () => {
   // Check onboarding completion status based on user type
   const isParent = !!parentProfile;
   const hasCompletedOnboarding = isParent 
-    ? !!(userProfile?.first_name && userProfile?.last_name && children.length > 0)
+    ? !!(userProfile?.first_name && userProfile?.last_name && parentProfile?.location && parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone && children.length > 0)
     : !!(userProfile?.first_name && userProfile?.last_name);
 
   // Different milestone sets for parents vs providers

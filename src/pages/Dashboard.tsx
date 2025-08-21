@@ -57,8 +57,8 @@ const Dashboard = () => {
         </div>
 
         {/* Gamified Progress */}
-        <div className="mb-8">
-          <GameifiedProgress progress={progress} />
+        <div className="mb-6">
+          <GameifiedProgress progress={progress} compact />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
