@@ -48,9 +48,9 @@ export const useGameifiedProgress = () => {
 
   // Check onboarding completion status based on user type
   const isParent = !!parentProfile;
-  const hasCompletedOnboarding = isParent 
-    ? !!(userProfile?.first_name && userProfile?.last_name && parentProfile?.location && parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone && children.length > 0)
-    : !!(userProfile?.first_name && userProfile?.last_name);
+  const hasCompletedBasicOnboarding = !!(userProfile?.first_name && userProfile?.last_name);
+  const hasCompletedParentOnboarding = isParent && hasCompletedBasicOnboarding && 
+    !!(parentProfile?.location && parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone && children.length > 0);
 
   // Different milestone sets for parents vs providers
   const parentMilestones: ProgressMilestone[] = [
@@ -157,7 +157,7 @@ export const useGameifiedProgress = () => {
       id: "business_info",
       title: "Business Information",
       description: "Add your business name, location, and description",
-      completed: hasCompletedOnboarding,
+      completed: hasCompletedBasicOnboarding,
       icon: "Building",
       points: 10,
     },
@@ -165,7 +165,7 @@ export const useGameifiedProgress = () => {
       id: "services_specialties",
       title: "Services & Specialties",
       description: "Define your age groups, specialties, and capacity",
-      completed: hasCompletedOnboarding,
+      completed: hasCompletedBasicOnboarding,
       icon: "Users",
       points: 10,
     },
@@ -173,7 +173,7 @@ export const useGameifiedProgress = () => {
       id: "pricing_model",
       title: "Pricing & Availability",
       description: "Set your pricing model and rates",
-      completed: hasCompletedOnboarding,
+      completed: hasCompletedBasicOnboarding,
       icon: "DollarSign",
       points: 10,
     },
@@ -181,7 +181,7 @@ export const useGameifiedProgress = () => {
       id: "facilities_amenities",
       title: "Facilities & Amenities",
       description: "Highlight your facility features and amenities",
-      completed: hasCompletedOnboarding,
+      completed: hasCompletedBasicOnboarding,
       icon: "MapPin",
       points: 10,
     },
@@ -189,7 +189,7 @@ export const useGameifiedProgress = () => {
       id: "credentials",
       title: "Credentials & Experience",
       description: "Add your experience and professional credentials",
-      completed: hasCompletedOnboarding,
+      completed: hasCompletedBasicOnboarding,
       icon: "Shield",
       points: 10,
     },

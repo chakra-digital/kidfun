@@ -74,12 +74,33 @@ const Auth = () => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
-      // If already authenticated, redirect to home
+      // If already authenticated, check onboarding status before redirecting
       if (session?.user) {
+        try {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("user_type, first_name, last_name")
+            .eq("user_id", session.user.id)
+            .single();
+
+          if (profile?.user_type) {
+            const hasBasicInfo = profile.first_name && profile.last_name;
+            
+            if (!hasBasicInfo) {
+              // User hasn't completed basic onboarding yet
+              navigate(`/onboarding?type=${profile.user_type}`);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("Error checking profile:", error);
+        }
+        
+        // User exists and has completed basic info, go to home
         navigate('/');
       }
     });
