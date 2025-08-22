@@ -161,7 +161,7 @@ export const useGameifiedProgress = () => {
       id: "business_info",
       title: "Business Information",
       description: "Add your business name, location, and description",
-      completed: hasCompletedBasicOnboarding,
+      completed: false, // Will be implemented when provider profile data is stored
       icon: "Building",
       points: 10,
     },
@@ -169,7 +169,7 @@ export const useGameifiedProgress = () => {
       id: "services_specialties",
       title: "Services & Specialties",
       description: "Define your age groups, specialties, and capacity",
-      completed: hasCompletedBasicOnboarding,
+      completed: false, // Will be implemented when provider profile data is stored
       icon: "Users",
       points: 10,
     },
@@ -177,7 +177,7 @@ export const useGameifiedProgress = () => {
       id: "pricing_model",
       title: "Pricing & Availability",
       description: "Set your pricing model and rates",
-      completed: hasCompletedBasicOnboarding,
+      completed: false, // Will be implemented when provider profile data is stored
       icon: "DollarSign",
       points: 10,
     },
@@ -185,7 +185,7 @@ export const useGameifiedProgress = () => {
       id: "facilities_amenities",
       title: "Facilities & Amenities",
       description: "Highlight your facility features and amenities",
-      completed: hasCompletedBasicOnboarding,
+      completed: false, // Will be implemented when provider profile data is stored
       icon: "MapPin",
       points: 10,
     },
@@ -193,7 +193,7 @@ export const useGameifiedProgress = () => {
       id: "credentials",
       title: "Credentials & Experience",
       description: "Add your experience and professional credentials",
-      completed: hasCompletedBasicOnboarding,
+      completed: false, // Will be implemented when provider profile data is stored
       icon: "Shield",
       points: 10,
     },
