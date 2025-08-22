@@ -52,6 +52,9 @@ export const useGameifiedProgress = () => {
   const hasCompletedParentOnboarding = isParent && hasCompletedBasicOnboarding && 
     !!(parentProfile?.location && parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone && children.length > 0);
 
+  // Only count as having started onboarding if they have parent-specific data or provider data
+  const hasStartedOnboarding = isParent ? !!parentProfile?.location : hasCompletedBasicOnboarding;
+
   // Different milestone sets for parents vs providers
   const parentMilestones: ProgressMilestone[] = [
     {
@@ -66,7 +69,7 @@ export const useGameifiedProgress = () => {
       id: "personal_info",
       title: "Add Personal Information",
       description: "Add your name and contact details",
-      completed: !!(userProfile?.first_name && userProfile?.last_name),
+      completed: hasStartedOnboarding && !!(userProfile?.first_name && userProfile?.last_name),
       icon: "UserCheck",
       points: 10,
     },
@@ -74,7 +77,7 @@ export const useGameifiedProgress = () => {
       id: "location_preferences",
       title: "Set Location & Preferences",
       description: "Add your location and activity preferences",
-      completed: !!(parentProfile?.location),
+      completed: hasStartedOnboarding && !!(parentProfile?.location),
       icon: "MapPin",
       points: 10,
     },
@@ -82,7 +85,7 @@ export const useGameifiedProgress = () => {
       id: "emergency_contact",
       title: "Add Emergency Contact",
       description: "Provide emergency contact information",
-      completed: !!(parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone),
+      completed: hasStartedOnboarding && !!(parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone),
       icon: "Phone",
       points: 10,
     },
@@ -90,7 +93,7 @@ export const useGameifiedProgress = () => {
       id: "add_child",
       title: "Add Your First Child",
       description: "Create a profile for your child with their interests",
-      completed: children.length > 0,
+      completed: hasStartedOnboarding && children.length > 0,
       icon: "Heart",
       points: 15,
     },
