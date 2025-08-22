@@ -22,7 +22,7 @@ export interface GameifiedProgress {
 
 export const useGameifiedProgress = () => {
   const { user } = useAuth();
-  const { userProfile, parentProfile } = useUserProfile();
+  const { userProfile, parentProfile, providerProfile } = useUserProfile();
   const { children } = useChildren();
   const [savedProviders, setSavedProviders] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -161,7 +161,7 @@ export const useGameifiedProgress = () => {
       id: "business_info",
       title: "Business Information",
       description: "Add your business name, location, and description",
-      completed: false, // Will be implemented when provider profile data is stored
+      completed: !!(providerProfile?.business_name && providerProfile?.location),
       icon: "Building",
       points: 10,
     },
@@ -169,7 +169,7 @@ export const useGameifiedProgress = () => {
       id: "services_specialties",
       title: "Services & Specialties",
       description: "Define your age groups, specialties, and capacity",
-      completed: false, // Will be implemented when provider profile data is stored
+      completed: !!(providerProfile?.age_groups?.length && providerProfile?.specialties?.length),
       icon: "Users",
       points: 10,
     },
@@ -177,7 +177,7 @@ export const useGameifiedProgress = () => {
       id: "pricing_model",
       title: "Pricing & Availability",
       description: "Set your pricing model and rates",
-      completed: false, // Will be implemented when provider profile data is stored
+      completed: !!(providerProfile?.pricing_model && providerProfile?.base_price),
       icon: "DollarSign",
       points: 10,
     },
@@ -185,7 +185,7 @@ export const useGameifiedProgress = () => {
       id: "facilities_amenities",
       title: "Facilities & Amenities",
       description: "Highlight your facility features and amenities",
-      completed: false, // Will be implemented when provider profile data is stored
+      completed: !!providerProfile, // Completed if provider profile exists (amenities are optional)
       icon: "MapPin",
       points: 10,
     },
@@ -193,7 +193,7 @@ export const useGameifiedProgress = () => {
       id: "credentials",
       title: "Credentials & Experience",
       description: "Add your experience and professional credentials",
-      completed: false, // Will be implemented when provider profile data is stored
+      completed: !!(providerProfile && providerProfile.years_experience !== null && providerProfile.years_experience !== undefined),
       icon: "Shield",
       points: 10,
     },
