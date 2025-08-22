@@ -47,13 +47,14 @@ export const useGameifiedProgress = () => {
   }, [user]);
 
   // Check onboarding completion status based on user type
-  const isParent = !!parentProfile;
+  const userType = userProfile?.user_type || user?.user_metadata?.user_type;
+  const isParent = userType === "parent";
   const hasCompletedBasicOnboarding = !!(userProfile?.first_name && userProfile?.last_name);
   const hasCompletedParentOnboarding = isParent && hasCompletedBasicOnboarding && 
     !!(parentProfile?.location && parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone && children.length > 0);
 
-  // Only count as having started onboarding if they have parent-specific data or provider data
-  const hasStartedOnboarding = isParent ? !!parentProfile?.location : hasCompletedBasicOnboarding;
+  // Only count as having started onboarding if they have parent-specific data (location) or provider-specific completion
+  const hasStartedOnboarding = isParent ? !!(parentProfile?.location) : hasCompletedBasicOnboarding;
 
   // Different milestone sets for parents vs providers
   const parentMilestones: ProgressMilestone[] = [
