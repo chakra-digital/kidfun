@@ -225,12 +225,17 @@ export type Database = {
           capacity: number
           created_at: string
           description: string
+          external_website: string
+          google_rating: number
+          google_reviews_count: number
           id: string
           location: string
+          phone: string
           pricing_model: string
           specialties: string[]
           updated_at: string
           user_id: string
+          verification_status: string
           years_experience: number
         }[]
       }

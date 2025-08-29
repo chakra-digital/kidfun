@@ -17,6 +17,11 @@ interface ProviderProfile {
   capacity: number | null;
   created_at: string;
   updated_at: string;
+  google_rating: number | null;
+  google_reviews_count: number | null;
+  external_website: string | null;
+  phone: string | null;
+  verification_status: string | null;
   // Truly sensitive fields only available to the provider themselves
   license_number?: string | null;
 }
@@ -109,12 +114,6 @@ export const usePublicProviderProfiles = (): UseProviderProfilesReturn => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchPublicProfiles = async () => {
-    if (!user) {
-      setProfiles([]);
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
@@ -136,7 +135,7 @@ export const usePublicProviderProfiles = (): UseProviderProfilesReturn => {
 
   useEffect(() => {
     fetchPublicProfiles();
-  }, [user]);
+  }, []); // Remove user dependency for public data
 
   const refreshProfiles = () => {
     fetchPublicProfiles();

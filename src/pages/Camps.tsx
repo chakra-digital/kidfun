@@ -4,7 +4,9 @@ import Footer from "@/components/layout/Footer";
 import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, User } from "lucide-react";
+import { Calendar, MapPin, User, Loader2 } from "lucide-react";
+import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for camps
 const mockCamps = [
@@ -103,10 +105,31 @@ const mockCamps = [
 const Camps = () => {
   const [activeFilter, setActiveFilter] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const { profiles: providers, loading, error } = usePublicProviderProfiles();
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter === activeFilter ? "" : filter);
   };
+
+  // Transform provider profiles to camp card format
+  const transformedProviders = providers.map(provider => ({
+    id: provider.id,
+    title: provider.business_name,
+    image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60", // Default image
+    location: provider.location,
+    price: provider.base_price || 50,
+    priceUnit: "day" as const,
+    rating: provider.google_rating || 4.5,
+    reviewCount: provider.google_reviews_count || 0,
+    dates: "Available",
+    availability: "Contact for availability",
+    type: "camp" as const,
+    distance: "Contact for details",
+    age: provider.age_groups?.join(", ") || "All ages",
+    verification_status: provider.verification_status,
+    external_website: provider.external_website,
+    phone: provider.phone
+  }));
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -150,17 +173,70 @@ const Camps = () => {
         {/* Camps Grid */}
         <section className="py-10">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold mb-6">Popular Summer Camps</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCamps.map((camp) => (
-                <CampCard key={camp.id} {...camp} />
-              ))}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">
+                Local Activity Providers 
+                <span className="text-lg font-normal text-gray-600 ml-2">
+                  ({transformedProviders.length} found)
+                </span>
+              </h2>
+              <div className="flex gap-2">
+                <Badge variant="outline">Verified</Badge>
+                <Badge variant="secondary">Unverified</Badge>
+              </div>
             </div>
-            <div className="mt-10 text-center">
-              <Button variant="outline" size="lg" className="rounded-full">
-                Load More Camps
-              </Button>
-            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <span className="ml-2">Loading providers...</span>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-red-600 mb-4">Error loading providers: {error}</p>
+                <Button onClick={() => window.location.reload()}>Try Again</Button>
+              </div>
+            ) : transformedProviders.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600 mb-4">No providers found in your area yet.</p>
+                <Button onClick={() => window.location.href = '/admin'}>Import Providers</Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {transformedProviders.map((provider) => (
+                    <div key={provider.id} className="relative">
+                      <CampCard {...provider} />
+                      {provider.verification_status === 'unverified' && (
+                        <Badge 
+                          variant="secondary" 
+                          className="absolute top-2 right-2 bg-orange-100 text-orange-800"
+                        >
+                          Unverified
+                        </Badge>
+                      )}
+                      {provider.external_website && (
+                        <div className="mt-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={() => window.open(provider.external_website, '_blank')}
+                          >
+                            Visit Website
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-10 text-center">
+                  <p className="text-gray-600 mb-4">
+                    Showing {transformedProviders.length} providers in Central Texas
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </section>
 
