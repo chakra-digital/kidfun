@@ -167,7 +167,7 @@ serve(async (req) => {
           google_reviews_count: details.user_ratings_total,
           phone: details.formatted_phone_number,
           verification_status: 'unverified',
-          user_id: '00000000-0000-0000-0000-000000000000', // Placeholder - will be updated when claimed
+          user_id: null, // NULL for unverified providers - will be set when claimed
           // Set reasonable defaults based on business type
           age_groups: categorizeAgeGroups(place.types),
           specialties: categorizeSpecialties(place.types),

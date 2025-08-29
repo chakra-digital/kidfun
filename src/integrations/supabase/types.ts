@@ -150,7 +150,7 @@ export type Database = {
           pricing_model: string | null
           specialties: string[] | null
           updated_at: string
-          user_id: string
+          user_id: string | null
           verification_status: string | null
           years_experience: number | null
         }
@@ -175,7 +175,7 @@ export type Database = {
           pricing_model?: string | null
           specialties?: string[] | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           verification_status?: string | null
           years_experience?: number | null
         }
@@ -200,7 +200,7 @@ export type Database = {
           pricing_model?: string | null
           specialties?: string[] | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           verification_status?: string | null
           years_experience?: number | null
         }
