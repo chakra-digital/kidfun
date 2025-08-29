@@ -14,6 +14,7 @@ import ProviderProfile from "./pages/ProviderProfile";
 import Activities from "./pages/Activities";
 import Camps from "./pages/Camps";
 import Dashboard from "./pages/Dashboard";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/activities" element={<Activities />} />
             <Route path="/camps" element={<Camps />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

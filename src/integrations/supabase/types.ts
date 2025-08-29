@@ -138,14 +138,20 @@ export type Database = {
           capacity: number | null
           created_at: string
           description: string | null
+          external_website: string | null
+          google_place_id: string | null
+          google_rating: number | null
+          google_reviews_count: number | null
           id: string
           insurance_verified: boolean | null
           license_number: string | null
           location: string
+          phone: string | null
           pricing_model: string | null
           specialties: string[] | null
           updated_at: string
           user_id: string
+          verification_status: string | null
           years_experience: number | null
         }
         Insert: {
@@ -157,14 +163,20 @@ export type Database = {
           capacity?: number | null
           created_at?: string
           description?: string | null
+          external_website?: string | null
+          google_place_id?: string | null
+          google_rating?: number | null
+          google_reviews_count?: number | null
           id?: string
           insurance_verified?: boolean | null
           license_number?: string | null
           location: string
+          phone?: string | null
           pricing_model?: string | null
           specialties?: string[] | null
           updated_at?: string
           user_id: string
+          verification_status?: string | null
           years_experience?: number | null
         }
         Update: {
@@ -176,14 +188,20 @@ export type Database = {
           capacity?: number | null
           created_at?: string
           description?: string | null
+          external_website?: string | null
+          google_place_id?: string | null
+          google_rating?: number | null
+          google_reviews_count?: number | null
           id?: string
           insurance_verified?: boolean | null
           license_number?: string | null
           location?: string
+          phone?: string | null
           pricing_model?: string | null
           specialties?: string[] | null
           updated_at?: string
           user_id?: string
+          verification_status?: string | null
           years_experience?: number | null
         }
         Relationships: []
