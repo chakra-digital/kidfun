@@ -59,6 +59,33 @@ serve(async (req) => {
   }
 
   try {
+    // Check authentication - get JWT from Authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Authentication required' 
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const jwt = authHeader.replace('Bearer ', '');
+    
+    // Verify the JWT and get user
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Invalid authentication' 
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`Import started by authenticated user: ${user.email}`);
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
