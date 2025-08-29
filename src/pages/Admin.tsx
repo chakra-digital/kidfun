@@ -39,9 +39,13 @@ const Admin = () => {
     return null; // Will be redirected by useEffect
   }
 
-  // Check if user has admin access (for now, any authenticated user can access)
-  // TODO: Implement proper role-based access control
-  const hasAdminAccess = user && userProfile;
+  // Check if user has admin access - email-based for now
+  const adminEmails = [
+    'your-email@example.com', // Replace with your actual email
+    // Add more admin emails as needed
+  ];
+  
+  const hasAdminAccess = user && adminEmails.includes(user.email || '');
 
   if (!hasAdminAccess) {
     return (
