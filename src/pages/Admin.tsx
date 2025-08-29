@@ -41,7 +41,7 @@ const Admin = () => {
 
   // Check if user has admin access - email-based for now
   const adminEmails = [
-    'your-email@example.com', // Replace with your actual email
+    'joshuachakra@gmail.com', // Replace with your actual email
     // Add more admin emails as needed
   ];
   
