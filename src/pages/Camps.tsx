@@ -105,14 +105,37 @@ const mockCamps = [
 const Camps = () => {
   const [activeFilter, setActiveFilter] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const { profiles: providers, loading, error } = usePublicProviderProfiles();
+
+  // Get search query from URL params
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const search = params.get('search');
+    if (search) {
+      setSearchQuery(search);
+    }
+  }, []);
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter === activeFilter ? "" : filter);
   };
 
+  // Filter providers based on search query
+  const filteredProviders = providers.filter((provider) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      provider.business_name.toLowerCase().includes(query) ||
+      provider.location.toLowerCase().includes(query) ||
+      provider.description?.toLowerCase().includes(query) ||
+      provider.specialties?.some(specialty => specialty.toLowerCase().includes(query)) ||
+      provider.age_groups?.some(age => age.toLowerCase().includes(query))
+    );
+  });
+
   // Transform provider profiles to camp card format
-  const transformedProviders = providers.map(provider => ({
+  const transformedProviders = filteredProviders.map(provider => ({
     id: provider.id,
     title: provider.business_name,
     image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60", // Default image
@@ -175,7 +198,11 @@ const Camps = () => {
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">
-                Local Activity Providers 
+                {searchQuery ? (
+                  <>Search Results for "{searchQuery}"</>
+                ) : (
+                  "Local Activity Providers"
+                )}
                 <span className="text-lg font-normal text-gray-600 ml-2">
                   ({transformedProviders.length} found)
                 </span>

@@ -179,7 +179,7 @@ serve(async (req) => {
           .maybeSingle();
 
         if (existingProvider) {
-          console.log(`Skipping existing provider: ${place.name}`);
+          console.log(`Provider already exists: ${place.name} (place_id: ${place.place_id})`);
           continue;
         }
 
@@ -228,9 +228,12 @@ serve(async (req) => {
       }
     }
 
+    const skippedCount = uniqueResults.length - processedProviders.length - errors.length;
+    
     const response = {
       success: true,
       imported_count: processedProviders.length,
+      skipped_count: skippedCount,
       error_count: errors.length,
       total_found: uniqueResults.length,
       providers: processedProviders.map(p => ({
@@ -242,7 +245,7 @@ serve(async (req) => {
       errors: errors
     };
 
-    console.log(`Import completed: ${processedProviders.length} imported, ${errors.length} errors`);
+    console.log(`Import completed: ${processedProviders.length} imported, ${skippedCount} skipped (already exist), ${errors.length} errors`);
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

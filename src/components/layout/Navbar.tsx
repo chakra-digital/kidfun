@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,14 @@ import { useAuth } from "@/hooks/useAuth";
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { user, signOut, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/camps?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <header className="border-b sticky top-0 z-50 bg-white">
@@ -20,7 +28,7 @@ const Navbar = () => {
         </Link>
 
         {/* Search Bar */}
-        <div className="flex items-center max-w-lg w-full mx-4 relative">
+        <form onSubmit={handleSearch} className="flex items-center max-w-lg w-full mx-4 relative">
           <Input
             type="text"
             placeholder="Search camps, activities, tutors and more..."
@@ -28,8 +36,13 @@ const Navbar = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Search className="absolute right-3 h-4 w-4 text-gray-400" />
-        </div>
+          <button 
+            type="submit"
+            className="absolute right-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <Search className="h-4 w-4 text-gray-400" />
+          </button>
+        </form>
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-2">

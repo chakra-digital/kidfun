@@ -13,6 +13,7 @@ import { Loader2, Download, CheckCircle, XCircle } from 'lucide-react';
 interface ImportResult {
   success: boolean;
   imported_count: number;
+  skipped_count?: number;
   error_count: number;
   total_found: number;
   providers: Array<{
@@ -53,8 +54,9 @@ const BulkProviderImport = () => {
       setImportResult(data);
       
       if (data.success) {
+        const skippedMessage = data.skipped_count ? `, ${data.skipped_count} already existed` : '';
         toast.success(`Import completed!`, {
-          description: `${data.imported_count} providers imported successfully`
+          description: `${data.imported_count} providers imported${skippedMessage}`
         });
       } else {
         toast.error('Import failed', {
@@ -140,12 +142,18 @@ const BulkProviderImport = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
                   {importResult.imported_count}
                 </div>
                 <div className="text-sm text-muted-foreground">Imported</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {importResult.skipped_count || 0}
+                </div>
+                <div className="text-sm text-muted-foreground">Skipped</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-red-600">

@@ -7,160 +7,46 @@ import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, Calendar, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 import soccerKidsImage from "@/assets/soccer-kids-action.jpg";
 import artsCraftsImage from "@/assets/arts-crafts-kids.jpg";
 import swimmingKidsImage from "@/assets/swimming-kids.jpg";
 import artDesignImage from "@/assets/art-design-workshop.jpg";
 
-// Mock data for camps and activities
-const mockCamps = [
-  {
-    id: "camp1",
-    title: "Wilderness Adventure Camp",
-    image: swimmingKidsImage,
-    location: "Boulder, Colorado",
-    price: 80,
-    priceUnit: "day",
-    rating: 4.9,
-    reviewCount: 128,
-    dates: "Jun 10 - Jun 24",
-    availability: "3 spots left",
-    type: "camp" as const,
-    distance: "15 miles away",
-    age: "8-12"
-  },
-  {
-    id: "camp2",
-    title: "Tech Innovators STEM Camp",
-    image: artsCraftsImage,
-    location: "San Francisco, CA",
-    price: 95,
-    priceUnit: "day",
-    rating: 4.8,
-    reviewCount: 87,
-    dates: "Jul 5 - Jul 16",
-    availability: "Available",
-    type: "camp" as const,
-    distance: "10 miles away",
-    age: "10-15"
-  },
-  {
-    id: "activity1",
-    title: "Forest Ecology Exploration",
-    image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "Portland, Oregon",
-    price: 45,
-    priceUnit: "session",
-    rating: 4.7,
-    reviewCount: 64,
-    dates: "Weekends in June",
-    availability: "7 spots left",
-    type: "activity" as const,
-    age: "6-10"
-  },
-  {
-    id: "activity2",
-    title: "Creative Arts & Crafts Workshop",
-    image: artsCraftsImage,
-    location: "Austin, TX",
-    price: 35,
-    priceUnit: "session",
-    rating: 4.9,
-    reviewCount: 112,
-    dates: "Mon & Wed, June-July",
-    availability: "Available",
-    type: "activity" as const,
-    age: "5-9"
-  },
-  {
-    id: "camp3",
-    title: "Summer Sports Academy",
-    image: soccerKidsImage,
-    location: "Chicago, IL",
-    price: 75,
-    priceUnit: "day",
-    rating: 4.6,
-    reviewCount: 93,
-    dates: "Jun 15 - Jul 30",
-    availability: "5 spots left",
-    type: "camp" as const,
-    distance: "8 miles away",
-    age: "9-14"
-  },
-  {
-    id: "activity3",
-    title: "Nature Photography Adventure",
-    image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "Seattle, WA",
-    price: 55,
-    priceUnit: "session",
-    rating: 4.8,
-    reviewCount: 47,
-    dates: "Saturdays in July",
-    availability: "Available",
-    type: "activity" as const,
-    age: "11-16"
-  },
-];
-
-const nearbyMockData = [
-  {
-    id: "nearby1",
-    title: "Soccer Skills Academy",
-    image: soccerKidsImage,
-    location: "2.5 miles away",
-    price: 40,
-    priceUnit: "session",
-    rating: 4.9,
-    reviewCount: 156,
-    dates: "Weekdays 4-6pm",
-    availability: "Available",
-    type: "activity" as const,
-    age: "6-12"
-  },
-  {
-    id: "nearby2",
-    title: "Math & Science Tutoring",
-    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "1.8 miles away",
-    price: 65,
-    priceUnit: "hour",
-    rating: 4.8,
-    reviewCount: 89,
-    dates: "Flexible scheduling",
-    availability: "3 spots left",
-    type: "activity" as const,
-    age: "8-16"
-  },
-  {
-    id: "nearby3",
-    title: "Art & Design Workshop",
-    image: artDesignImage,
-    location: "3.2 miles away",
-    price: 45,
-    priceUnit: "session",
-    rating: 4.7,
-    reviewCount: 72,
-    dates: "Saturdays 10am-12pm",
-    availability: "Available",
-    type: "activity" as const,
-    age: "7-14"
-  }
-];
+// Mock data for camps
 
 const Index = () => {
   const [activeFilter, setActiveFilter] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const { user, loading } = useAuth();
+  const { profiles: providers, loading: providersLoading } = usePublicProviderProfiles();
   const navigate = useNavigate();
-
-  // No onboarding check needed here - Auth component handles it
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter === activeFilter ? "" : filter);
   };
+
+  // Transform provider profiles to CampCard format
+  const transformedProviders = providers.map((provider) => ({
+    id: provider.id,
+    title: provider.business_name,
+    image: soccerKidsImage, // Default image for now
+    location: provider.location,
+    price: provider.base_price || 35,
+    priceUnit: "session" as const,
+    rating: provider.google_rating || 4.5,
+    reviewCount: provider.google_reviews_count || 0,
+    dates: "Available",
+    availability: "Available",
+    type: "activity" as const,
+    age: "6-12", // Default age range
+    distance: "Austin area"
+  }));
+
+  // Get featured providers (first 10) and nearby providers (first 3)
+  const featuredProviders = transformedProviders.slice(0, 10);
+  const nearbyProviders = transformedProviders.slice(0, 3);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -236,13 +122,26 @@ const Index = () => {
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Nearby</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-              {nearbyMockData.map((item) => (
-                <CampCard key={item.id} {...item} />
-              ))}
-            </div>
+            {providersLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+                {nearbyProviders.map((item) => (
+                  <CampCard key={item.id} {...item} />
+                ))}
+              </div>
+            )}
             <div className="mt-8 md:mt-10 text-center">
-              <Button variant="outline" size="lg" className="rounded-full">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="rounded-full"
+                onClick={() => navigate('/camps')}
+              >
                 View All Nearby
               </Button>
             </div>
@@ -253,13 +152,26 @@ const Index = () => {
         <section className="py-8 md:py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Featured Camps & Activities</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-              {mockCamps.map((camp) => (
-                <CampCard key={camp.id} {...camp} />
-              ))}
-            </div>
+            {providersLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+                {featuredProviders.map((camp) => (
+                  <CampCard key={camp.id} {...camp} />
+                ))}
+              </div>
+            )}
             <div className="mt-8 md:mt-10 text-center">
-              <Button variant="outline" size="lg" className="rounded-full">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="rounded-full"
+                onClick={() => navigate('/camps')}
+              >
                 Show More Options
               </Button>
             </div>
