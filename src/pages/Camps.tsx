@@ -116,7 +116,19 @@ const Camps = () => {
     if (search) {
       setSearchQuery(search);
     }
-  }, [window.location.search]);
+  }, []);
+
+  // Listen to URL changes for search
+  React.useEffect(() => {
+    const handleLocationChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const search = params.get('search');
+      setSearchQuery(search || '');
+    };
+    
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
 
   // Filter both mock camps and providers based on search query
   const filteredMockCamps = mockCamps.filter((camp) => {
@@ -186,21 +198,6 @@ const Camps = () => {
               <p className="text-lg mb-6">
                 Discover camps that provide enriching experiences, new friendships, and unforgettable memories.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <div className="relative w-full sm:w-auto">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Where are you looking?"
-                    className="pl-10 pr-4 py-3 rounded-full w-full sm:w-64 text-camps-dark"
-                    value={searchLocation}
-                    onChange={(e) => setSearchLocation(e.target.value)}
-                  />
-                </div>
-                <Button size="lg" className="rounded-full w-full sm:w-auto">
-                  Find Camps
-                </Button>
-              </div>
             </div>
           </div>
         </section>
@@ -247,14 +244,6 @@ const Camps = () => {
                   {allResults.map((result) => (
                     <div key={result.id} className="relative">
                       <CampCard {...result} />
-                      {'verification_status' in result && result.verification_status === 'unverified' && (
-                        <Badge 
-                          variant="secondary" 
-                          className="absolute top-2 right-2 bg-orange-100 text-orange-800"
-                        >
-                          Unverified
-                        </Badge>
-                      )}
                       {'external_website' in result && result.external_website && (
                         <div className="mt-2">
                           <Button 

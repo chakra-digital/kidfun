@@ -68,20 +68,64 @@ export function generateProviderIcon(businessName: string, specialties?: string[
   const color = colors[hash % colors.length];
   const bgColor = bgColors[hash % bgColors.length];
   
-  // Simple geometric patterns
+  // Varied patterns inspired by WhatsApp-style illustrations
   const patterns = [
-    // Circle
-    `<circle cx="50" cy="50" r="25" fill="${color}" opacity="0.8"/>`,
-    // Triangle
-    `<polygon points="50,25 75,75 25,75" fill="${color}" opacity="0.8"/>`,
-    // Square
-    `<rect x="25" y="25" width="50" height="50" fill="${color}" opacity="0.8" rx="8"/>`,
-    // Star
-    `<polygon points="50,15 55,35 75,35 60,50 65,70 50,60 35,70 40,50 25,35 45,35" fill="${color}" opacity="0.8"/>`,
-    // Diamond
-    `<polygon points="50,20 70,50 50,80 30,50" fill="${color}" opacity="0.8"/>`,
-    // Heart
-    `<path d="M50,75 C35,55 20,45 20,30 C20,20 30,15 40,20 C45,15 55,15 60,20 C70,15 80,20 80,30 C80,45 65,55 50,75z" fill="${color}" opacity="0.8"/>`
+    // Circle with dots
+    `<circle cx="50" cy="50" r="20" fill="${color}" opacity="0.2"/>
+     <circle cx="40" cy="40" r="3" fill="${color}"/>
+     <circle cx="60" cy="35" r="2" fill="${color}"/>
+     <circle cx="45" cy="60" r="2.5" fill="${color}"/>
+     <circle cx="65" cy="55" r="1.5" fill="${color}"/>`,
+    
+    // Layered shapes
+    `<rect x="30" y="30" width="40" height="40" fill="${color}" opacity="0.3" rx="8"/>
+     <circle cx="45" cy="45" r="8" fill="${color}" opacity="0.8"/>
+     <rect x="55" y="35" width="10" height="30" fill="${color}" opacity="0.6" rx="3"/>`,
+    
+    // Scattered elements
+    `<polygon points="30,40 40,25 50,40" fill="${color}" opacity="0.7"/>
+     <circle cx="60" cy="35" r="5" fill="${color}" opacity="0.5"/>
+     <rect x="25" y="55" width="15" height="10" fill="${color}" opacity="0.6" rx="2"/>
+     <polygon points="65,60 75,55 70,70" fill="${color}" opacity="0.4"/>`,
+    
+    // Lines and curves pattern
+    `<path d="M25,30 Q40,20 55,30 T75,40" stroke="${color}" stroke-width="3" fill="none" opacity="0.7"/>
+     <circle cx="30" cy="50" r="4" fill="${color}" opacity="0.8"/>
+     <circle cx="50" cy="60" r="3" fill="${color}" opacity="0.6"/>
+     <circle cx="70" cy="45" r="5" fill="${color}" opacity="0.5"/>`,
+    
+    // Grid pattern
+    `<rect x="25" y="25" width="12" height="12" fill="${color}" opacity="0.3" rx="2"/>
+     <rect x="44" y="25" width="12" height="12" fill="${color}" opacity="0.6" rx="2"/>
+     <rect x="63" y="25" width="12" height="12" fill="${color}" opacity="0.4" rx="2"/>
+     <rect x="25" y="44" width="12" height="12" fill="${color}" opacity="0.7" rx="2"/>
+     <rect x="44" y="44" width="12" height="12" fill="${color}" opacity="0.5" rx="2"/>
+     <rect x="63" y="44" width="12" height="12" fill="${color}" opacity="0.8" rx="2"/>
+     <rect x="25" y="63" width="12" height="12" fill="${color}" opacity="0.4" rx="2"/>
+     <rect x="44" y="63" width="12" height="12" fill="${color}" opacity="0.6" rx="2"/>
+     <rect x="63" y="63" width="12" height="12" fill="${color}" opacity="0.5" rx="2"/>`,
+    
+    // Organic shapes
+    `<path d="M30,40 C25,35 25,45 30,50 C35,55 45,55 50,50 C55,45 55,35 50,30 C45,25 35,25 30,40z" fill="${color}" opacity="0.4"/>
+     <circle cx="60" cy="35" r="6" fill="${color}" opacity="0.7"/>
+     <ellipse cx="40" cy="65" rx="8" ry="5" fill="${color}" opacity="0.6"/>`,
+     
+    // Constellation pattern
+    `<circle cx="35" cy="30" r="2" fill="${color}"/>
+     <circle cx="55" cy="25" r="1.5" fill="${color}"/>
+     <circle cx="45" cy="40" r="2.5" fill="${color}"/>
+     <circle cx="65" cy="45" r="2" fill="${color}"/>
+     <circle cx="30" cy="55" r="1.5" fill="${color}"/>
+     <circle cx="60" cy="65" r="3" fill="${color}"/>
+     <line x1="35" y1="30" x2="55" y2="25" stroke="${color}" stroke-width="1" opacity="0.5"/>
+     <line x1="45" y1="40" x2="65" y2="45" stroke="${color}" stroke-width="1" opacity="0.5"/>
+     <line x1="30" y1="55" x2="60" y2="65" stroke="${color}" stroke-width="1" opacity="0.5"/>`,
+     
+    // Geometric mix
+    `<polygon points="40,25 50,35 40,45 30,35" fill="${color}" opacity="0.6"/>
+     <rect x="55" y="30" width="15" height="8" fill="${color}" opacity="0.4" rx="2"/>
+     <circle cx="35" cy="60" r="7" fill="${color}" opacity="0.5"/>
+     <polygon points="60,55 68,60 60,70 52,65" fill="${color}" opacity="0.7"/>`
   ];
   
   const pattern = patterns[hash % patterns.length];
