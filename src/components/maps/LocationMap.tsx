@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+// Lazy-load Mapbox only when needed to prevent blank-screen issues in some environments
+// We'll dynamically import both the library and its CSS after the user provides a token
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MapPin } from 'lucide-react';
@@ -19,15 +19,18 @@ interface LocationMapProps {
 
 const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "" }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const map = useRef<any>(null);
   const [mapboxToken, setMapboxToken] = useState('');
   const [tokenSubmitted, setTokenSubmitted] = useState(false);
 
-  const initializeMap = (token: string) => {
+  const initializeMap = async (token: string) => {
     if (!mapContainer.current || !token) return;
 
+    const mapboxgl = (await import('mapbox-gl')).default;
+    await import('mapbox-gl/dist/mapbox-gl.css');
+
     mapboxgl.accessToken = token;
-    
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
@@ -36,28 +39,22 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
     });
 
     // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl(),
-      'top-right'
-    );
+    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
     // Add markers for providers (mock locations for now)
-    providers.forEach((provider, index) => {
+    providers.forEach(() => {
       // Mock coordinates around Austin area
       const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
       const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
-      
+
       const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
         `<div class="p-2">
-          <h3 class="font-semibold">${provider.business_name}</h3>
-          <p class="text-sm text-gray-600">${provider.location}</p>
-          ${provider.google_rating ? `<p class="text-sm">⭐ ${provider.google_rating.toFixed(1)}</p>` : ''}
+          <h3 class="font-semibold">Provider</h3>
+          <p class="text-sm text-gray-600">Austin area</p>
         </div>`
       );
 
-      new mapboxgl.Marker({
-        color: '#3490dc'
-      })
+      new mapboxgl.Marker({ color: '#3490dc' })
         .setLngLat([lng, lat])
         .setPopup(popup)
         .addTo(map.current!);

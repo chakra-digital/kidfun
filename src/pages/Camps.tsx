@@ -8,6 +8,7 @@ import { Calendar, MapPin, User, Loader2 } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import { Badge } from "@/components/ui/badge";
 import { generateProviderIcon } from "@/lib/imageUtils";
+import { useLocation } from "react-router-dom";
 
 // Mock data for camps
 const mockCamps = [
@@ -109,24 +110,13 @@ const Camps = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { profiles: providers, loading, error } = usePublicProviderProfiles();
 
-  // Get search query from URL params and update it when URL changes
+  // Read search query from URL params and update when it changes
+  const location = useLocation();
   React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const search = params.get('search');
     setSearchQuery(search || '');
-  }, [window.location.search]);
-
-  // Listen to URL changes for search
-  React.useEffect(() => {
-    const handleLocationChange = () => {
-      const params = new URLSearchParams(window.location.search);
-      const search = params.get('search');
-      setSearchQuery(search || '');
-    };
-    
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
-  }, []);
+  }, [location.search]);
 
   // Filter both mock camps and providers based on search query
   const filteredMockCamps = mockCamps.filter((camp) => {
