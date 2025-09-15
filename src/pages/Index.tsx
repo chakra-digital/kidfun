@@ -10,10 +10,7 @@ import { MapPin, User, Calendar, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
-import soccerKidsImage from "@/assets/soccer-kids-action.jpg";
-import artsCraftsImage from "@/assets/arts-crafts-kids.jpg";
-import swimmingKidsImage from "@/assets/swimming-kids.jpg";
-import artDesignImage from "@/assets/art-design-workshop.jpg";
+import { generateProviderIcon } from "@/lib/imageUtils";
 
 // Mock data for camps
 
@@ -28,14 +25,11 @@ const Index = () => {
     setActiveFilter(filter === activeFilter ? "" : filter);
   };
 
-  // Array of different images for variety
-  const imageOptions = [soccerKidsImage, artsCraftsImage, swimmingKidsImage, artDesignImage];
-
   // Transform provider profiles to CampCard format
-  const transformedProviders = providers.map((provider, index) => ({
+  const transformedProviders = providers.map((provider) => ({
     id: provider.id,
     title: provider.business_name,
-    image: imageOptions[index % imageOptions.length], // Rotate through different images
+    image: generateProviderIcon(provider.business_name, provider.specialties),
     location: provider.location,
     price: provider.base_price || 35,
     priceUnit: "session" as const,

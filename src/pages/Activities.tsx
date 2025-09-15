@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import FilterBar from "@/components/filters/FilterBar";
+
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, Plus, Calendar, List, User, Star } from "lucide-react";
-import { getProviderImage } from "@/lib/imageUtils";
+import { generateProviderIcon } from "@/lib/imageUtils";
 
 const mockActivities = [
   {
     id: "activity1",
     title: "Forest Ecology Exploration",
-    image: getProviderImage("activity1"),
+    image: generateProviderIcon("Forest Ecology Exploration"),
     location: "Portland, Oregon",
     price: 45,
     priceUnit: "session",
@@ -25,7 +25,7 @@ const mockActivities = [
   {
     id: "activity2",
     title: "Creative Arts & Crafts Workshop",
-    image: getProviderImage("activity2"),
+    image: generateProviderIcon("Creative Arts & Crafts Workshop"),
     location: "Austin, TX",
     price: 35,
     priceUnit: "session",
@@ -39,7 +39,7 @@ const mockActivities = [
   {
     id: "activity3",
     title: "Nature Photography Adventure",
-    image: getProviderImage("activity3"),
+    image: generateProviderIcon("Nature Photography Adventure"),
     location: "Seattle, WA",
     price: 55,
     priceUnit: "session",
@@ -53,7 +53,7 @@ const mockActivities = [
   {
     id: "activity4",
     title: "Junior Soccer League",
-    image: getProviderImage("activity4"),
+    image: generateProviderIcon("Junior Soccer League"),
     location: "Chicago, IL",
     price: 40,
     priceUnit: "session",
@@ -67,7 +67,7 @@ const mockActivities = [
   {
     id: "activity5",
     title: "Coding for Kids",
-    image: getProviderImage("activity5"),
+    image: generateProviderIcon("Coding for Kids"),
     location: "San Francisco, CA",
     price: 60,
     priceUnit: "session",
@@ -81,7 +81,7 @@ const mockActivities = [
   {
     id: "activity6",
     title: "Kids Outdoor Cooking Class",
-    image: getProviderImage("activity6"),
+    image: generateProviderIcon("Kids Outdoor Cooking Class"),
     location: "Denver, CO",
     price: 50,
     priceUnit: "session",
@@ -126,31 +126,6 @@ const Activities = () => {
           </div>
         </section>
 
-        <div className="border-b sticky top-16 bg-white z-40">
-          <div className="container mx-auto py-4">
-            <div className="flex items-center space-x-4 overflow-x-auto pb-2 hide-scrollbar">
-              {activityCategories.map((category) => (
-                <Button
-                  key={category.label}
-                  variant={activeFilter === category.label ? "default" : "outline"}
-                  size="sm"
-                  className="rounded-full whitespace-nowrap"
-                  onClick={() => handleFilterChange(category.label)}
-                >
-                  <span className="mr-2">{category.icon}</span>
-                  {category.label}
-                </Button>
-              ))}
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full whitespace-nowrap ml-auto"
-              >
-                <span className="mr-2">Filters</span>
-              </Button>
-            </div>
-          </div>
-        </div>
 
         <section className="py-10">
           <div className="container mx-auto px-4">

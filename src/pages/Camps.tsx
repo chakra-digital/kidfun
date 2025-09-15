@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import FilterBar from "@/components/filters/FilterBar";
+
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, User, Loader2 } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import { Badge } from "@/components/ui/badge";
-import { getThemedProviderImage } from "@/lib/imageUtils";
+import { generateProviderIcon } from "@/lib/imageUtils";
 
 // Mock data for camps
 const mockCamps = [
@@ -109,20 +109,25 @@ const Camps = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { profiles: providers, loading, error } = usePublicProviderProfiles();
 
-  // Get search query from URL params
+  // Get search query from URL params and update it when URL changes
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const search = params.get('search');
     if (search) {
       setSearchQuery(search);
     }
-  }, []);
+  }, [window.location.search]);
 
-  const handleFilterChange = (filter: string) => {
-    setActiveFilter(filter === activeFilter ? "" : filter);
-  };
+  // Filter both mock camps and providers based on search query
+  const filteredMockCamps = mockCamps.filter((camp) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      camp.title.toLowerCase().includes(query) ||
+      camp.location.toLowerCase().includes(query)
+    );
+  });
 
-  // Filter providers based on search query
   const filteredProviders = providers.filter((provider) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -139,7 +144,7 @@ const Camps = () => {
   const transformedProviders = filteredProviders.map(provider => ({
     id: provider.id,
     title: provider.business_name,
-    image: getThemedProviderImage(provider.id, provider.business_name, provider.specialties),
+    image: generateProviderIcon(provider.business_name, provider.specialties),
     location: provider.location,
     price: provider.base_price || 50,
     priceUnit: "day" as const,
@@ -154,6 +159,18 @@ const Camps = () => {
     external_website: provider.external_website,
     phone: provider.phone
   }));
+
+  // Transform mock camps to use generated icons
+  const transformedMockCamps = filteredMockCamps.map(camp => ({
+    ...camp,
+    image: generateProviderIcon(camp.title),
+    verification_status: 'verified' as const,
+    external_website: undefined
+  }));
+
+  // Combine all results
+  const allResults = [...transformedMockCamps, ...transformedProviders];
+  const totalResults = allResults.length;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -188,11 +205,6 @@ const Camps = () => {
           </div>
         </section>
 
-        {/* Filter Section */}
-        <FilterBar 
-          onFilterChange={handleFilterChange}
-          activeFilter={activeFilter}
-        />
 
         {/* Camps Grid */}
         <section className="py-10">
@@ -205,7 +217,7 @@ const Camps = () => {
                   "Local Activity Providers"
                 )}
                 <span className="text-lg font-normal text-gray-600 ml-2">
-                  ({transformedProviders.length} found)
+                  ({totalResults} found)
                 </span>
               </h2>
               <div className="flex gap-2">
@@ -224,7 +236,7 @@ const Camps = () => {
                 <p className="text-red-600 mb-4">Error loading providers: {error}</p>
                 <Button onClick={() => window.location.reload()}>Try Again</Button>
               </div>
-            ) : transformedProviders.length === 0 ? (
+            ) : allResults.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600 mb-4">No providers found in your area yet.</p>
                 <Button onClick={() => window.location.href = '/admin'}>Import Providers</Button>
@@ -232,10 +244,10 @@ const Camps = () => {
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {transformedProviders.map((provider) => (
-                    <div key={provider.id} className="relative">
-                      <CampCard {...provider} />
-                      {provider.verification_status === 'unverified' && (
+                  {allResults.map((result) => (
+                    <div key={result.id} className="relative">
+                      <CampCard {...result} />
+                      {'verification_status' in result && result.verification_status === 'unverified' && (
                         <Badge 
                           variant="secondary" 
                           className="absolute top-2 right-2 bg-orange-100 text-orange-800"
@@ -243,13 +255,13 @@ const Camps = () => {
                           Unverified
                         </Badge>
                       )}
-                      {provider.external_website && (
+                      {'external_website' in result && result.external_website && (
                         <div className="mt-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             className="w-full"
-                            onClick={() => window.open(provider.external_website, '_blank')}
+                            onClick={() => window.open('external_website' in result ? result.external_website : '', '_blank')}
                           >
                             Visit Website
                           </Button>
@@ -260,7 +272,7 @@ const Camps = () => {
                 </div>
                 <div className="mt-10 text-center">
                   <p className="text-gray-600 mb-4">
-                    Showing {transformedProviders.length} providers in Central Texas
+                    Showing {totalResults} results
                   </p>
                 </div>
               </>
