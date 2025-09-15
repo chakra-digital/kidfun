@@ -144,5 +144,5 @@ export function generateProviderIcon(businessName: string, specialties?: string[
     ).join('')}
   </svg>`;
   
-  return `data:image/svg+xml;base64,${btoa(svg)}`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
