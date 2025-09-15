@@ -18,6 +18,7 @@ export interface CampCardProps {
   type: "camp" | "activity";
   distance?: string;
   age?: string;
+  external_website?: string;
 }
 
 const CampCard = ({
@@ -34,9 +35,20 @@ const CampCard = ({
   type,
   distance,
   age,
+  external_website,
 }: CampCardProps) => {
+  
+  // Handle click - navigate to provider's website if available, otherwise to provider page
+  const handleClick = (e: React.MouseEvent) => {
+    if (external_website) {
+      e.preventDefault();
+      // TODO: Add URL tracking here
+      window.open(external_website, '_blank', 'noopener,noreferrer');
+    }
+    // If no external website, let the Link component handle navigation to provider page
+  };
   return (
-    <Link to={`/${type}/${id}`} className="block">
+    <Link to={`/provider/${id}`} className="block" onClick={handleClick}>
       <div className="rounded-xl overflow-hidden shadow-sm border card-hover">
         {/* Card Image */}
         <div className="relative aspect-[4/3]">

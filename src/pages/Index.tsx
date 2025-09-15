@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
+import LocationMap from "@/components/maps/LocationMap";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, Calendar, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,11 +28,14 @@ const Index = () => {
     setActiveFilter(filter === activeFilter ? "" : filter);
   };
 
+  // Array of different images for variety
+  const imageOptions = [soccerKidsImage, artsCraftsImage, swimmingKidsImage, artDesignImage];
+
   // Transform provider profiles to CampCard format
-  const transformedProviders = providers.map((provider) => ({
+  const transformedProviders = providers.map((provider, index) => ({
     id: provider.id,
     title: provider.business_name,
-    image: soccerKidsImage, // Default image for now
+    image: imageOptions[index % imageOptions.length], // Rotate through different images
     location: provider.location,
     price: provider.base_price || 35,
     priceUnit: "session" as const,
@@ -41,12 +45,12 @@ const Index = () => {
     availability: "Available",
     type: "activity" as const,
     age: "6-12", // Default age range
-    distance: "Austin area"
+    distance: "Austin area",
+    external_website: provider.external_website
   }));
 
-  // Get featured providers (first 10) and nearby providers (first 3)
-  const featuredProviders = transformedProviders.slice(0, 10);
-  const nearbyProviders = transformedProviders.slice(0, 3);
+  // Get featured providers (first 8 for better grid layout)
+  const featuredProviders = transformedProviders.slice(6, 14);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -118,31 +122,49 @@ const Index = () => {
         </section>
 
 
-        {/* Nearby Section */}
+        {/* Local Results Section with Map */}
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Nearby</h2>
-            {providersLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
-                ))}
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Local Providers</h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              {/* Results Grid */}
+              <div>
+                {providersLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                    {transformedProviders.slice(0, 6).map((item) => (
+                      <CampCard key={item.id} {...item} />
+                    ))}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-                {nearbyProviders.map((item) => (
-                  <CampCard key={item.id} {...item} />
-                ))}
-              </div>
-            )}
-            <div className="mt-8 md:mt-10 text-center">
+
+              {/* Map Component */}
+              <LocationMap 
+                providers={transformedProviders.slice(0, 6).map(p => ({
+                  id: p.id,
+                  business_name: p.title,
+                  location: p.location,
+                  google_rating: p.rating
+                }))}
+                className="h-[400px]"
+              />
+            </div>
+
+            <div className="text-center">
               <Button 
                 variant="outline" 
                 size="lg" 
                 className="rounded-full"
                 onClick={() => navigate('/camps')}
               >
-                View All Nearby
+                View All Local Providers
               </Button>
             </div>
           </div>
