@@ -89,33 +89,37 @@ const Index = () => {
                   Summer Camps
                 </Button>
                 <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  Activities
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  Tutors
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  Sports
-                </Button>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
-                >
-                  After School
-                </Button>
+                   variant="secondary" 
+                   size="lg" 
+                   className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                   onClick={() => navigate('/activities')}
+                 >
+                   Activities
+                 </Button>
+                 <Button 
+                   variant="secondary" 
+                   size="lg" 
+                   className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                   onClick={() => navigate('/camps')}
+                 >
+                   Tutors
+                 </Button>
+                 <Button 
+                   variant="secondary" 
+                   size="lg" 
+                   className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                   onClick={() => navigate('/camps')}
+                 >
+                   Sports
+                 </Button>
+                 <Button 
+                   variant="secondary" 
+                   size="lg" 
+                   className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-full px-6 md:px-8 py-2 md:py-3 font-semibold text-sm md:text-base shadow-lg transition-all duration-200"
+                   onClick={() => navigate('/camps')}
+                 >
+                   After School
+                 </Button>
               </div>
             </div>
           </div>
