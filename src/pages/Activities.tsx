@@ -11,7 +11,7 @@ const mockActivities = [
   {
     id: "activity1",
     title: "Forest Ecology Exploration",
-    image: generateProviderIcon("Forest Ecology Exploration"),
+    image: generateProviderIcon("Forest Ecology Exploration", ["ecology", "nature"], "activity1"),
     location: "Portland, Oregon",
     price: 45,
     priceUnit: "session",
@@ -25,7 +25,7 @@ const mockActivities = [
   {
     id: "activity2",
     title: "Creative Arts & Crafts Workshop",
-    image: generateProviderIcon("Creative Arts & Crafts Workshop"),
+    image: generateProviderIcon("Creative Arts & Crafts Workshop", ["arts", "crafts"], "activity2"),
     location: "Austin, TX",
     price: 35,
     priceUnit: "session",
@@ -39,7 +39,7 @@ const mockActivities = [
   {
     id: "activity3",
     title: "Nature Photography Adventure",
-    image: generateProviderIcon("Nature Photography Adventure"),
+    image: generateProviderIcon("Nature Photography Adventure", ["photography", "nature"], "activity3"),
     location: "Seattle, WA",
     price: 55,
     priceUnit: "session",
@@ -53,7 +53,7 @@ const mockActivities = [
   {
     id: "activity4",
     title: "Junior Soccer League",
-    image: generateProviderIcon("Junior Soccer League"),
+    image: generateProviderIcon("Junior Soccer League", ["soccer", "sports"], "activity4"),
     location: "Chicago, IL",
     price: 40,
     priceUnit: "session",
@@ -67,7 +67,7 @@ const mockActivities = [
   {
     id: "activity5",
     title: "Coding for Kids",
-    image: generateProviderIcon("Coding for Kids"),
+    image: generateProviderIcon("Coding for Kids", ["coding", "tech"], "activity5"),
     location: "San Francisco, CA",
     price: 60,
     priceUnit: "session",
@@ -81,7 +81,7 @@ const mockActivities = [
   {
     id: "activity6",
     title: "Kids Outdoor Cooking Class",
-    image: generateProviderIcon("Kids Outdoor Cooking Class"),
+    image: generateProviderIcon("Kids Outdoor Cooking Class", ["cooking", "outdoor"], "activity6"),
     location: "Denver, CO",
     price: 50,
     priceUnit: "session",

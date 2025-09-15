@@ -156,7 +156,7 @@ const Camps = () => {
   const transformedProviders = filteredProviders.map(provider => ({
     id: provider.id,
     title: provider.business_name,
-    image: generateProviderIcon(provider.business_name, provider.specialties),
+    image: generateProviderIcon(provider.business_name, provider.specialties, provider.id),
     location: provider.location,
     price: provider.base_price || 50,
     priceUnit: "day" as const,
@@ -175,7 +175,7 @@ const Camps = () => {
   // Transform mock camps to use generated icons
   const transformedMockCamps = filteredMockCamps.map(camp => ({
     ...camp,
-    image: generateProviderIcon(camp.title),
+    image: generateProviderIcon(camp.title, [], camp.id),
     verification_status: 'verified' as const,
     external_website: undefined
   }));

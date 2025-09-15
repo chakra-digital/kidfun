@@ -29,7 +29,7 @@ const Index = () => {
   const transformedProviders = providers.map((provider) => ({
     id: provider.id,
     title: provider.business_name,
-    image: generateProviderIcon(provider.business_name, provider.specialties),
+    image: generateProviderIcon(provider.business_name, provider.specialties, provider.id),
     location: provider.location,
     price: provider.base_price || 35,
     priceUnit: "session" as const,
