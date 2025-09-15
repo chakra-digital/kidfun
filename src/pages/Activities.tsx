@@ -5,12 +5,13 @@ import FilterBar from "@/components/filters/FilterBar";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { MapPin, Plus, Calendar, List, User, Star } from "lucide-react";
+import { getProviderImage } from "@/lib/imageUtils";
 
 const mockActivities = [
   {
     id: "activity1",
     title: "Forest Ecology Exploration",
-    image: "https://images.unsplash.com/photo-1472396961693-142e6e269027?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: getProviderImage("activity1"),
     location: "Portland, Oregon",
     price: 45,
     priceUnit: "session",
@@ -24,7 +25,7 @@ const mockActivities = [
   {
     id: "activity2",
     title: "Creative Arts & Crafts Workshop",
-    image: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: getProviderImage("activity2"),
     location: "Austin, TX",
     price: 35,
     priceUnit: "session",
@@ -38,7 +39,7 @@ const mockActivities = [
   {
     id: "activity3",
     title: "Nature Photography Adventure",
-    image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: getProviderImage("activity3"),
     location: "Seattle, WA",
     price: 55,
     priceUnit: "session",
@@ -52,7 +53,7 @@ const mockActivities = [
   {
     id: "activity4",
     title: "Junior Soccer League",
-    image: "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: getProviderImage("activity4"),
     location: "Chicago, IL",
     price: 40,
     priceUnit: "session",
@@ -66,7 +67,7 @@ const mockActivities = [
   {
     id: "activity5",
     title: "Coding for Kids",
-    image: "https://images.unsplash.com/photo-1517613992687-2f8e8415f780?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: getProviderImage("activity5"),
     location: "San Francisco, CA",
     price: 60,
     priceUnit: "session",
@@ -80,7 +81,7 @@ const mockActivities = [
   {
     id: "activity6",
     title: "Kids Outdoor Cooking Class",
-    image: "https://images.unsplash.com/photo-1526455131823-3066654ad50f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
+    image: getProviderImage("activity6"),
     location: "Denver, CO",
     price: 50,
     priceUnit: "session",

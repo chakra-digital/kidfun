@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, User, Loader2 } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import { Badge } from "@/components/ui/badge";
+import { getThemedProviderImage } from "@/lib/imageUtils";
 
 // Mock data for camps
 const mockCamps = [
@@ -138,7 +139,7 @@ const Camps = () => {
   const transformedProviders = filteredProviders.map(provider => ({
     id: provider.id,
     title: provider.business_name,
-    image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60", // Default image
+    image: getThemedProviderImage(provider.id, provider.business_name, provider.specialties),
     location: provider.location,
     price: provider.base_price || 50,
     priceUnit: "day" as const,
