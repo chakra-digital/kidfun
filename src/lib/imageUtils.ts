@@ -41,113 +41,107 @@ export function getProviderImage(identifier: string): string {
 }
 
 /**
- * Generate a clean SVG icon pattern for providers
+ * Generate fun emoji-based provider avatars
  */
 export function generateProviderIcon(businessName: string, specialties?: string[], providerId?: string): string {
-  // Create multiple hash variations for better uniqueness
-  const createHash = (str: string, seed: number = 0) => {
-    let hash = seed;
+  // Simple hash function for consistency
+  function simpleHash(str: string): number {
+    let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char + seed;
+      hash = ((hash << 5) - hash) + char;
       hash = hash & hash;
     }
     return Math.abs(hash);
+  }
+
+  // Emoji sets for different activity types
+  const emojiSets = {
+    sports: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏓', '🏸', '🏑', '🥍', '🏊‍♀️', '🏃‍♂️', '🚴‍♀️', '⛷️', '🏄‍♂️'],
+    arts: ['🎨', '🖌️', '✏️', '🖍️', '🎭', '🎪', '🎬', '📸', '🎵', '🎼', '🎹', '🎸', '🥁', '🎤', '🎺'],
+    science: ['🔬', '⚗️', '🧪', '🔭', '🌍', '🌟', '⚡', '🔋', '💡', '🧬', '🦠', '🌡️', '⚖️', '🧲', '🚀'],
+    nature: ['🌳', '🌿', '🌱', '🌺', '🦋', '🐛', '🐝', '🐞', '🦗', '🌻', '🍃', '🌲', '🌴', '🌵', '🍄'],
+    cooking: ['👨‍🍳', '👩‍🍳', '🍳', '🥘', '🍰', '🧁', '🍪', '🥧', '🍕', '🥖', '🥞', '🧄', '🌶️', '🥄', '🍽️'],
+    tech: ['💻', '🖥️', '📱', '⌨️', '🖱️', '🎮', '🕹️', '🤖', '⚙️', '🔧', '💾', '📡', '🌐', '💿', '📀'],
+    reading: ['📚', '📖', '📝', '✍️', '📄', '📰', '📑', '🗞️', '📜', '📋', '📌', '📍', '🔖', '📕', '📗'],
+    dance: ['💃', '🕺', '🩰', '👯‍♀️', '🎵', '🎶', '🎼', '🥁', '🎹', '🎸', '🎤', '🎺', '🎷', '🪘', '🔔'],
+    water: ['🏊‍♀️', '🏊‍♂️', '🌊', '💧', '🐠', '🐟', '🐡', '🦈', '🐙', '🐚', '⛵', '🛥️', '🏄‍♀️', '🏄‍♂️', '🤽‍♀️'],
+    animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐸', '🐵', '🦆', '🐥']
   };
 
-  // Use multiple identifiers to ensure uniqueness
-  const identifier = `${businessName}-${providerId || ''}-${specialties?.join('') || ''}`;
-  const primaryHash = createHash(identifier);
-  const secondaryHash = createHash(identifier, 7919); // Prime number seed
-  const tertiaryHash = createHash(identifier, 1009); // Another prime seed
+  // Default fun kid emojis
+  const defaultEmojis = ['🎈', '🎉', '🎊', '🌈', '⭐', '✨', '🎯', '🎁', '🏆', '🎪', '🎠', '🎡', '🎢', '🎳', '🎲'];
 
-  const colors = [
-    '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', 
-    '#F59E0B', '#06B6D4', '#6366F1', '#EF4444',
-    '#14B8A6', '#F97316', '#84CC16', '#A855F7',
-    '#EAB308', '#F43F5E', '#06B6D4', '#8B5A2B'
-  ];
+  // Determine emoji set based on specialties and business name
+  function getRelevantEmojis(): string[] {
+    const text = `${businessName} ${specialties?.join(' ') || ''}`.toLowerCase();
+    
+    for (const [category, emojis] of Object.entries(emojiSets)) {
+      const keywords = {
+        sports: ['sport', 'soccer', 'football', 'basketball', 'tennis', 'swim', 'run', 'bike', 'ski', 'surf', 'gym', 'fitness', 'athletic'],
+        arts: ['art', 'craft', 'paint', 'draw', 'music', 'sing', 'dance', 'theater', 'drama', 'creative', 'design'],
+        science: ['science', 'stem', 'tech', 'robot', 'code', 'program', 'engineer', 'math', 'chemistry', 'physics', 'biology'],
+        nature: ['nature', 'outdoor', 'garden', 'plant', 'forest', 'tree', 'environment', 'eco', 'wildlife', 'camping'],
+        cooking: ['cook', 'bake', 'chef', 'kitchen', 'food', 'culinary', 'recipe', 'nutrition'],
+        tech: ['computer', 'digital', 'coding', 'programming', 'robotics', 'technology', 'gaming'],
+        reading: ['read', 'book', 'story', 'library', 'writing', 'literature', 'language'],
+        dance: ['dance', 'ballet', 'hip hop', 'movement', 'choreography', 'rhythm'],
+        water: ['swim', 'pool', 'water', 'aquatic', 'diving', 'surf', 'sailing'],
+        animals: ['animal', 'pet', 'zoo', 'farm', 'wildlife', 'veterinary', 'dog', 'cat', 'horse']
+      };
+
+      if (keywords[category as keyof typeof keywords]?.some(keyword => text.includes(keyword))) {
+        return emojis;
+      }
+    }
+    
+    return defaultEmojis;
+  }
+
+  const relevantEmojis = getRelevantEmojis();
   
+  // Create unique identifier for consistent results
+  const identifier = `${businessName}-${providerId || ''}-${specialties?.join('') || ''}`;
+  const hash = simpleHash(identifier);
+  
+  // Select primary emoji
+  const primaryEmojiIndex = hash % relevantEmojis.length;
+  const primaryEmoji = relevantEmojis[primaryEmojiIndex];
+  
+  // Select 2-3 secondary emojis from the same set
+  const secondaryEmojis = [];
+  for (let i = 1; i <= 2; i++) {
+    const secondaryIndex = (hash + i * 17) % relevantEmojis.length;
+    if (secondaryIndex !== primaryEmojiIndex) {
+      secondaryEmojis.push(relevantEmojis[secondaryIndex]);
+    }
+  }
+  
+  // Color palette - soft, kid-friendly colors
   const bgColors = [
-    '#EFF6FF', '#ECFDF5', '#F3E8FF', '#FDF2F8',
-    '#FFFBEB', '#ECFEFF', '#EEF2FF', '#FEF2F2',
-    '#F0FDFA', '#FFF7ED', '#F7FEE7', '#FAF5FF',
-    '#FEFCE8', '#FDF2F8', '#ECFEFF', '#FDF6E3'
+    '#FEF7ED', '#FDF2F8', '#F0F9FF', '#F0FDF4', '#FFFBEB', 
+    '#FAF5FF', '#F3E8FF', '#EFF6FF', '#ECFDF5', '#FEF3C7'
   ];
   
-  // Varied patterns inspired by WhatsApp-style illustrations
-  const patterns = [
-    // Circle with dots
-    `<circle cx="50" cy="50" r="20" fill="COLOR_PLACEHOLDER" opacity="0.2"/>
-     <circle cx="40" cy="40" r="3" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="60" cy="35" r="2" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="45" cy="60" r="2.5" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="65" cy="55" r="1.5" fill="COLOR_PLACEHOLDER"/>`,
-    
-    // Layered shapes
-    `<rect x="30" y="30" width="40" height="40" fill="COLOR_PLACEHOLDER" opacity="0.3" rx="8"/>
-     <circle cx="45" cy="45" r="8" fill="COLOR_PLACEHOLDER" opacity="0.8"/>
-     <rect x="55" y="35" width="10" height="30" fill="COLOR_PLACEHOLDER" opacity="0.6" rx="3"/>`,
-    
-    // Scattered elements
-    `<polygon points="30,40 40,25 50,40" fill="COLOR_PLACEHOLDER" opacity="0.7"/>
-     <circle cx="60" cy="35" r="5" fill="COLOR_PLACEHOLDER" opacity="0.5"/>
-     <rect x="25" y="55" width="15" height="10" fill="COLOR_PLACEHOLDER" opacity="0.6" rx="2"/>
-     <polygon points="65,60 75,55 70,70" fill="COLOR_PLACEHOLDER" opacity="0.4"/>`,
-    
-    // Lines and curves pattern
-    `<path d="M25,30 Q40,20 55,30 T75,40" stroke="COLOR_PLACEHOLDER" stroke-width="3" fill="none" opacity="0.7"/>
-     <circle cx="30" cy="50" r="4" fill="COLOR_PLACEHOLDER" opacity="0.8"/>
-     <circle cx="50" cy="60" r="3" fill="COLOR_PLACEHOLDER" opacity="0.6"/>
-     <circle cx="70" cy="45" r="5" fill="COLOR_PLACEHOLDER" opacity="0.5"/>`,
-    
-    // Grid pattern
-    `<rect x="25" y="25" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.3" rx="2"/>
-     <rect x="44" y="25" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.6" rx="2"/>
-     <rect x="63" y="25" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.4" rx="2"/>
-     <rect x="25" y="44" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.7" rx="2"/>
-     <rect x="44" y="44" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.5" rx="2"/>
-     <rect x="63" y="44" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.8" rx="2"/>
-     <rect x="25" y="63" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.4" rx="2"/>
-     <rect x="44" y="63" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.6" rx="2"/>
-     <rect x="63" y="63" width="12" height="12" fill="COLOR_PLACEHOLDER" opacity="0.5" rx="2"/>`,
-    
-    // Organic shapes
-    `<path d="M30,40 C25,35 25,45 30,50 C35,55 45,55 50,50 C55,45 55,35 50,30 C45,25 35,25 30,40z" fill="COLOR_PLACEHOLDER" opacity="0.4"/>
-     <circle cx="60" cy="35" r="6" fill="COLOR_PLACEHOLDER" opacity="0.7"/>
-     <ellipse cx="40" cy="65" rx="8" ry="5" fill="COLOR_PLACEHOLDER" opacity="0.6"/>`,
-     
-    // Constellation pattern
-    `<circle cx="35" cy="30" r="2" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="55" cy="25" r="1.5" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="45" cy="40" r="2.5" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="65" cy="45" r="2" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="30" cy="55" r="1.5" fill="COLOR_PLACEHOLDER"/>
-     <circle cx="60" cy="65" r="3" fill="COLOR_PLACEHOLDER"/>
-     <line x1="35" y1="30" x2="55" y2="25" stroke="COLOR_PLACEHOLDER" stroke-width="1" opacity="0.5"/>
-     <line x1="45" y1="40" x2="65" y2="45" stroke="COLOR_PLACEHOLDER" stroke-width="1" opacity="0.5"/>
-     <line x1="30" y1="55" x2="60" y2="65" stroke="COLOR_PLACEHOLDER" stroke-width="1" opacity="0.5"/>`,
-     
-    // Geometric mix
-    `<polygon points="40,25 50,35 40,45 30,35" fill="COLOR_PLACEHOLDER" opacity="0.6"/>
-     <rect x="55" y="30" width="15" height="8" fill="COLOR_PLACEHOLDER" opacity="0.4" rx="2"/>
-     <circle cx="35" cy="60" r="7" fill="COLOR_PLACEHOLDER" opacity="0.5"/>
-     <polygon points="60,55 68,60 60,70 52,65" fill="COLOR_PLACEHOLDER" opacity="0.7"/>`
+  const accentColors = [
+    '#FB923C', '#F472B6', '#60A5FA', '#4ADE80', '#FBBF24',
+    '#A78BFA', '#C084FC', '#3B82F6', '#10B981', '#F59E0B'
   ];
   
-  // Use different hash variations for color selection to avoid patterns
-  const colorIndex = (primaryHash + secondaryHash) % colors.length;
-  const bgColorIndex = (secondaryHash + tertiaryHash) % bgColors.length;
-  const patternIndex = (primaryHash * 3 + tertiaryHash * 7) % patterns.length;
+  const bgColorIndex = hash % bgColors.length;
+  const accentColorIndex = (hash + 7) % accentColors.length;
   
-  const color = colors[colorIndex];
   const bgColor = bgColors[bgColorIndex];
+  const accentColor = accentColors[accentColorIndex];
   
-  const pattern = patterns[patternIndex].replace(/COLOR_PLACEHOLDER/g, color);
-  
+  // Create SVG with emoji pattern
   const svg = `<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <rect width="100" height="100" fill="${bgColor}" rx="16"/>
-    ${pattern}
+    <circle cx="50" cy="50" r="35" fill="${accentColor}" opacity="0.1"/>
+    <text x="50" y="60" text-anchor="middle" font-size="32" font-family="system-ui">${primaryEmoji}</text>
+    ${secondaryEmojis.map((emoji, i) => 
+      `<text x="${25 + i * 50}" y="${25 + (i % 2) * 50}" text-anchor="middle" font-size="16" font-family="system-ui" opacity="0.6">${emoji}</text>`
+    ).join('')}
   </svg>`;
   
   return `data:image/svg+xml;base64,${btoa(svg)}`;

@@ -113,10 +113,8 @@ const Camps = () => {
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const search = params.get('search');
-    if (search) {
-      setSearchQuery(search);
-    }
-  }, []);
+    setSearchQuery(search || '');
+  }, [window.location.search]);
 
   // Listen to URL changes for search
   React.useEffect(() => {
