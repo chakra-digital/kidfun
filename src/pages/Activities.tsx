@@ -7,11 +7,10 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Plus, Calendar, List, User, Star } from "lucide-react";
 import { generateProviderIcon } from "@/lib/imageUtils";
 
-const mockActivities = [
+const baseActivities = [
   {
     id: "activity1",
     title: "Forest Ecology Exploration",
-    image: generateProviderIcon("Forest Ecology Exploration", ["ecology", "nature"], "activity1"),
     location: "Portland, Oregon",
     price: 45,
     priceUnit: "session",
@@ -20,12 +19,11 @@ const mockActivities = [
     dates: "Weekends in June",
     availability: "7 spots left",
     type: "activity" as const,
-    age: "6-10"
+    age: "6-10",
   },
   {
     id: "activity2",
     title: "Creative Arts & Crafts Workshop",
-    image: generateProviderIcon("Creative Arts & Crafts Workshop", ["arts", "crafts"], "activity2"),
     location: "Austin, TX",
     price: 35,
     priceUnit: "session",
@@ -34,12 +32,11 @@ const mockActivities = [
     dates: "Mon & Wed, June-July",
     availability: "Available",
     type: "activity" as const,
-    age: "5-9"
+    age: "5-9",
   },
   {
     id: "activity3",
     title: "Nature Photography Adventure",
-    image: generateProviderIcon("Nature Photography Adventure", ["photography", "nature"], "activity3"),
     location: "Seattle, WA",
     price: 55,
     priceUnit: "session",
@@ -48,12 +45,11 @@ const mockActivities = [
     dates: "Saturdays in July",
     availability: "Available",
     type: "activity" as const,
-    age: "11-16"
+    age: "11-16",
   },
   {
     id: "activity4",
     title: "Junior Soccer League",
-    image: generateProviderIcon("Junior Soccer League", ["soccer", "sports"], "activity4"),
     location: "Chicago, IL",
     price: 40,
     priceUnit: "session",
@@ -62,12 +58,11 @@ const mockActivities = [
     dates: "Tuesdays & Thursdays, June-Aug",
     availability: "5 spots left",
     type: "activity" as const,
-    age: "7-12"
+    age: "7-12",
   },
   {
     id: "activity5",
     title: "Coding for Kids",
-    image: generateProviderIcon("Coding for Kids", ["coding", "tech"], "activity5"),
     location: "San Francisco, CA",
     price: 60,
     priceUnit: "session",
@@ -76,12 +71,11 @@ const mockActivities = [
     dates: "Mondays, June-July",
     availability: "Available",
     type: "activity" as const,
-    age: "10-14"
+    age: "10-14",
   },
   {
     id: "activity6",
     title: "Kids Outdoor Cooking Class",
-    image: generateProviderIcon("Kids Outdoor Cooking Class", ["cooking", "outdoor"], "activity6"),
     location: "Denver, CO",
     price: 50,
     priceUnit: "session",
@@ -90,8 +84,8 @@ const mockActivities = [
     dates: "Saturdays, June-Sep",
     availability: "10 spots left",
     type: "activity" as const,
-    age: "8-13"
-  }
+    age: "8-13",
+  },
 ];
 
 const activityCategories = [
@@ -105,9 +99,13 @@ const activityCategories = [
 const Activities = () => {
   const [activeFilter, setActiveFilter] = useState("");
 
-  const handleFilterChange = (filter: string) => {
-    setActiveFilter(filter === activeFilter ? "" : filter);
-  };
+  const activities = React.useMemo(() =>
+    baseActivities.map((a) => ({
+      ...a,
+      image: generateProviderIcon(a.title, [], a.id),
+    })),
+  []);
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -131,7 +129,7 @@ const Activities = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold mb-6">Popular Activities</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockActivities.map((activity) => (
+              {activities.map((activity) => (
                 <CampCard key={activity.id} {...activity} />
               ))}
             </div>
