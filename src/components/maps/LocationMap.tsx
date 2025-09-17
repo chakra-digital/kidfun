@@ -244,8 +244,16 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
           <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" style={{ minHeight: '400px' }} />
           
           {/* Debug info */}
-          <div className="absolute bottom-2 left-2 text-xs bg-black/50 text-white p-2 rounded">
-            Status: {isLoading ? 'Loading...' : error ? 'Error' : 'Ready'} | Providers: {providers.length}
+          <div className="absolute bottom-2 left-2 text-xs bg-black/50 text-white p-2 rounded flex items-center gap-2">
+            <span>Status: {isLoading ? 'Loading...' : error ? 'Error' : 'Ready'} | Providers: {providers.length}</span>
+            <Button 
+              onClick={handleResetApiKey} 
+              variant="outline" 
+              size="sm" 
+              className="text-xs py-1 px-2 h-auto"
+            >
+              Reset
+            </Button>
           </div>
         </>
       )}
