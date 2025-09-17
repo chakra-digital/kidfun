@@ -30,6 +30,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
+  console.log('LocationMap render:', { 
+    providersCount: providers.length, 
+    apiKeySubmitted, 
+    hasError: !!error,
+    className 
+  });
+
   const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (window.google && window.google.maps) {
@@ -173,7 +180,11 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
           Get yours at <a href="https://console.developers.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Console</a>
         </p>
         <p className="text-xs text-muted-foreground text-center mb-4 max-w-md">
-          For referrer restrictions: Add <code className="bg-background px-1 rounded">*.lovable.dev/*</code> and <code className="bg-background px-1 rounded">localhost:*</code>
+          For referrer restrictions, add these exact formats:
+          <br />• <code className="bg-background px-1 rounded">*.lovable.dev/*</code>
+          <br />• <code className="bg-background px-1 rounded">https://kidfun.app/*</code>
+          <br />• <code className="bg-background px-1 rounded">https://www.kidfun.app/*</code>
+          <br />• <code className="bg-background px-1 rounded">http://localhost:*</code>
         </p>
         {error && (
           <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 text-sm max-w-md text-center">
