@@ -28,6 +28,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState('');
   const [apiKeySubmitted, setApiKeySubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>('');
 
   const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -50,10 +51,19 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
     if (!mapContainer.current || !apiKey) return;
 
     setIsLoading(true);
+    setError('');
     
     try {
+      console.log('Loading Google Maps with API key...');
       await loadGoogleMapsScript(apiKey);
+      console.log('Google Maps script loaded successfully');
 
+      // Test if Google Maps is available
+      if (!window.google || !window.google.maps) {
+        throw new Error('Google Maps API not available after loading');
+      }
+
+      console.log('Initializing map...');
       // Initialize map centered on Austin, TX
       map.current = new window.google.maps.Map(mapContainer.current, {
         center: { lat: 30.2672, lng: -97.7431 },
@@ -67,6 +77,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         ]
       });
 
+      console.log('Map initialized, adding markers...');
       // Add markers for providers
       providers.forEach((provider) => {
         // For now, use mock coordinates around Austin area since we don't have lat/lng
@@ -106,9 +117,12 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
           infoWindow.open(map.current, marker);
         });
       });
+      console.log('Markers added successfully');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading Google Maps:', error);
+      setError(error.message || 'Failed to load Google Maps. Please check your API key and try again.');
+      setApiKeySubmitted(false);
     } finally {
       setIsLoading(false);
     }
@@ -116,10 +130,32 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
 
   const handleApiKeySubmit = () => {
     if (googleMapsApiKey.trim()) {
+      // Save to localStorage
+      localStorage.setItem('googleMapsApiKey', googleMapsApiKey.trim());
       setApiKeySubmitted(true);
       initializeMap(googleMapsApiKey.trim());
     }
   };
+
+  const handleResetApiKey = () => {
+    localStorage.removeItem('googleMapsApiKey');
+    setApiKeySubmitted(false);
+    setGoogleMapsApiKey('');
+    setError('');
+    if (map.current) {
+      map.current = null;
+    }
+  };
+
+  // Check for saved API key on mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('googleMapsApiKey');
+    if (savedApiKey) {
+      setGoogleMapsApiKey(savedApiKey);
+      setApiKeySubmitted(true);
+      initializeMap(savedApiKey);
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -136,6 +172,14 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
           To display provider locations on the map, please enter your Google Maps API key.
           Get yours at <a href="https://console.developers.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Console</a>
         </p>
+        <p className="text-xs text-muted-foreground text-center mb-4 max-w-md">
+          For referrer restrictions: Add <code className="bg-background px-1 rounded">*.lovable.dev/*</code> and <code className="bg-background px-1 rounded">localhost:*</code>
+        </p>
+        {error && (
+          <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 text-sm max-w-md text-center">
+            {error}
+          </div>
+        )}
         <div className="flex gap-2 w-full max-w-sm">
           <Input
             placeholder="Enter Google Maps API key"
@@ -158,6 +202,16 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
             <p className="text-sm text-muted-foreground">Loading map...</p>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="absolute top-4 left-4 right-4 bg-destructive/90 text-destructive-foreground p-3 rounded-md text-sm z-20">
+          <div className="flex justify-between items-start gap-2">
+            <span>{error}</span>
+            <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs">
+              Reset Key
+            </Button>
           </div>
         </div>
       )}
