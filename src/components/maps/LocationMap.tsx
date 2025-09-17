@@ -25,6 +25,7 @@ declare global {
 const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "" }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any>(null);
+  const initialized = useRef(false);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState('');
   const [apiKeySubmitted, setApiKeySubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -152,8 +153,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       // Save to localStorage
       localStorage.setItem('googleMapsApiKey', googleMapsApiKey.trim());
       setApiKeySubmitted(true);
-      console.log('About to call initializeMap');
-      initializeMap(googleMapsApiKey.trim());
+      setError('');
+      setIsLoading(false); // loading will start when initializeMap runs in effect
+      console.log('API key saved; map will initialize after container mounts');
     } else {
       console.log('No API key provided, not submitting');
     }
@@ -164,18 +166,18 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
     setApiKeySubmitted(false);
     setGoogleMapsApiKey('');
     setError('');
+    initialized.current = false;
     if (map.current) {
       map.current = null;
     }
   };
-
   // Check for saved API key on mount
   useEffect(() => {
     const savedApiKey = localStorage.getItem('googleMapsApiKey');
     if (savedApiKey) {
       setGoogleMapsApiKey(savedApiKey);
       setApiKeySubmitted(true);
-      initializeMap(savedApiKey);
+      // initialization will run in the effect below once the container is mounted
     }
   }, []);
 
@@ -184,6 +186,30 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       // Google Maps cleanup is handled automatically
     };
   }, []);
+
+  // Initialize map after the container is mounted and key is available
+  useEffect(() => {
+    if (!apiKeySubmitted) return;
+
+    const key = (googleMapsApiKey || localStorage.getItem('googleMapsApiKey') || '').trim();
+
+    if (!mapContainer.current) {
+      console.log('Map container not ready yet');
+      return;
+    }
+    if (!key) {
+      console.warn('No API key available to initialize map');
+      return;
+    }
+    if (initialized.current) {
+      console.log('Map already initialized, skipping');
+      return;
+    }
+
+    initialized.current = true;
+    console.log('Initializing map from effect...');
+    void initializeMap(key);
+  }, [apiKeySubmitted, googleMapsApiKey]);
 
   return (
     <div className={`relative ${className}`}>
