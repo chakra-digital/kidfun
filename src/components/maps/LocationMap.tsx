@@ -185,63 +185,70 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
     };
   }, []);
 
-  if (!apiKeySubmitted) {
-    return (
-      <div className={`bg-muted rounded-lg p-8 flex flex-col items-center justify-center ${className}`}>
-        <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Interactive Map</h3>
-        <p className="text-sm text-muted-foreground text-center mb-4 max-w-md">
-          To display provider locations on the map, please enter your Google Maps API key.
-          Get yours at <a href="https://console.developers.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Console</a>
-        </p>
-        <p className="text-xs text-muted-foreground text-center mb-4 max-w-md">
-          For referrer restrictions, add these exact formats:
-          <br />• <code className="bg-background px-1 rounded">*.lovable.dev/*</code>
-          <br />• <code className="bg-background px-1 rounded">https://kidfun.app/*</code>
-          <br />• <code className="bg-background px-1 rounded">https://www.kidfun.app/*</code>
-          <br />• <code className="bg-background px-1 rounded">http://localhost:*</code>
-        </p>
-        {error && (
-          <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 text-sm max-w-md text-center">
-            {error}
-          </div>
-        )}
-        <div className="flex gap-2 w-full max-w-sm">
-          <Input
-            placeholder="Enter Google Maps API key"
-            value={googleMapsApiKey}
-            onChange={(e) => setGoogleMapsApiKey(e.target.value)}
-            type="password"
-          />
-          <Button onClick={handleApiKeySubmit} disabled={isLoading}>
-            {isLoading ? 'Loading...' : 'Load Map'}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`relative ${className}`}>
-      {isLoading && (
-        <div className="absolute inset-0 bg-muted rounded-lg flex items-center justify-center z-10">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-            <p className="text-sm text-muted-foreground">Loading map...</p>
-          </div>
-        </div>
-      )}
-      {error && (
-        <div className="absolute top-4 left-4 right-4 bg-destructive/90 text-destructive-foreground p-3 rounded-md text-sm z-20">
-          <div className="flex justify-between items-start gap-2">
-            <span>{error}</span>
-            <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs">
-              Reset Key
+      {!apiKeySubmitted ? (
+        // API Key Input Form
+        <div className="bg-muted rounded-lg p-8 flex flex-col items-center justify-center h-full">
+          <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Interactive Map</h3>
+          <p className="text-sm text-muted-foreground text-center mb-4 max-w-md">
+            To display provider locations on the map, please enter your Google Maps API key.
+            Get yours at <a href="https://console.developers.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Console</a>
+          </p>
+          <p className="text-xs text-muted-foreground text-center mb-4 max-w-md">
+            For referrer restrictions, add these exact formats:
+            <br />• <code className="bg-background px-1 rounded">*.lovable.dev/*</code>
+            <br />• <code className="bg-background px-1 rounded">https://kidfun.app/*</code>
+            <br />• <code className="bg-background px-1 rounded">https://www.kidfun.app/*</code>
+            <br />• <code className="bg-background px-1 rounded">http://localhost:*</code>
+          </p>
+          {error && (
+            <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 text-sm max-w-md text-center">
+              {error}
+            </div>
+          )}
+          <div className="flex gap-2 w-full max-w-sm">
+            <Input
+              placeholder="Enter Google Maps API key"
+              value={googleMapsApiKey}
+              onChange={(e) => setGoogleMapsApiKey(e.target.value)}
+              type="password"
+            />
+            <Button onClick={handleApiKeySubmit} disabled={isLoading}>
+              {isLoading ? 'Loading...' : 'Load Map'}
             </Button>
           </div>
         </div>
+      ) : (
+        // Map Container
+        <>
+          {isLoading && (
+            <div className="absolute inset-0 bg-muted rounded-lg flex items-center justify-center z-10">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Loading map...</p>
+              </div>
+            </div>
+          )}
+          {error && (
+            <div className="absolute top-4 left-4 right-4 bg-destructive/90 text-destructive-foreground p-3 rounded-md text-sm z-20">
+              <div className="flex justify-between items-start gap-2">
+                <span>{error}</span>
+                <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs">
+                  Reset Key
+                </Button>
+              </div>
+            </div>
+          )}
+          <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" style={{ minHeight: '400px' }} />
+          
+          {/* Debug info */}
+          <div className="absolute bottom-2 left-2 text-xs bg-black/50 text-white p-2 rounded">
+            Status: {isLoading ? 'Loading...' : error ? 'Error' : 'Ready'} | Providers: {providers.length}
+          </div>
+        </>
       )}
-      <div ref={mapContainer} className="w-full h-full rounded-lg" />
     </div>
   );
 };
