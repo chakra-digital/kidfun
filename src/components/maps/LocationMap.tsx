@@ -39,7 +39,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
 
   const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
     return new Promise((resolve, reject) => {
+      console.log('loadGoogleMapsScript called with key:', apiKey ? 'API key provided' : 'No API key');
+      
       if (window.google && window.google.maps) {
+        console.log('Google Maps already loaded');
         resolve();
         return;
       }
@@ -48,8 +51,16 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       script.async = true;
       script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Failed to load Google Maps API'));
+      script.onload = () => {
+        console.log('Google Maps script onload event triggered');
+        resolve();
+      };
+      script.onerror = (error) => {
+        console.error('Google Maps script onerror event:', error);
+        reject(new Error('Failed to load Google Maps API - check your API key and referrer restrictions'));
+      };
+      
+      console.log('Adding Google Maps script to document head');
       document.head.appendChild(script);
     });
   };
@@ -136,11 +147,15 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
   };
 
   const handleApiKeySubmit = () => {
+    console.log('handleApiKeySubmit called with key:', googleMapsApiKey ? 'API key provided' : 'No API key');
     if (googleMapsApiKey.trim()) {
       // Save to localStorage
       localStorage.setItem('googleMapsApiKey', googleMapsApiKey.trim());
       setApiKeySubmitted(true);
+      console.log('About to call initializeMap');
       initializeMap(googleMapsApiKey.trim());
+    } else {
+      console.log('No API key provided, not submitting');
     }
   };
 
