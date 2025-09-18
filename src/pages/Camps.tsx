@@ -5,6 +5,7 @@ import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, User, Loader2 } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
+import FilterBar from "@/components/filters/FilterBar";
 import { Badge } from "@/components/ui/badge";
 import { generateProviderIcon } from "@/lib/imageUtils";
 import { useLocation } from "react-router-dom";
@@ -23,17 +24,25 @@ const Camps = () => {
     setSearchQuery(search || '');
   }, [location.search]);
 
-  // Filter providers based on search query
+  // Filter providers based on search query and active filter
   const filteredProviders = providers.filter((provider) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      provider.business_name.toLowerCase().includes(query) ||
-      provider.location.toLowerCase().includes(query) ||
-      provider.description?.toLowerCase().includes(query) ||
-      provider.specialties?.some(specialty => specialty.toLowerCase().includes(query)) ||
-      provider.age_groups?.some(age => age.toLowerCase().includes(query))
-    );
+    // Apply search query filter
+    const matchesSearch = !searchQuery || (() => {
+      const query = searchQuery.toLowerCase();
+      return (
+        provider.business_name.toLowerCase().includes(query) ||
+        provider.location.toLowerCase().includes(query) ||
+        provider.description?.toLowerCase().includes(query) ||
+        provider.specialties?.some(specialty => specialty.toLowerCase().includes(query)) ||
+        provider.age_groups?.some(age => age.toLowerCase().includes(query))
+      );
+    })();
+
+    // Apply category filter
+    const matchesCategory = !activeFilter || activeFilter === "all" || 
+      provider.specialties?.includes(activeFilter);
+
+    return matchesSearch && matchesCategory;
   });
 
   // Transform provider profiles to camp card format
@@ -112,6 +121,12 @@ const Camps = () => {
             </div>
           </div>
         </section>
+
+        {/* Filter Bar */}
+        <FilterBar 
+          onFilterChange={handleFilterChange} 
+          activeFilter={activeFilter}
+        />
 
         {/* Main Content */}
         <section className="py-12">

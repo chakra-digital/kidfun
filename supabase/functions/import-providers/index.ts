@@ -189,6 +189,8 @@ serve(async (req) => {
         const providerData = {
           business_name: details.name,
           location: details.formatted_address || place.vicinity || 'Austin, TX',
+          latitude: place.geometry.location.lat,
+          longitude: place.geometry.location.lng,
           description: `${details.name} offers activities and services for children and families in the Austin area.`,
           google_place_id: place.place_id,
           external_website: details.website || details.url,

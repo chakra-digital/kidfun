@@ -144,8 +144,10 @@ export type Database = {
           google_reviews_count: number | null
           id: string
           insurance_verified: boolean | null
+          latitude: number | null
           license_number: string | null
           location: string
+          longitude: number | null
           phone: string | null
           pricing_model: string | null
           specialties: string[] | null
@@ -169,8 +171,10 @@ export type Database = {
           google_reviews_count?: number | null
           id?: string
           insurance_verified?: boolean | null
+          latitude?: number | null
           license_number?: string | null
           location: string
+          longitude?: number | null
           phone?: string | null
           pricing_model?: string | null
           specialties?: string[] | null
@@ -194,8 +198,10 @@ export type Database = {
           google_reviews_count?: number | null
           id?: string
           insurance_verified?: boolean | null
+          latitude?: number | null
           license_number?: string | null
           location?: string
+          longitude?: number | null
           phone?: string | null
           pricing_model?: string | null
           specialties?: string[] | null

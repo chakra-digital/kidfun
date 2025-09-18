@@ -274,9 +274,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
     
     console.log('Adding markers for providers:', providers.length);
     providers.forEach((provider) => {
-      // Mock coordinates around Austin area since we don't have lat/lng yet
-      const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
-      const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
+      // Use real coordinates if available, otherwise use Austin area with slight random offset
+      const lat = provider.latitude || (30.2672 + (Math.random() - 0.5) * 0.1);
+      const lng = provider.longitude || (-97.7431 + (Math.random() - 0.5) * 0.1);
 
       const marker = new (window as any).google.maps.Marker({
         position: { lat, lng },

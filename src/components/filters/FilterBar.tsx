@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, User, Calendar as CalendarIcon, List } from "lucide-react";
 
 const categories = [
-  { icon: <Calendar className="h-5 w-5" />, label: "Summer Camps" },
-  { icon: <User className="h-5 w-5" />, label: "Sports" },
-  { icon: <CalendarIcon className="h-5 w-5" />, label: "Arts & Crafts" },
-  { icon: <List className="h-5 w-5" />, label: "STEM" },
-  { icon: <MapPin className="h-5 w-5" />, label: "Outdoor Adventure" },
+  { icon: <Calendar className="h-5 w-5" />, label: "All", value: "all" },
+  { icon: <User className="h-5 w-5" />, label: "Adventure Activities", value: "Adventure Activities" },
+  { icon: <CalendarIcon className="h-5 w-5" />, label: "Educational Programs", value: "Educational Programs" },
+  { icon: <List className="h-5 w-5" />, label: "Social Activities", value: "Social Activities" },
+  { icon: <MapPin className="h-5 w-5" />, label: "Sports & Fitness", value: "Sports & Fitness" },
 ];
 
 interface FilterBarProps {
@@ -24,10 +24,10 @@ const FilterBar = ({ onFilterChange, activeFilter }: FilterBarProps) => {
           {categories.map((category) => (
             <Button
               key={category.label}
-              variant={activeFilter === category.label ? "default" : "outline"}
+              variant={activeFilter === category.value ? "default" : "outline"}
               size="sm"
               className="rounded-full whitespace-nowrap"
-              onClick={() => onFilterChange && onFilterChange(category.label)}
+              onClick={() => onFilterChange && onFilterChange(category.value)}
             >
               <span className="mr-2">{category.icon}</span>
               {category.label}
