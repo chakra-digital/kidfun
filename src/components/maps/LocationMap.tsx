@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-
-
+import { supabase } from '@/integrations/supabase/client';
 
 interface LocationMapProps {
   providers?: Array<{
@@ -49,7 +48,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&libraries=places,marker`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&loading=async`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -208,9 +207,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
       try {
         setIsLoading(true);
-        const resp = await fetch('https://vjyzhgwiajobfpumeqvy.supabase.co/functions/v1/get-maps-key');
-        if (!resp.ok) throw new Error('Failed to retrieve Maps API key');
-        const { key } = await resp.json();
+        const { data, error } = await supabase.functions.invoke('get-maps-key');
+        if (error) throw error;
+        const key = (data as any)?.key;
         if (!key) throw new Error('No API key returned');
         localStorage.setItem('googleMapsApiKey', key);
         setGoogleMapsApiKey(key);
