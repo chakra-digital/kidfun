@@ -7,6 +7,7 @@ import { Star, User, Calendar, MapPin, Check, Clock, MessageSquare } from "lucid
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CampCard from "@/components/camps/CampCard";
+import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 
 // Mock provider data
 const mockProvider = {
@@ -105,6 +106,10 @@ const mockProvider = {
 
 const ProviderProfile = () => {
   const { id } = useParams<{ id: string }>();
+  const { profiles: providers } = usePublicProviderProfiles();
+  
+  // Find the provider by ID, fallback to mock data if not found
+  const provider = providers.find(p => p.id === id) || mockProvider;
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -145,7 +145,7 @@ const Index = () => {
 
               {/* Map Component */}
               <LocationMap 
-                providers={transformedProviders.slice(0, 6).map(p => ({
+                providers={transformedProviders.map(p => ({
                   id: p.id,
                   business_name: p.title,
                   location: p.location,

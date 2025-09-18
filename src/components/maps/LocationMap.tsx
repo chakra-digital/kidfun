@@ -171,16 +171,16 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
               ` : '<div style="margin-bottom: 12px;"></div>'}
               <div style="display: flex; flex-direction: column; gap: 8px;">
                 ${provider.external_website ? `
-                  <a href="${provider.external_website}" target="_blank" rel="noopener noreferrer" 
+                  <a href="${provider.external_website}?utm_source=kidfun&utm_medium=map&utm_campaign=provider_referral" target="_blank" rel="noopener noreferrer" 
                      style="display: block; width: 100%; background-color: #3b82f6; color: white; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
                      onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
                     Visit Website
                   </a>
                 ` : ''}
-                <a href="/camps?search=${encodeURIComponent(provider.business_name)}" 
+                <a href="/provider/${provider.id}" 
                    style="display: block; width: 100%; background-color: #f3f4f6; color: #374151; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
                    onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
-                  View Details
+                   View Profile
                 </a>
               </div>
             </div>
@@ -305,16 +305,16 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
             ` : '<div style="margin-bottom: 12px;"></div>'}
             <div style="display: flex; flex-direction: column; gap: 8px;">
               ${provider.external_website ? `
-                <a href="${provider.external_website}" target="_blank" rel="noopener noreferrer" 
+                <a href="${provider.external_website}?utm_source=kidfun&utm_medium=map&utm_campaign=provider_referral" target="_blank" rel="noopener noreferrer" 
                    style="display: block; width: 100%; background-color: #3b82f6; color: white; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
                    onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
                   Visit Website
                 </a>
               ` : ''}
-              <a href="/camps?search=${encodeURIComponent(provider.business_name)}" 
+              <a href="/provider/${provider.id}" 
                  style="display: block; width: 100%; background-color: #f3f4f6; color: #374151; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
                  onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
-                View Details
+                View Profile
               </a>
             </div>
           </div>
