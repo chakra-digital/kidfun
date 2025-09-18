@@ -245,6 +245,48 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
     void initializeMap(key);
   }, [apiKeySubmitted, googleMapsApiKey]);
 
+  // Add markers when providers change and map is ready
+  useEffect(() => {
+    if (!map.current || !providers.length) return;
+    
+    console.log('Adding markers for providers:', providers.length);
+    providers.forEach((provider) => {
+      // Mock coordinates around Austin area since we don't have lat/lng yet
+      const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
+      const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
+
+      const marker = new (window as any).google.maps.Marker({
+        position: { lat, lng },
+        map: map.current,
+        title: provider.business_name,
+        icon: {
+          path: (window as any).google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: '#3b82f6',
+          fillOpacity: 1,
+          strokeColor: '#1e40af',
+          strokeWeight: 2,
+        }
+      });
+      
+      const infoWindow = new (window as any).google.maps.InfoWindow({
+        content: `
+          <div class="p-2 max-w-xs">
+            <h3 class="font-semibold text-sm">${provider.business_name}</h3>
+            <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
+            ${provider.google_rating ? `
+              <div class="flex items-center text-xs">
+                <span class="text-yellow-500">★</span>
+                <span class="ml-1">${provider.google_rating}</span>
+              </div>
+            ` : ''}
+          </div>
+        `
+      });
+      marker.addListener('click', () => infoWindow.open(map.current, marker));
+    });
+  }, [providers, map.current]);
+
   return (
     <div className={`relative ${className}`}>
       {isLoading && (
