@@ -83,22 +83,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       console.log('Initializing map...');
-      // Feature-detect the loader API; fall back to classic constructors if not available
-      let MapCtor: any;
-      let AdvancedMarkerElement: any | null = null;
-      let PinElement: any | null = null;
-
-      if ((window as any).google.maps.importLibrary) {
-        const { Map } = await (window as any).google.maps.importLibrary('maps');
-        const markerLib = await (window as any).google.maps.importLibrary('marker');
-        MapCtor = Map;
-        AdvancedMarkerElement = markerLib.AdvancedMarkerElement;
-        PinElement = markerLib.PinElement;
-      } else {
-        MapCtor = (window as any).google.maps.Map;
-        AdvancedMarkerElement = (window as any).google.maps?.marker?.AdvancedMarkerElement || null;
-        PinElement = (window as any).google.maps?.marker?.PinElement || null;
-      }
+      // Use classic constructors for maximum compatibility
+      const MapCtor = (window as any).google.maps.Map;
 
       // Initialize map centered on Austin, TX
       map.current = new MapCtor(mapContainer.current, {
@@ -116,63 +102,34 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
         const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
 
-        if (PinElement && AdvancedMarkerElement) {
-          const pinElement = new PinElement({
-            background: '#3b82f6',
-            borderColor: '#1e40af',
-            glyphColor: '#ffffff',
-          });
-          const marker = new AdvancedMarkerElement({
-            position: { lat, lng },
-            map: map.current,
-            title: provider.business_name,
-            content: pinElement.element,
-          });
-          const infoWindow = new (window as any).google.maps.InfoWindow({
-            content: `
-              <div class="p-2 max-w-xs">
-                <h3 class="font-semibold text-sm">${provider.business_name}</h3>
-                <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
-                ${provider.google_rating ? `
-                  <div class="flex items-center text-xs">
-                    <span class="text-yellow-500">★</span>
-                    <span class="ml-1">${provider.google_rating}</span>
-                  </div>
-                ` : ''}
-              </div>
-            `
-          });
-          marker.addListener('click', () => infoWindow.open(map.current, marker));
-        } else {
-          const marker = new (window as any).google.maps.Marker({
-            position: { lat, lng },
-            map: map.current,
-            title: provider.business_name,
-            icon: {
-              path: (window as any).google.maps.SymbolPath.CIRCLE,
-              scale: 8,
-              fillColor: '#3b82f6',
-              fillOpacity: 1,
-              strokeColor: '#1e40af',
-              strokeWeight: 2,
-            }
-          });
-          const infoWindow = new (window as any).google.maps.InfoWindow({
-            content: `
-              <div class="p-2 max-w-xs">
-                <h3 class="font-semibold text-sm">${provider.business_name}</h3>
-                <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
-                ${provider.google_rating ? `
-                  <div class="flex items-center text-xs">
-                    <span class="text-yellow-500">★</span>
-                    <span class="ml-1">${provider.google_rating}</span>
-                  </div>
-                ` : ''}
-              </div>
-            `
-          });
-          marker.addListener('click', () => infoWindow.open(map.current, marker));
-        }
+        const marker = new (window as any).google.maps.Marker({
+          position: { lat, lng },
+          map: map.current,
+          title: provider.business_name,
+          icon: {
+            path: (window as any).google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#3b82f6',
+            fillOpacity: 1,
+            strokeColor: '#1e40af',
+            strokeWeight: 2,
+          }
+        });
+        const infoWindow = new (window as any).google.maps.InfoWindow({
+          content: `
+            <div class="p-2 max-w-xs">
+              <h3 class="font-semibold text-sm">${provider.business_name}</h3>
+              <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
+              ${provider.google_rating ? `
+                <div class="flex items-center text-xs">
+                  <span class="text-yellow-500">★</span>
+                  <span class="ml-1">${provider.google_rating}</span>
+                </div>
+              ` : ''}
+            </div>
+          `
+        });
+        marker.addListener('click', () => infoWindow.open(map.current, marker));
       });
       console.log('Markers added successfully');
 
