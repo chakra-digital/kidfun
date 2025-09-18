@@ -127,7 +127,15 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         zoom: 11,
         styles: [
           { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] }
-        ]
+        ],
+        // Minimize Google branding and controls
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: (window as any).google.maps.ControlPosition.RIGHT_CENTER
+        }
       });
 
       console.log('Map initialized, adding markers...');
@@ -152,24 +160,26 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         });
         const infoWindow = new (window as any).google.maps.InfoWindow({
           content: `
-            <div class="p-3 max-w-xs">
-              <h3 class="font-semibold text-base mb-2">${provider.business_name}</h3>
-              <p class="text-sm text-gray-600 mb-2">${provider.location}</p>
+            <div style="padding: 12px; max-width: 280px; font-family: Arial, sans-serif;">
+              <h3 style="font-weight: 600; font-size: 16px; margin: 0 0 8px 0; color: #1f2937;">${provider.business_name}</h3>
+              <p style="font-size: 14px; color: #6b7280; margin: 0 0 8px 0;">${provider.location}</p>
               ${provider.google_rating ? `
-                <div class="flex items-center text-sm mb-3">
-                  <span class="text-yellow-500">★</span>
-                  <span class="ml-1">${provider.google_rating}</span>
+                <div style="display: flex; align-items: center; font-size: 14px; margin: 0 0 12px 0;">
+                  <span style="color: #f59e0b;">★</span>
+                  <span style="margin-left: 4px; color: #374151;">${provider.google_rating}</span>
                 </div>
-              ` : ''}
-              <div class="space-y-2">
+              ` : '<div style="margin-bottom: 12px;"></div>'}
+              <div style="display: flex; flex-direction: column; gap: 8px;">
                 ${provider.external_website ? `
                   <a href="${provider.external_website}" target="_blank" rel="noopener noreferrer" 
-                     class="block w-full bg-blue-500 hover:bg-blue-600 text-white text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                     style="display: block; width: 100%; background-color: #3b82f6; color: white; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
+                     onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
                     Visit Website
                   </a>
                 ` : ''}
                 <a href="/camps?search=${encodeURIComponent(provider.business_name)}" 
-                   class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                   style="display: block; width: 100%; background-color: #f3f4f6; color: #374151; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
+                   onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
                   View Details
                 </a>
               </div>
@@ -284,24 +294,26 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       
       const infoWindow = new (window as any).google.maps.InfoWindow({
         content: `
-          <div class="p-3 max-w-xs">
-            <h3 class="font-semibold text-base mb-2">${provider.business_name}</h3>
-            <p class="text-sm text-gray-600 mb-2">${provider.location}</p>
+          <div style="padding: 12px; max-width: 280px; font-family: Arial, sans-serif;">
+            <h3 style="font-weight: 600; font-size: 16px; margin: 0 0 8px 0; color: #1f2937;">${provider.business_name}</h3>
+            <p style="font-size: 14px; color: #6b7280; margin: 0 0 8px 0;">${provider.location}</p>
             ${provider.google_rating ? `
-              <div class="flex items-center text-sm mb-3">
-                <span class="text-yellow-500">★</span>
-                <span class="ml-1">${provider.google_rating}</span>
+              <div style="display: flex; align-items: center; font-size: 14px; margin: 0 0 12px 0;">
+                <span style="color: #f59e0b;">★</span>
+                <span style="margin-left: 4px; color: #374151;">${provider.google_rating}</span>
               </div>
-            ` : ''}
-            <div class="space-y-2">
+            ` : '<div style="margin-bottom: 12px;"></div>'}
+            <div style="display: flex; flex-direction: column; gap: 8px;">
               ${provider.external_website ? `
                 <a href="${provider.external_website}" target="_blank" rel="noopener noreferrer" 
-                   class="block w-full bg-blue-500 hover:bg-blue-600 text-white text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                   style="display: block; width: 100%; background-color: #3b82f6; color: white; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
+                   onmouseover="this.style.backgroundColor='#2563eb'" onmouseout="this.style.backgroundColor='#3b82f6'">
                   Visit Website
                 </a>
               ` : ''}
               <a href="/camps?search=${encodeURIComponent(provider.business_name)}" 
-                 class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                 style="display: block; width: 100%; background-color: #f3f4f6; color: #374151; text-align: center; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; transition: background-color 0.2s;"
+                 onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
                 View Details
               </a>
             </div>
@@ -333,20 +345,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         </div>
       )}
 
-      <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" style={{ minHeight: '400px' }} />
-
-      {/* Debug info */}
-      <div className="absolute bottom-2 left-2 text-xs bg-black/50 text-white p-2 rounded flex items-center gap-2">
-        <span>Status: {isLoading ? 'Loading...' : error ? 'Error' : 'Ready'} | Providers: {providers.length}</span>
-        <Button 
-          onClick={handleResetApiKey} 
-          variant="outline" 
-          size="sm" 
-          className="text-xs py-1 px-2 h-auto"
-        >
-          Reset
-        </Button>
-      </div>
+      <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" />
     </div>
   );
 };
