@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
-import { MapPin } from 'lucide-react';
+
 
 interface LocationMapProps {
   providers?: Array<{
@@ -49,8 +49,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&libraries=places,marker`;
       script.async = true;
+      script.defer = true;
       script.onload = () => {
         console.log('Google Maps script onload event triggered');
         console.log('Google Maps script onload event triggered');
@@ -83,12 +84,25 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       console.log('Initializing map...');
-      // Load libraries with the new importLibrary API (required with loading=async)
-      const { Map } = await (window as any).google.maps.importLibrary('maps');
-      const { AdvancedMarkerElement, PinElement } = await (window as any).google.maps.importLibrary('marker');
+      // Feature-detect the loader API; fall back to classic constructors if not available
+      let MapCtor: any;
+      let AdvancedMarkerElement: any | null = null;
+      let PinElement: any | null = null;
+
+      if ((window as any).google.maps.importLibrary) {
+        const { Map } = await (window as any).google.maps.importLibrary('maps');
+        const markerLib = await (window as any).google.maps.importLibrary('marker');
+        MapCtor = Map;
+        AdvancedMarkerElement = markerLib.AdvancedMarkerElement;
+        PinElement = markerLib.PinElement;
+      } else {
+        MapCtor = (window as any).google.maps.Map;
+        AdvancedMarkerElement = (window as any).google.maps?.marker?.AdvancedMarkerElement || null;
+        PinElement = (window as any).google.maps?.marker?.PinElement || null;
+      }
 
       // Initialize map centered on Austin, TX
-      map.current = new Map(mapContainer.current, {
+      map.current = new MapCtor(mapContainer.current, {
         center: { lat: 30.2672, lng: -97.7431 },
         zoom: 11,
         styles: [
@@ -97,44 +111,69 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       });
 
       console.log('Map initialized, adding markers...');
-      // Add markers for providers using modern AdvancedMarkerElement
+      // Add markers for providers using AdvancedMarkerElement when available, else fall back
       providers.forEach((provider) => {
-        // For now, use mock coordinates around Austin area since we don't have lat/lng
+        // Mock coordinates around Austin area since we don't have lat/lng yet
         const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
         const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
 
-        // Create a custom pin element
-        const pinElement = new (window as any).google.maps.marker.PinElement({
-          background: '#3b82f6',
-          borderColor: '#1e40af',
-          glyphColor: '#ffffff',
-        });
-
-        const marker = new (window as any).google.maps.marker.AdvancedMarkerElement({
-          position: { lat, lng },
-          map: map.current,
-          title: provider.business_name,
-          content: pinElement.element,
-        });
-
-        const infoWindow = new (window as any).google.maps.InfoWindow({
-          content: `
-            <div class="p-2 max-w-xs">
-              <h3 class="font-semibold text-sm">${provider.business_name}</h3>
-              <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
-              ${provider.google_rating ? `
-                <div class="flex items-center text-xs">
-                  <span class="text-yellow-500">★</span>
-                  <span class="ml-1">${provider.google_rating}</span>
-                </div>
-              ` : ''}
-            </div>
-          `
-        });
-
-        marker.addListener('click', () => {
-          infoWindow.open(map.current, marker);
-        });
+        if ((PinElement && AdvancedMarkerElement)) {
+          const pinElement = new (window as any).google.maps.marker.PinElement({
+            background: '#3b82f6',
+            borderColor: '#1e40af',
+            glyphColor: '#ffffff',
+          });
+          const marker = new (window as any).google.maps.marker.AdvancedMarkerElement({
+            position: { lat, lng },
+            map: map.current,
+            title: provider.business_name,
+            content: pinElement.element,
+          });
+          const infoWindow = new (window as any).google.maps.InfoWindow({
+            content: `
+              <div class="p-2 max-w-xs">
+                <h3 class="font-semibold text-sm">${provider.business_name}</h3>
+                <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
+                ${provider.google_rating ? `
+                  <div class="flex items-center text-xs">
+                    <span class="text-yellow-500">★</span>
+                    <span class="ml-1">${provider.google_rating}</span>
+                  </div>
+                ` : ''}
+              </div>
+            `
+          });
+          marker.addListener('click', () => infoWindow.open(map.current, marker));
+        } else {
+          const marker = new (window as any).google.maps.Marker({
+            position: { lat, lng },
+            map: map.current,
+            title: provider.business_name,
+            icon: {
+              path: (window as any).google.maps.SymbolPath.CIRCLE,
+              scale: 8,
+              fillColor: '#3b82f6',
+              fillOpacity: 1,
+              strokeColor: '#1e40af',
+              strokeWeight: 2,
+            }
+          });
+          const infoWindow = new (window as any).google.maps.InfoWindow({
+            content: `
+              <div class="p-2 max-w-xs">
+                <h3 class="font-semibold text-sm">${provider.business_name}</h3>
+                <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
+                ${provider.google_rating ? `
+                  <div class="flex items-center text-xs">
+                    <span class="text-yellow-500">★</span>
+                    <span class="ml-1">${provider.google_rating}</span>
+                  </div>
+                ` : ''}
+              </div>
+            `
+          });
+          marker.addListener('click', () => infoWindow.open(map.current, marker));
+        }
       });
       console.log('Markers added successfully');
 
@@ -147,19 +186,6 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
     }
   };
 
-  const handleApiKeySubmit = () => {
-    console.log('handleApiKeySubmit called with key:', googleMapsApiKey ? 'API key provided' : 'No API key');
-    if (googleMapsApiKey.trim()) {
-      // Save to localStorage
-      localStorage.setItem('googleMapsApiKey', googleMapsApiKey.trim());
-      setApiKeySubmitted(true);
-      setError('');
-      setIsLoading(false); // loading will start when initializeMap runs in effect
-      console.log('API key saved; map will initialize after container mounts');
-    } else {
-      console.log('No API key provided, not submitting');
-    }
-  };
 
   const handleResetApiKey = () => {
     localStorage.removeItem('googleMapsApiKey');
