@@ -48,11 +48,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
-        console.log('Google Maps script onload event triggered');
         console.log('Google Maps script onload event triggered');
         resolve();
       };
@@ -87,7 +86,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       const MapCtor = (window as any).google.maps.Map;
 
       // Initialize map centered on Austin, TX
-      map.current = new MapCtor(mapContainer.current, {
+      map.current = new (window as any).google.maps.Map(mapContainer.current, {
         center: { lat: 30.2672, lng: -97.7431 },
         zoom: 11,
         styles: [
