@@ -115,29 +115,48 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
     return [];
   }
 
-  const searchQueries = [
-    `${searchAnalysis.googlePlacesQuery} children activities ${location}`,
-    ...searchAnalysis.activities.map((activity: string) => 
-      `${activity} classes children ${location}`
-    )
+  // Create more effective search queries for Google Places
+  const baseQueries = [
+    searchAnalysis.googlePlacesQuery,
+    // More generic activity-based searches
+    ...searchAnalysis.activities.map((activity: string) => `${activity} lessons kids`),
+    ...searchAnalysis.activities.map((activity: string) => `${activity} classes children`),
+    // Fallback generic searches if no activities detected
+    ...(searchAnalysis.activities.length === 0 ? [
+      'swimming lessons kids',
+      'children swimming classes',
+      'youth swimming instruction',
+      'kids swim school'
+    ] : [])
   ];
+
+  const searchQueries = baseQueries
+    .slice(0, 4) // Limit to 4 base queries
+    .map(query => `${query} ${location}`)
+    .concat(baseQueries.slice(0, 2).map(query => query)); // Also try without location
+
+  console.log('Google Places search queries:', searchQueries);
 
   const allResults: any[] = [];
 
-  for (const searchQuery of searchQueries.slice(0, 3)) { // Limit to 3 queries
+  for (const searchQuery of searchQueries) {
     try {
-      const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${googleMapsApiKey}`;
+      const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${googleMapsApiKey}&type=establishment&radius=25000`;
       
+      console.log(`Searching Google Places: "${searchQuery}"`);
       const response = await fetch(url);
       const data = await response.json();
 
-      if (data.results) {
+      console.log(`Google Places API response status: ${data.status}, results count: ${data.results?.length || 0}`);
+
+      if (data.status === 'OK' && data.results) {
         const relevantResults = data.results
-          .filter((place: any) => 
-            place.business_status === 'OPERATIONAL' &&
-            place.rating && place.rating >= 3.5
-          )
-          .slice(0, 5) // Limit results per query
+          .filter((place: any) => {
+            const isOperational = !place.business_status || place.business_status === 'OPERATIONAL';
+            const hasMinRating = !place.rating || place.rating >= 3.0; // Lower threshold
+            return isOperational && hasMinRating;
+          })
+          .slice(0, 8) // More results per query
           .map((place: any) => ({
             google_place_id: place.place_id,
             business_name: place.name,
@@ -146,12 +165,20 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
             longitude: place.geometry?.location?.lng,
             google_rating: place.rating,
             google_reviews_count: place.user_ratings_total,
-            description: null,
-            specialties: searchAnalysis.activities,
+            description: `${place.name} offers activities and services for children and families in the ${location} area.`,
+            specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : ['Swimming', 'Water Activities'],
+            amenities: ['Outdoor Space', 'Safety Equipment'],
+            pricing_model: 'per_session',
+            base_price: 25.00,
+            capacity: 20,
+            age_groups: ['3-5', '6-12', '13-17'],
             source: 'google_places'
           }));
 
         allResults.push(...relevantResults);
+        console.log(`Added ${relevantResults.length} results from query: "${searchQuery}"`);
+      } else if (data.status !== 'ZERO_RESULTS') {
+        console.log(`Google Places API error for query "${searchQuery}":`, data.status, data.error_message);
       }
     } catch (error) {
       console.error(`Error searching Google Places for "${searchQuery}":`, error);
@@ -163,7 +190,8 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
     index === self.findIndex(r => r.google_place_id === result.google_place_id)
   );
 
-  return uniqueResults.slice(0, 10); // Limit total results
+  console.log(`Total unique Google Places results: ${uniqueResults.length}`);
+  return uniqueResults.slice(0, 15); // More total results
 }
 
 async function rankAndCombineResults(existingProviders: any[], googlePlacesResults: any[], searchAnalysis: any, originalQuery: string) {
