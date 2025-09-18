@@ -116,13 +116,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
         const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
 
-        if ((PinElement && AdvancedMarkerElement)) {
-          const pinElement = new (window as any).google.maps.marker.PinElement({
+        if (PinElement && AdvancedMarkerElement) {
+          const pinElement = new PinElement({
             background: '#3b82f6',
             borderColor: '#1e40af',
             glyphColor: '#ffffff',
           });
-          const marker = new (window as any).google.maps.marker.AdvancedMarkerElement({
+          const marker = new AdvancedMarkerElement({
             position: { lat, lng },
             map: map.current,
             title: provider.business_name,
