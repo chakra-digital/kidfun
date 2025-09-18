@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { MapPin } from 'lucide-react';
 
 interface LocationMapProps {
@@ -49,10 +49,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&loading=async`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&loading=async`;
       script.async = true;
-      script.defer = true;
       script.onload = () => {
+        console.log('Google Maps script onload event triggered');
         console.log('Google Maps script onload event triggered');
         resolve();
       };
@@ -83,16 +83,16 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       console.log('Initializing map...');
+      // Load libraries with the new importLibrary API (required with loading=async)
+      const { Map } = await (window as any).google.maps.importLibrary('maps');
+      const { AdvancedMarkerElement, PinElement } = await (window as any).google.maps.importLibrary('marker');
+
       // Initialize map centered on Austin, TX
-      map.current = new window.google.maps.Map(mapContainer.current, {
+      map.current = new Map(mapContainer.current, {
         center: { lat: 30.2672, lng: -97.7431 },
         zoom: 11,
         styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'on' }]
-          }
+          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] }
         ]
       });
 
@@ -104,20 +104,20 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
 
         // Create a custom pin element
-        const pinElement = new window.google.maps.marker.PinElement({
+        const pinElement = new (window as any).google.maps.marker.PinElement({
           background: '#3b82f6',
           borderColor: '#1e40af',
           glyphColor: '#ffffff',
         });
 
-        const marker = new window.google.maps.marker.AdvancedMarkerElement({
+        const marker = new (window as any).google.maps.marker.AdvancedMarkerElement({
           position: { lat, lng },
           map: map.current,
           title: provider.business_name,
           content: pinElement.element,
         });
 
-        const infoWindow = new window.google.maps.InfoWindow({
+        const infoWindow = new (window as any).google.maps.InfoWindow({
           content: `
             <div class="p-2 max-w-xs">
               <h3 class="font-semibold text-sm">${provider.business_name}</h3>
@@ -171,14 +171,32 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       map.current = null;
     }
   };
-  // Check for saved API key on mount
+  // Fetch API key on mount (from localStorage or Edge Function) and auto-submit
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('googleMapsApiKey');
-    if (savedApiKey) {
-      setGoogleMapsApiKey(savedApiKey);
-      setApiKeySubmitted(true);
-      // initialization will run in the effect below once the container is mounted
-    }
+    const init = async () => {
+      const savedApiKey = localStorage.getItem('googleMapsApiKey');
+      if (savedApiKey) {
+        setGoogleMapsApiKey(savedApiKey);
+        setApiKeySubmitted(true);
+        return;
+      }
+      try {
+        setIsLoading(true);
+        const resp = await fetch('https://vjyzhgwiajobfpumeqvy.supabase.co/functions/v1/get-maps-key');
+        if (!resp.ok) throw new Error('Failed to retrieve Maps API key');
+        const { key } = await resp.json();
+        if (!key) throw new Error('No API key returned');
+        localStorage.setItem('googleMapsApiKey', key);
+        setGoogleMapsApiKey(key);
+        setApiKeySubmitted(true);
+      } catch (e: any) {
+        console.error('Failed to fetch Maps API key', e);
+        setError(e.message || 'Unable to load Google Maps API key');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    void init();
   }, []);
 
   useEffect(() => {
@@ -213,76 +231,39 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
 
   return (
     <div className={`relative ${className}`}>
-      {!apiKeySubmitted ? (
-        // API Key Input Form
-        <div className="bg-muted rounded-lg p-8 flex flex-col items-center justify-center h-full">
-          <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Interactive Map</h3>
-          <p className="text-sm text-muted-foreground text-center mb-4 max-w-md">
-            To display provider locations on the map, please enter your Google Maps API key.
-            Get yours at <a href="https://console.developers.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Cloud Console</a>
-          </p>
-          <p className="text-xs text-muted-foreground text-center mb-4 max-w-md">
-            For referrer restrictions, add these exact formats:
-            <br />• <code className="bg-background px-1 rounded">*.lovable.app/*</code>
-            <br />• <code className="bg-background px-1 rounded">https://kidfun.app/*</code>
-            <br />• <code className="bg-background px-1 rounded">https://www.kidfun.app/*</code>
-            <br />• <code className="bg-background px-1 rounded">localhost:*</code>
-          </p>
-          {error && (
-            <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 text-sm max-w-md text-center">
-              {error}
-            </div>
-          )}
-          <div className="flex gap-2 w-full max-w-sm">
-            <Input
-              placeholder="Enter Google Maps API key"
-              value={googleMapsApiKey}
-              onChange={(e) => setGoogleMapsApiKey(e.target.value)}
-              type="password"
-            />
-            <Button onClick={handleApiKeySubmit} disabled={isLoading}>
-              {isLoading ? 'Loading...' : 'Load Map'}
+      {isLoading && (
+        <div className="absolute inset-0 bg-muted rounded-lg flex items-center justify-center z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p className="text-sm text-muted-foreground">Loading map...</p>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="absolute top-4 left-4 right-4 bg-destructive/90 text-destructive-foreground p-3 rounded-md text-sm z-20">
+          <div className="flex justify-between items-start gap-2">
+            <span>{error}</span>
+            <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs">
+              Reset Key
             </Button>
           </div>
         </div>
-      ) : (
-        // Map Container
-        <>
-          {isLoading && (
-            <div className="absolute inset-0 bg-muted rounded-lg flex items-center justify-center z-10">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                <p className="text-sm text-muted-foreground">Loading map...</p>
-              </div>
-            </div>
-          )}
-          {error && (
-            <div className="absolute top-4 left-4 right-4 bg-destructive/90 text-destructive-foreground p-3 rounded-md text-sm z-20">
-              <div className="flex justify-between items-start gap-2">
-                <span>{error}</span>
-                <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs">
-                  Reset Key
-                </Button>
-              </div>
-            </div>
-          )}
-          <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" style={{ minHeight: '400px' }} />
-          
-          {/* Debug info */}
-          <div className="absolute bottom-2 left-2 text-xs bg-black/50 text-white p-2 rounded flex items-center gap-2">
-            <span>Status: {isLoading ? 'Loading...' : error ? 'Error' : 'Ready'} | Providers: {providers.length}</span>
-            <Button 
-              onClick={handleResetApiKey} 
-              variant="outline" 
-              size="sm" 
-              className="text-xs py-1 px-2 h-auto"
-            >
-              Reset
-            </Button>
-          </div>
-        </>
       )}
+
+      <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" style={{ minHeight: '400px' }} />
+
+      {/* Debug info */}
+      <div className="absolute bottom-2 left-2 text-xs bg-black/50 text-white p-2 rounded flex items-center gap-2">
+        <span>Status: {isLoading ? 'Loading...' : error ? 'Error' : 'Ready'} | Providers: {providers.length}</span>
+        <Button 
+          onClick={handleResetApiKey} 
+          variant="outline" 
+          size="sm" 
+          className="text-xs py-1 px-2 h-auto"
+        >
+          Reset
+        </Button>
+      </div>
     </div>
   );
 };
