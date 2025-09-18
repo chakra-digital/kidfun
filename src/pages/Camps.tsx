@@ -134,44 +134,15 @@ const Camps = () => {
             </div>
             
             {/* AI Conversational Search */}
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg shadow-sm border border-white/20 max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <ConversationalSearch 
                 onResultsUpdate={handleAIResultsUpdate}
-                className="mb-6"
+                className="mb-4"
               />
               
-              {/* Traditional Search - Only show when not using AI results */}
-              {!showAIResults && (
-                <div className="space-y-4 pt-4 border-t border-white/20">
-                  <div className="text-sm text-white/80 text-center">
-                    Or use traditional search:
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <Input
-                        placeholder="Enter your location (e.g., Austin, TX)"
-                        className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60"
-                        value={searchLocation}
-                        onChange={(e) => setSearchLocation(e.target.value)}
-                      />
-                    </div>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      <Input
-                        placeholder="Search activities, ages, or keywords..."
-                        className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              
               {(searchQuery || showAIResults) && (
-                <div className="mt-4">
-                  <Badge variant="secondary" className="text-sm">
+                <div className="text-center">
+                  <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
                     {totalResults} results {showAIResults ? "from AI search" : searchQuery ? `for "${searchQuery}"` : ""}
                   </Badge>
                 </div>

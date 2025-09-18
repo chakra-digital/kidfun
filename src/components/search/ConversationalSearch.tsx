@@ -110,36 +110,38 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Main Search Input */}
-      <Card className="border-2 border-primary/20 bg-gradient-to-r from-background to-primary/5">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-1">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary" />
+      <Card className="border-2 border-primary bg-white shadow-lg">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center mx-auto">
+                <Sparkles className="w-6 h-6 text-primary-foreground" />
               </div>
+              <h3 className="text-lg font-semibold text-foreground">Ask me anything about activities for your kids</h3>
+              <p className="text-sm text-muted-foreground">I'll help you find the perfect activities using AI-powered search</p>
             </div>
-            <div className="flex-1 space-y-3">
-              <div className="text-sm text-muted-foreground">
-                Ask me anything about activities for your kids...
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  ref={inputRef}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="e.g., 'Find soccer camps for my 10 year old daughter near downtown'"
-                  className="flex-1"
-                  disabled={isSearching}
-                />
-                <Button 
-                  onClick={handleSearch}
-                  disabled={!query.trim() || isSearching}
-                  size="icon"
-                >
+            <div className="flex gap-3">
+              <Input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="e.g., 'Find soccer camps for my 10 year old daughter near downtown'"
+                className="flex-1 text-foreground placeholder:text-muted-foreground border-2 border-border focus:border-primary"
+                disabled={isSearching}
+              />
+              <Button 
+                onClick={handleSearch}
+                disabled={!query.trim() || isSearching}
+                size="lg"
+                className="px-6"
+              >
+                {isSearching ? (
+                  <Sparkles className="w-4 h-4 animate-spin" />
+                ) : (
                   <Send className="w-4 h-4" />
-                </Button>
-              </div>
+                )}
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -170,16 +172,18 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
       {/* Quick Suggestions */}
       {searchHistory.length === 0 && (
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-muted-foreground">Try these searches:</div>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-3">
+          <div className="text-center">
+            <div className="text-sm font-medium text-foreground mb-2">Try these popular searches:</div>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-center">
             {getSuggestionQueries().map((suggestion, index) => (
               <Button
                 key={index}
                 variant="outline"
                 size="sm"
                 onClick={() => setQuery(suggestion)}
-                className="text-xs"
+                className="text-xs bg-white hover:bg-primary hover:text-primary-foreground border-border text-foreground"
               >
                 {suggestion}
               </Button>

@@ -221,8 +221,10 @@ async function rankAndCombineResults(existingProviders: any[], googlePlacesResul
   const data = await response.json();
   
   try {
-    const rankings = JSON.parse(data.choices[0].message.content);
-    
+    let content = data.choices[0].message.content;
+    // Remove markdown formatting if present
+    content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '');
+    const rankings = JSON.parse(content);
     // Apply rankings to providers
     const rankedProviders = rankings
       .filter((ranking: any) => ranking.relevanceScore >= 30) // Filter low relevance
