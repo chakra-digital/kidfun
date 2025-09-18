@@ -59,6 +59,12 @@ serve(async (req) => {
   }
 
   try {
+    // Initialize Supabase client first
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     // Check authentication - get JWT from Authorization header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -86,10 +92,6 @@ serve(async (req) => {
     }
 
     console.log(`Import started by authenticated user: ${user.email}`);
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
 
     const googleApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
     if (!googleApiKey) {

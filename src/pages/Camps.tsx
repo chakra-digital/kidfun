@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, User, Loader2 } from "lucide-react";
@@ -9,100 +8,6 @@ import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import { Badge } from "@/components/ui/badge";
 import { generateProviderIcon } from "@/lib/imageUtils";
 import { useLocation } from "react-router-dom";
-
-// Mock data for camps
-const mockCamps = [
-  {
-    id: "camp1",
-    title: "Wilderness Adventure Camp",
-    image: "https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "Boulder, Colorado",
-    price: 80,
-    priceUnit: "day",
-    rating: 4.9,
-    reviewCount: 128,
-    dates: "Jun 10 - Jun 24",
-    availability: "3 spots left",
-    type: "camp" as const,
-    distance: "15 miles away",
-    age: "8-12"
-  },
-  {
-    id: "camp2",
-    title: "Tech Innovators STEM Camp",
-    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "San Francisco, CA",
-    price: 95,
-    priceUnit: "day",
-    rating: 4.8,
-    reviewCount: 87,
-    dates: "Jul 5 - Jul 16",
-    availability: "Available",
-    type: "camp" as const,
-    distance: "10 miles away",
-    age: "10-15"
-  },
-  {
-    id: "camp3",
-    title: "Summer Sports Academy",
-    image: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "Chicago, IL",
-    price: 75,
-    priceUnit: "day",
-    rating: 4.6,
-    reviewCount: 93,
-    dates: "Jun 15 - Jul 30",
-    availability: "5 spots left",
-    type: "camp" as const,
-    distance: "8 miles away",
-    age: "9-14"
-  },
-  {
-    id: "camp4",
-    title: "Young Artists Workshop",
-    image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "New York, NY",
-    price: 85,
-    priceUnit: "day",
-    rating: 4.7,
-    reviewCount: 76,
-    dates: "Jul 10 - Aug 7",
-    availability: "Available",
-    type: "camp" as const,
-    distance: "5 miles away",
-    age: "7-13"
-  },
-  {
-    id: "camp5",
-    title: "Junior Explorers Nature Camp",
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "Portland, OR",
-    price: 70,
-    priceUnit: "day",
-    rating: 4.9,
-    reviewCount: 104,
-    dates: "Jun 20 - Jul 15",
-    availability: "2 spots left",
-    type: "camp" as const,
-    distance: "12 miles away",
-    age: "6-10"
-  },
-  {
-    id: "camp6",
-    title: "Ocean Adventure Camp",
-    image: "https://images.unsplash.com/photo-1615729947596-a598e5de0ab3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    location: "San Diego, CA",
-    price: 90,
-    priceUnit: "day",
-    rating: 4.8,
-    reviewCount: 89,
-    dates: "Jul 5 - Jul 26",
-    availability: "Available",
-    type: "camp" as const,
-    distance: "7 miles away",
-    age: "8-13"
-  }
-];
 
 const Camps = () => {
   const [activeFilter, setActiveFilter] = useState("");
@@ -118,16 +23,7 @@ const Camps = () => {
     setSearchQuery(search || '');
   }, [location.search]);
 
-  // Filter both mock camps and providers based on search query
-  const filteredMockCamps = mockCamps.filter((camp) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      camp.title.toLowerCase().includes(query) ||
-      camp.location.toLowerCase().includes(query)
-    );
-  });
-
+  // Filter providers based on search query
   const filteredProviders = providers.filter((provider) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -153,92 +49,111 @@ const Camps = () => {
     dates: "Available",
     availability: "Contact for availability",
     type: "camp" as const,
-    distance: "Contact for details",
+    distance: "Austin area",
     age: provider.age_groups?.join(", ") || "All ages",
-    verification_status: provider.verification_status,
-    external_website: provider.external_website,
-    phone: provider.phone
+    external_website: provider.external_website
   }));
 
-  // Transform mock camps to use generated icons
-  const transformedMockCamps = filteredMockCamps.map(camp => ({
-    ...camp,
-    image: generateProviderIcon(camp.title, [], camp.id),
-    verification_status: 'verified' as const,
-    external_website: undefined
-  }));
-
-  // Combine all results
-  const allResults = [...transformedMockCamps, ...transformedProviders];
+  const allResults = transformedProviders;
   const totalResults = allResults.length;
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter === activeFilter ? "" : filter);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin mb-4" />
+            <p>Loading camps and activities...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">Error loading camps: {error}</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-r from-camps-secondary to-camps-primary text-white py-12">
+        {/* Header */}
+        <section className="bg-gradient-to-r from-camps-primary to-camps-secondary text-white py-12">
           <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto text-center">
-              <h1 className="text-3xl md:text-4xl font-bold mb-4">
-                Find the Perfect Summer Camp
-              </h1>
-              <p className="text-lg mb-6">
-                Discover camps that provide enriching experiences, new friendships, and unforgettable memories.
-              </p>
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">Summer Camps & Activities</h1>
+              <p className="text-xl mb-8">Discover amazing camps and activities for your kids</p>
+              
+              {searchQuery && (
+                <div className="mb-4">
+                  <Badge variant="secondary" className="text-sm">
+                    {totalResults} results for "{searchQuery}"
+                  </Badge>
+                </div>
+              )}
             </div>
           </div>
         </section>
 
-
-        {/* Camps Grid */}
-        <section className="py-10">
+        {/* Main Content */}
+        <section className="py-12">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">
-                {searchQuery ? (
-                  <>Search Results for "{searchQuery}"</>
-                ) : (
-                  "Local Activity Providers"
+            {totalResults === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600 text-lg mb-4">
+                  {searchQuery ? `No results found for "${searchQuery}"` : "No camps found."}
+                </p>
+                {searchQuery && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSearchQuery("");
+                      window.history.pushState({}, '', '/camps');
+                    }}
+                  >
+                    Clear Search
+                  </Button>
                 )}
-                <span className="text-lg font-normal text-gray-600 ml-2">
-                  ({totalResults} found)
-                </span>
-              </h2>
-              <div className="flex gap-2">
-                <Badge variant="outline">Verified</Badge>
-                <Badge variant="secondary">Unverified</Badge>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin" />
-                <span className="ml-2">Loading providers...</span>
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-red-600 mb-4">Error loading providers: {error}</p>
-                <Button onClick={() => window.location.reload()}>Try Again</Button>
-              </div>
-            ) : allResults.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-600 mb-4">No providers found in your area yet.</p>
-                <Button onClick={() => window.location.href = '/admin'}>Import Providers</Button>
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {allResults.map((result) => (
                     <div key={result.id} className="relative">
-                      <CampCard {...result} />
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => window.location.href = `/provider/${result.id}`}
+                      >
+                        <CampCard {...result} />
+                      </div>
                       {'external_website' in result && result.external_website && (
                         <div className="mt-2">
                           <Button 
                             variant="outline" 
                             size="sm" 
                             className="w-full"
-                            onClick={() => window.open('external_website' in result ? result.external_website : '', '_blank')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(`${result.external_website}?utm_source=kidfun&utm_medium=camps_page&utm_campaign=provider_referral`, '_blank');
+                            }}
                           >
                             Visit Website
                           </Button>
@@ -281,8 +196,8 @@ const Camps = () => {
                       <MapPin className="h-5 w-5 text-camps-secondary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Consider the Location</h3>
-                      <p className="text-gray-600">Choose from nearby day camps or destination camps for older children.</p>
+                      <h3 className="font-semibold text-lg">Choose the Right Location</h3>
+                      <p className="text-gray-600">Consider proximity to home, transportation options, and the camp environment that best suits your child.</p>
                     </div>
                   </div>
                   <div className="flex items-start">
@@ -290,19 +205,51 @@ const Camps = () => {
                       <User className="h-5 w-5 text-camps-accent" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Match Interests and Skills</h3>
-                      <p className="text-gray-600">Find specialized camps that cater to your child's interests, from sports to arts to STEM.</p>
+                      <h3 className="font-semibold text-lg">Match Your Child's Interests</h3>
+                      <p className="text-gray-600">From sports and arts to science and outdoor adventures, find camps that align with your child's passions.</p>
                     </div>
                   </div>
                 </div>
-                <Button className="mt-8 rounded-full">Download Free Guide</Button>
+                <Button className="mt-6" size="lg">
+                  Download Planning Guide
+                </Button>
               </div>
-              <div className="hidden lg:block">
+              <div className="relative h-64 lg:h-80">
                 <img 
-                  src="https://images.unsplash.com/photo-1493962853295-0fd70327578a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60" 
-                  alt="Children at summer camp"
-                  className="rounded-xl shadow-lg"
+                  src="https://images.unsplash.com/photo-1544717297-fa95b6ee9643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60" 
+                  alt="Kids enjoying summer camp activities"
+                  className="w-full h-full object-cover rounded-lg shadow-lg"
                 />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Camp Categories */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">Popular Camp Categories</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="bg-gradient-to-r from-blue-400 to-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Sports & Recreation</h3>
+                <p className="text-gray-600">Soccer, basketball, swimming, and more active adventures for energetic kids.</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-gradient-to-r from-green-400 to-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <User className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Arts & Creativity</h3>
+                <p className="text-gray-600">Painting, music, theater, and crafts to nurture your child's creative spirit.</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-gradient-to-r from-purple-400 to-purple-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MapPin className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">STEM & Technology</h3>
+                <p className="text-gray-600">Coding, robotics, science experiments, and innovative learning experiences.</p>
               </div>
             </div>
           </div>

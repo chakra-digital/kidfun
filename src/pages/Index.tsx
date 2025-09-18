@@ -65,9 +65,9 @@ const Index = () => {
           
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-5xl mx-auto text-center">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg">
-                Kids camps, activities, tutors, sports and more
-              </h1>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg">
+                The best camps, activities and more
+                </h1>
               <p className="text-lg md:text-xl mb-8 md:mb-10 text-white/95 max-w-3xl mx-auto drop-shadow-md">
                 Find trusted providers, book with confidence, and create unforgettable experiences
               </p>

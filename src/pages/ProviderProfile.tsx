@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CampCard from "@/components/camps/CampCard";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
+import { generateProviderIcon } from "@/lib/imageUtils";
 
 // Mock provider data
 const mockProvider = {
@@ -109,7 +110,29 @@ const ProviderProfile = () => {
   const { profiles: providers } = usePublicProviderProfiles();
   
   // Find the provider by ID, fallback to mock data if not found
-  const provider = providers.find(p => p.id === id) || mockProvider;
+  const provider = providers.find(p => p.id === id);
+  
+  // If provider not found, show error message
+  if (!provider && providers.length > 0) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Provider Not Found</h1>
+            <p className="text-gray-600 mb-4">The requested provider profile could not be found.</p>
+            <Link to="/camps">
+              <Button>Browse All Providers</Button>
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Use actual provider data or mock as fallback
+  const displayProvider = provider || mockProvider;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -123,11 +146,11 @@ const ProviderProfile = () => {
               <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
                 <div className="relative w-24 h-24 md:w-32 md:h-32">
                   <img 
-                    src={mockProvider.image} 
-                    alt={mockProvider.name}
+                    src={provider?.external_website ? generateProviderIcon(provider.business_name, provider.specialties, provider.id) : mockProvider.image} 
+                    alt={provider?.business_name || mockProvider.name}
                     className="w-full h-full object-cover rounded-full border-4 border-white shadow-sm"
                   />
-                  {mockProvider.verified && (
+                  {(provider?.verification_status === 'verified' || mockProvider.verified) && (
                     <div className="absolute -bottom-2 -right-2 bg-camps-certified text-white rounded-full p-1.5">
                       <Check className="h-4 w-4" />
                     </div>
@@ -135,15 +158,21 @@ const ProviderProfile = () => {
                 </div>
                 <div>
                   <div className="flex flex-col md:flex-row md:items-center gap-2">
-                    <h1 className="text-3xl font-bold">{mockProvider.name}</h1>
-                    <Badge className="bg-camps-certified max-w-fit">Verified Host</Badge>
+                    <h1 className="text-3xl font-bold">{provider?.business_name || mockProvider.name}</h1>
+                    <Badge className="bg-camps-certified max-w-fit">
+                      {provider?.verification_status === 'verified' ? 'Verified Provider' : 'Listed Provider'}
+                    </Badge>
                   </div>
-                  <p className="text-xl text-gray-700 mt-1">{mockProvider.title}</p>
+                  <p className="text-xl text-gray-700 mt-1">{provider?.description || mockProvider.title}</p>
                   <div className="flex items-center mt-2 text-gray-600">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span>{mockProvider.location}</span>
-                    <span className="mx-2">•</span>
-                    <span>Joined {mockProvider.joinedDate}</span>
+                    <span>{provider?.location || mockProvider.location}</span>
+                    {!provider && (
+                      <>
+                        <span className="mx-2">•</span>
+                        <span>Joined {mockProvider.joinedDate}</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -153,14 +182,14 @@ const ProviderProfile = () => {
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center mb-1">
                     <Star className="h-5 w-5 fill-current text-camps-accent mr-1" />
-                    <span className="font-semibold text-lg">{mockProvider.averageRating}</span>
+                    <span className="font-semibold text-lg">{provider?.google_rating || mockProvider.averageRating}</span>
                   </div>
-                  <p className="text-gray-600">{mockProvider.totalReviews} reviews</p>
+                  <p className="text-gray-600">{provider?.google_reviews_count || mockProvider.totalReviews} reviews</p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center mb-1">
                     <User className="h-5 w-5 mr-1" />
-                    <span className="font-semibold text-lg">{mockProvider.yearsOfExperience}+ years</span>
+                    <span className="font-semibold text-lg">{provider?.years_experience || mockProvider.yearsOfExperience}+ years</span>
                   </div>
                   <p className="text-gray-600">Experience</p>
                 </div>
@@ -182,100 +211,134 @@ const ProviderProfile = () => {
 
               {/* Bio */}
               <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">About {mockProvider.name}</h2>
+                <h2 className="text-xl font-semibold mb-4">About {provider?.business_name || mockProvider.name}</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  {mockProvider.bio}
+                  {provider?.description || mockProvider.bio}
                 </p>
               </div>
 
               {/* Languages & Credentials */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
-                  <h3 className="text-lg font-medium mb-3">Languages</h3>
+                  <h3 className="text-lg font-medium mb-3">Specialties</h3>
                   <div className="flex flex-wrap gap-2">
-                    {mockProvider.languages.map((language, index) => (
+                    {(provider?.specialties || mockProvider.languages).map((item, index) => (
                       <Badge key={index} variant="outline" className="text-gray-700">
-                        {language}
+                        {item}
                       </Badge>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium mb-3">Credentials</h3>
+                  <h3 className="text-lg font-medium mb-3">Amenities</h3>
                   <ul className="space-y-2">
-                    {mockProvider.credentials.map((credential, index) => (
+                    {(provider?.amenities || mockProvider.credentials).map((item, index) => (
                       <li key={index} className="flex items-start">
                         <Check className="h-5 w-5 mr-2 text-camps-certified mt-0.5" />
-                        <span>{credential}</span>
+                        <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
               </div>
 
-              {/* Camps and Activities */}
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">{mockProvider.name}'s Camps & Activities</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {mockProvider.camps.map((camp) => (
-                    <CampCard key={camp.id} {...camp} />
-                  ))}
+              {/* External Website Link */}
+              {provider?.external_website && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-semibold mb-4">Visit Website</h2>
+                  <Button 
+                    onClick={() => window.open(`${provider.external_website}?utm_source=kidfun&utm_medium=profile&utm_campaign=provider_referral`, '_blank')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Visit {provider.business_name}'s Website
+                  </Button>
                 </div>
-              </div>
+              )}
 
-              {/* Reviews */}
-              <div>
-                <div className="flex items-center mb-4">
-                  <Star className="h-5 w-5 fill-current text-camps-accent mr-1" />
-                  <h2 className="text-xl font-semibold">
-                    {mockProvider.averageRating} · {mockProvider.totalReviews} reviews
-                  </h2>
-                </div>
-                <div className="space-y-6">
-                  {mockProvider.reviews.map((review) => (
-                    <div key={review.id} className="border-b pb-6">
-                      <div className="flex items-center mb-3">
-                        <img 
-                          src={review.userImage} 
-                          alt={review.author}
-                          className="w-10 h-10 object-cover rounded-full mr-3"
-                        />
-                        <div>
-                          <p className="font-medium">{review.author}</p>
-                          <p className="text-gray-500 text-sm">{review.date}</p>
-                        </div>
-                      </div>
-                      <div className="flex mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`h-4 w-4 ${i < review.rating ? 'fill-current text-camps-accent' : 'text-gray-300'} mr-0.5`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-gray-700">{review.comment}</p>
+              {/* Mock camps only shown for demo provider */}
+              {!provider && (
+                <>
+                  <div className="mb-8">
+                    <h2 className="text-xl font-semibold mb-4">{mockProvider.name}'s Camps & Activities</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                      {mockProvider.camps.map((camp) => (
+                        <CampCard key={camp.id} {...camp} />
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <Button variant="outline" className="mt-6">
-                  Show all {mockProvider.totalReviews} reviews
-                </Button>
-              </div>
+                  </div>
+
+                  {/* Reviews */}
+                  <div>
+                    <div className="flex items-center mb-4">
+                      <Star className="h-5 w-5 fill-current text-camps-accent mr-1" />
+                      <h2 className="text-xl font-semibold">
+                        {mockProvider.averageRating} · {mockProvider.totalReviews} reviews
+                      </h2>
+                    </div>
+                    <div className="space-y-6">
+                      {mockProvider.reviews.map((review) => (
+                        <div key={review.id} className="border-b pb-6">
+                          <div className="flex items-center mb-3">
+                            <img 
+                              src={review.userImage} 
+                              alt={review.author}
+                              className="w-10 h-10 object-cover rounded-full mr-3"
+                            />
+                            <div>
+                              <p className="font-medium">{review.author}</p>
+                              <p className="text-gray-500 text-sm">{review.date}</p>
+                            </div>
+                          </div>
+                          <div className="flex mb-2">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                className={`h-4 w-4 ${i < review.rating ? 'fill-current text-camps-accent' : 'text-gray-300'} mr-0.5`}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-gray-700">{review.comment}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <Button variant="outline" className="mt-6">
+                      Show all {mockProvider.totalReviews} reviews
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Right Column: Contact */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 rounded-xl border p-6 shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">Contact {mockProvider.name}</h2>
+                <h2 className="text-xl font-semibold mb-4">Contact {provider?.business_name || mockProvider.name}</h2>
                 <p className="text-gray-600 mb-6">
-                  Have questions? Reach out to discuss your child's needs or learn more about camps and activities.
+                  Have questions? Reach out to discuss your child's needs or learn more about activities.
                 </p>
-                <Button className="w-full mb-3">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Send Message
-                </Button>
+                
+                {provider?.external_website ? (
+                  <Button 
+                    className="w-full mb-3"
+                    onClick={() => window.open(`${provider.external_website}?utm_source=kidfun&utm_medium=profile_contact&utm_campaign=provider_referral`, '_blank')}
+                  >
+                    Visit Website
+                  </Button>
+                ) : (
+                  <Button className="w-full mb-3">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Send Message
+                  </Button>
+                )}
+                
+                {provider?.phone && (
+                  <Button variant="outline" className="w-full mb-3">
+                    Call {provider.phone}
+                  </Button>
+                )}
+                
                 <p className="text-xs text-center text-gray-500">
-                  {mockProvider.name} typically responds within 2 hours
+                  {provider ? 'Contact information available on their website' : `${mockProvider.name} typically responds within 2 hours`}
                 </p>
                 
                 {/* Safety Reminder */}

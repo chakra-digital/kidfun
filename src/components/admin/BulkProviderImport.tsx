@@ -106,7 +106,7 @@ const BulkProviderImport = () => {
                 value={limit}
                 onChange={(e) => setLimit(Number(e.target.value))}
                 min={1}
-                max={100}
+                max={200}
               />
             </div>
           </div>
