@@ -10,6 +10,7 @@ interface LocationMapProps {
     latitude?: number;
     longitude?: number;
     google_rating?: number;
+    external_website?: string;
   }>;
   className?: string;
 }
@@ -151,15 +152,27 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
         });
         const infoWindow = new (window as any).google.maps.InfoWindow({
           content: `
-            <div class="p-2 max-w-xs">
-              <h3 class="font-semibold text-sm">${provider.business_name}</h3>
-              <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
+            <div class="p-3 max-w-xs">
+              <h3 class="font-semibold text-base mb-2">${provider.business_name}</h3>
+              <p class="text-sm text-gray-600 mb-2">${provider.location}</p>
               ${provider.google_rating ? `
-                <div class="flex items-center text-xs">
+                <div class="flex items-center text-sm mb-3">
                   <span class="text-yellow-500">★</span>
                   <span class="ml-1">${provider.google_rating}</span>
                 </div>
               ` : ''}
+              <div class="space-y-2">
+                ${provider.external_website ? `
+                  <a href="${provider.external_website}" target="_blank" rel="noopener noreferrer" 
+                     class="block w-full bg-blue-500 hover:bg-blue-600 text-white text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                    Visit Website
+                  </a>
+                ` : ''}
+                <a href="/camps?search=${encodeURIComponent(provider.business_name)}" 
+                   class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                  View Details
+                </a>
+              </div>
             </div>
           `
         });
@@ -271,15 +284,27 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       
       const infoWindow = new (window as any).google.maps.InfoWindow({
         content: `
-          <div class="p-2 max-w-xs">
-            <h3 class="font-semibold text-sm">${provider.business_name}</h3>
-            <p class="text-xs text-gray-600 mb-1">${provider.location}</p>
+          <div class="p-3 max-w-xs">
+            <h3 class="font-semibold text-base mb-2">${provider.business_name}</h3>
+            <p class="text-sm text-gray-600 mb-2">${provider.location}</p>
             ${provider.google_rating ? `
-              <div class="flex items-center text-xs">
+              <div class="flex items-center text-sm mb-3">
                 <span class="text-yellow-500">★</span>
                 <span class="ml-1">${provider.google_rating}</span>
               </div>
             ` : ''}
+            <div class="space-y-2">
+              ${provider.external_website ? `
+                <a href="${provider.external_website}" target="_blank" rel="noopener noreferrer" 
+                   class="block w-full bg-blue-500 hover:bg-blue-600 text-white text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                  Visit Website
+                </a>
+              ` : ''}
+              <a href="/camps?search=${encodeURIComponent(provider.business_name)}" 
+                 class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-center py-2 px-3 rounded text-sm font-medium transition-colors">
+                View Details
+              </a>
+            </div>
           </div>
         `
       });

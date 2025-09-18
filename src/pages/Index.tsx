@@ -149,9 +149,10 @@ const Index = () => {
                   id: p.id,
                   business_name: p.title,
                   location: p.location,
-                  google_rating: p.rating
+                  google_rating: p.rating,
+                  external_website: p.external_website
                 }))}
-                className="h-[400px]"
+                className="h-[600px] lg:h-[700px]"
               />
             </div>
 
