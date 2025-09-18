@@ -3,8 +3,11 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, User, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Calendar, MapPin, User, Loader2, Search } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
+import ConversationalSearch from "@/components/search/ConversationalSearch";
+import AIResultCard from "@/components/search/AIResultCard";
 import FilterBar from "@/components/filters/FilterBar";
 import { Badge } from "@/components/ui/badge";
 import { generateProviderIcon } from "@/lib/imageUtils";
@@ -14,6 +17,8 @@ const Camps = () => {
   const [activeFilter, setActiveFilter] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [aiResults, setAiResults] = useState<any[]>([]);
+  const [showAIResults, setShowAIResults] = useState(false);
   const { profiles: providers, loading, error } = usePublicProviderProfiles();
 
   // Read search query from URL params and update when it changes
@@ -24,8 +29,11 @@ const Camps = () => {
     setSearchQuery(search || '');
   }, [location.search]);
 
-  // Filter providers based on search query and active filter
-  const filteredProviders = providers.filter((provider) => {
+  // Choose which results to show - AI results take precedence when available
+  const displayResults = showAIResults && aiResults.length > 0 ? aiResults : providers;
+
+  // Filter providers based on search query and active filter (only for database results)
+  const filteredProviders = (!showAIResults ? displayResults?.filter((provider) => {
     // Apply search query filter
     const matchesSearch = !searchQuery || (() => {
       const query = searchQuery.toLowerCase();
@@ -43,10 +51,23 @@ const Camps = () => {
       provider.specialties?.includes(activeFilter);
 
     return matchesSearch && matchesCategory;
-  });
+  }) : displayResults) || [];
 
-  // Transform provider profiles to camp card format
-  const transformedProviders = filteredProviders.map(provider => ({
+  const handleAIResultsUpdate = (results: any[]) => {
+    setAiResults(results);
+    setShowAIResults(results.length > 0);
+    // Clear traditional search when AI search is used
+    setSearchQuery("");
+    setActiveFilter("all");
+  };
+
+  const handleClearAIResults = () => {
+    setAiResults([]);
+    setShowAIResults(false);
+  };
+
+  // Transform provider profiles to camp card format (only for traditional results)
+  const transformedProviders = !showAIResults ? filteredProviders.map(provider => ({
     id: provider.id,
     title: provider.business_name,
     image: generateProviderIcon(provider.business_name, provider.specialties, provider.id),
@@ -61,9 +82,9 @@ const Camps = () => {
     distance: "Austin area",
     age: provider.age_groups?.join(", ") || "All ages",
     external_website: provider.external_website
-  }));
+  })) : [];
 
-  const allResults = transformedProviders;
+  const allResults = showAIResults ? filteredProviders : transformedProviders;
   const totalResults = allResults.length;
 
   const handleFilterChange = (filter: string) => {
@@ -107,14 +128,51 @@ const Camps = () => {
         {/* Header */}
         <section className="bg-gradient-to-r from-camps-primary to-camps-secondary text-white py-12">
           <div className="container mx-auto px-4">
-            <div className="text-center">
+            <div className="text-center mb-8">
               <h1 className="text-4xl font-bold mb-4">Summer Camps & Activities</h1>
               <p className="text-xl mb-8">Discover amazing camps and activities for your kids</p>
+            </div>
+            
+            {/* AI Conversational Search */}
+            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg shadow-sm border border-white/20 max-w-4xl mx-auto">
+              <ConversationalSearch 
+                onResultsUpdate={handleAIResultsUpdate}
+                className="mb-6"
+              />
               
-              {searchQuery && (
-                <div className="mb-4">
+              {/* Traditional Search - Only show when not using AI results */}
+              {!showAIResults && (
+                <div className="space-y-4 pt-4 border-t border-white/20">
+                  <div className="text-sm text-white/80 text-center">
+                    Or use traditional search:
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <Input
+                        placeholder="Enter your location (e.g., Austin, TX)"
+                        className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60"
+                        value={searchLocation}
+                        onChange={(e) => setSearchLocation(e.target.value)}
+                      />
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <Input
+                        placeholder="Search activities, ages, or keywords..."
+                        className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/60"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {(searchQuery || showAIResults) && (
+                <div className="mt-4">
                   <Badge variant="secondary" className="text-sm">
-                    {totalResults} results for "{searchQuery}"
+                    {totalResults} results {showAIResults ? "from AI search" : searchQuery ? `for "${searchQuery}"` : ""}
                   </Badge>
                 </div>
               )}
@@ -122,11 +180,32 @@ const Camps = () => {
           </div>
         </section>
 
-        {/* Filter Bar */}
-        <FilterBar 
-          onFilterChange={handleFilterChange} 
-          activeFilter={activeFilter}
-        />
+        {/* Only show filter bar for traditional search */}
+        {!showAIResults && (
+          <FilterBar 
+            onFilterChange={handleFilterChange} 
+            activeFilter={activeFilter}
+          />
+        )}
+        
+        {/* AI Results Header */}
+        {showAIResults && aiResults.length > 0 && (
+          <div className="border-b bg-primary/5">
+            <div className="container mx-auto py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg">AI-Powered Search Results</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Found {aiResults.length} relevant providers ranked by AI relevance
+                  </p>
+                </div>
+                <Button variant="outline" onClick={handleClearAIResults}>
+                  Back to Browse All
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <section className="py-12">
@@ -134,53 +213,74 @@ const Camps = () => {
             {totalResults === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600 text-lg mb-4">
-                  {searchQuery ? `No results found for "${searchQuery}"` : "No camps found."}
+                  {showAIResults ? "No AI results found. Try a different search." : 
+                   searchQuery ? `No results found for "${searchQuery}"` : "No camps found."}
                 </p>
-                {searchQuery && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    if (showAIResults) {
+                      handleClearAIResults();
+                    } else if (searchQuery) {
                       setSearchQuery("");
                       window.history.pushState({}, '', '/camps');
-                    }}
-                  >
-                    Clear Search
-                  </Button>
-                )}
+                    }
+                  }}
+                >
+                  {showAIResults ? "Back to Browse All" : "Clear Search"}
+                </Button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {allResults.map((result) => (
-                    <div key={result.id} className="relative">
-                      <div 
-                        className="cursor-pointer"
-                        onClick={() => window.location.href = `/provider/${result.id}`}
-                      >
-                        <CampCard {...result} />
-                      </div>
-                      {'external_website' in result && result.external_website && (
-                        <div className="mt-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              window.open(`${result.external_website}?utm_source=kidfun&utm_medium=camps_page&utm_campaign=provider_referral`, '_blank');
-                            }}
-                          >
-                            Visit Website
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-10 text-center">
-                  <p className="text-gray-600 mb-4">
-                    Showing {totalResults} results
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold">
+                    {showAIResults ? "AI Search Results" :
+                     searchQuery ? `Search Results for "${searchQuery}"` : 
+                     activeFilter && activeFilter !== "all" ? `${activeFilter} Activities` : 
+                     "All Activities"}
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    {totalResults} {totalResults === 1 ? 'result' : 'results'}
                   </p>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {showAIResults ? (
+                    // Render AI Results
+                    allResults.map((result, index) => (
+                      <AIResultCard
+                        key={result.id || result.google_place_id || index}
+                        {...result}
+                      />
+                    ))
+                  ) : (
+                    // Render Traditional Camp Cards
+                    allResults.map((result) => (
+                      <div key={result.id} className="relative">
+                        <div 
+                          className="cursor-pointer"
+                          onClick={() => window.location.href = `/provider/${result.id}`}
+                        >
+                          <CampCard {...result} />
+                        </div>
+                        {'external_website' in result && result.external_website && (
+                          <div className="mt-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(`${result.external_website}?utm_source=kidfun&utm_medium=camps_page&utm_campaign=provider_referral`, '_blank');
+                              }}
+                            >
+                              Visit Website
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </>
             )}
