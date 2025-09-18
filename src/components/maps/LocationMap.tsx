@@ -18,6 +18,7 @@ interface LocationMapProps {
 declare global {
   interface Window {
     google: any;
+    __gm_init?: () => void;
   }
 }
 
@@ -40,21 +41,49 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
   const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       console.log('loadGoogleMapsScript called with key:', apiKey ? 'API key provided' : 'No API key');
+
+      const waitForMapConstructor = (onReady: () => void, onFail: (e: any) => void) => {
+        const start = Date.now();
+        const maxWait = 10000; // 10s safety timeout
+        const tick = () => {
+          if (window.google?.maps?.Map && typeof window.google.maps.Map === 'function') {
+            onReady();
+            return;
+          }
+          if (Date.now() - start > maxWait) {
+            onFail(new Error('Google Maps API not ready after timeout'));
+            return;
+          }
+          setTimeout(tick, 50);
+        };
+        tick();
+      };
       
-      if (window.google && window.google.maps) {
-        console.log('Google Maps already loaded');
+      // Already loaded and ready
+      if (window.google?.maps?.Map && typeof window.google.maps.Map === 'function') {
+        console.log('Google Maps already loaded and ready');
         resolve();
         return;
       }
 
+      // If a script tag already exists, just wait for readiness
+      const existing = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+      if (existing) {
+        console.log('Google Maps script tag already present, waiting for readiness');
+        waitForMapConstructor(resolve, reject);
+        return;
+      }
+
+      // Define a global callback to fire when API is fully initialized
+      (window as any).__gm_init = () => {
+        console.log('Google Maps global callback fired');
+        waitForMapConstructor(resolve, reject);
+      };
+
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=quarterly&callback=__gm_init`;
       script.async = true;
       script.defer = true;
-      script.onload = () => {
-        console.log('Google Maps script onload event triggered');
-        resolve();
-      };
       script.onerror = (error) => {
         console.error('Google Maps script onerror event:', error);
         reject(new Error('Failed to load Google Maps API - check your API key and referrer restrictions'));
@@ -62,9 +91,15 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       
       console.log('Adding Google Maps script to document head');
       document.head.appendChild(script);
+
+      // Absolute fallback in case callback never fires
+      setTimeout(() => {
+        if (!(window.google?.maps?.Map)) {
+          reject(new Error('Google Maps failed to become ready (timeout)'));
+        }
+      }, 12000);
     });
   };
-
   const initializeMap = async (apiKey: string) => {
     if (!mapContainer.current || !apiKey) return;
 
