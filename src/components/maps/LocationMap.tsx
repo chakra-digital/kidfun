@@ -49,7 +49,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       }
 
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,marker&loading=async`;
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -97,24 +97,24 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
       });
 
       console.log('Map initialized, adding markers...');
-      // Add markers for providers
+      // Add markers for providers using modern AdvancedMarkerElement
       providers.forEach((provider) => {
         // For now, use mock coordinates around Austin area since we don't have lat/lng
         const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
         const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
 
-        const marker = new window.google.maps.Marker({
+        // Create a custom pin element
+        const pinElement = new window.google.maps.marker.PinElement({
+          background: '#3b82f6',
+          borderColor: '#1e40af',
+          glyphColor: '#ffffff',
+        });
+
+        const marker = new window.google.maps.marker.AdvancedMarkerElement({
           position: { lat, lng },
           map: map.current,
           title: provider.business_name,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#3b82f6',
-            fillOpacity: 1,
-            strokeColor: '#1e40af',
-            strokeWeight: 2,
-          }
+          content: pinElement.element,
         });
 
         const infoWindow = new window.google.maps.InfoWindow({
@@ -224,10 +224,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], className = "
           </p>
           <p className="text-xs text-muted-foreground text-center mb-4 max-w-md">
             For referrer restrictions, add these exact formats:
-            <br />• <code className="bg-background px-1 rounded">*.lovable.dev/*</code>
+            <br />• <code className="bg-background px-1 rounded">*.lovable.app/*</code>
             <br />• <code className="bg-background px-1 rounded">https://kidfun.app/*</code>
             <br />• <code className="bg-background px-1 rounded">https://www.kidfun.app/*</code>
-            <br />• <code className="bg-background px-1 rounded">http://localhost:*</code>
+            <br />• <code className="bg-background px-1 rounded">localhost:*</code>
           </p>
           {error && (
             <div className="bg-destructive/10 text-destructive p-3 rounded-md mb-4 text-sm max-w-md text-center">
