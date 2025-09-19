@@ -109,9 +109,9 @@ async function analyzeSearchQuery(query: string) {
 }
 
 async function searchGooglePlaces(searchAnalysis: any, location: string) {
-  const googleMapsApiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
-  if (!googleMapsApiKey) {
-    console.log("No Google Maps API key found, skipping Places search");
+  const googlePlacesApiKey = Deno.env.get('GOOGLE_PLACES_API_KEY');
+  if (!googlePlacesApiKey) {
+    console.log("No Google Places API key found, skipping Places search");
     return [];
   }
 
@@ -141,7 +141,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
 
   for (const searchQuery of searchQueries) {
     try {
-      const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${googleMapsApiKey}&type=establishment&radius=25000`;
+      const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${googlePlacesApiKey}&type=establishment&radius=25000`;
       
       console.log(`Searching Google Places: "${searchQuery}"`);
       const response = await fetch(url);
