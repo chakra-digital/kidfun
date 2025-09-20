@@ -8,6 +8,7 @@ import { Calendar, MapPin, User, Loader2, Search } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import ConversationalSearch from "@/components/search/ConversationalSearch";
 import AIResultCard from "@/components/search/AIResultCard";
+import AIResultModal from "@/components/search/AIResultModal";
 import FilterBar from "@/components/filters/FilterBar";
 import { Badge } from "@/components/ui/badge";
 import { generateProviderIcon } from "@/lib/imageUtils";
@@ -64,6 +65,14 @@ const Camps = () => {
   const handleClearAIResults = () => {
     setAiResults([]);
     setShowAIResults(false);
+  };
+
+  const [selectedAIResult, setSelectedAIResult] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAIResultClick = (result: any) => {
+    setSelectedAIResult(result);
+    setIsModalOpen(true);
   };
 
   // Transform provider profiles to camp card format (only for traditional results)
@@ -219,9 +228,10 @@ const Camps = () => {
                   {showAIResults ? (
                     // Render AI Results
                     allResults.map((result, index) => (
-                      <AIResultCard
-                        key={result.id || result.google_place_id || index}
-                        {...result}
+                    <AIResultCard
+                      key={result.id || result.google_place_id || index}
+                      {...result}
+                      onClick={() => handleAIResultClick(result)}
                       />
                     ))
                   ) : (
@@ -342,6 +352,13 @@ const Camps = () => {
         </section>
       </main>
       <Footer />
+      
+      {/* AI Result Modal */}
+      <AIResultModal
+        result={selectedAIResult}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

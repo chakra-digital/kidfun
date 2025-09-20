@@ -121,18 +121,41 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
 
       <CardFooter className="p-4 pt-0 flex gap-2">
         {phone && (
-          <Button size="sm" variant="outline" className="flex-1">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(`tel:${phone}`, '_self');
+            }}
+          >
             <Phone className="w-3 h-3 mr-1" />
             Call
           </Button>
         )}
         {external_website && (
-          <Button size="sm" variant="outline" className="flex-1">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(external_website, '_blank', 'noopener,noreferrer');
+            }}
+          >
             <ExternalLink className="w-3 h-3 mr-1" />
             Website
           </Button>
         )}
-        <Button size="sm" className="flex-1">
+        <Button 
+          size="sm" 
+          className="flex-1"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onClick) onClick();
+          }}
+        >
           View Details
         </Button>
       </CardFooter>
