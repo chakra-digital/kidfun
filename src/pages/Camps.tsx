@@ -143,19 +143,11 @@ const Camps = () => {
             </div>
             
             {/* AI Conversational Search */}
-            <div className="max-w-4xl mx-auto">
+            <div className="mb-8">
               <ConversationalSearch 
                 onResultsUpdate={handleAIResultsUpdate}
-                className="mb-4"
+                className=""
               />
-              
-              {(searchQuery || showAIResults) && (
-                <div className="text-center">
-                  <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
-                    {totalResults} results {showAIResults ? "from AI search" : searchQuery ? `for "${searchQuery}"` : ""}
-                  </Badge>
-                </div>
-              )}
             </div>
           </div>
         </section>

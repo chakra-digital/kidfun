@@ -5,6 +5,7 @@ import { Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import ConversationalSearch from "@/components/search/ConversationalSearch";
 
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,22 +28,18 @@ const Navbar = () => {
           <span className="text-xl font-bold text-camps-dark">KidFun</span>
         </Link>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex items-center max-w-lg w-full mx-4 relative">
-          <Input
-            type="text"
-            placeholder="Search camps, activities, tutors and more..."
-            className="w-full pr-10 rounded-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+        {/* AI Search Bar */}
+        <div className="flex items-center max-w-lg w-full mx-4">
+          <ConversationalSearch 
+            onResultsUpdate={(results) => {
+              if (results.length > 0) {
+                navigate('/camps');
+              }
+            }} 
+            compact={true}
+            className="w-full"
           />
-          <button 
-            type="submit"
-            className="absolute right-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <Search className="h-4 w-4 text-gray-400" />
-          </button>
-        </form>
+        </div>
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-2">
