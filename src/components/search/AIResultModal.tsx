@@ -134,36 +134,49 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              className="flex-1"
-              onClick={handleGetDirections}
-            >
-              <Navigation className="w-4 h-4 mr-2" />
-              Get Directions
-            </Button>
+          <div className="space-y-3 pt-4 border-t">
+            {result.external_website && (
+              <Button 
+                className="w-full"
+                size="lg"
+                onClick={() => {
+                  try {
+                    const url = new URL(result.external_website);
+                    url.searchParams.append('utm_source', 'campconnect');
+                    url.searchParams.append('utm_medium', 'ai_search');
+                    url.searchParams.append('utm_campaign', 'provider_discovery');
+                    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+                  } catch {
+                    window.open(result.external_website, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Book Now
+              </Button>
+            )}
             
-            {result.phone && (
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button 
                 variant="outline" 
                 className="flex-1"
-                onClick={() => window.open(`tel:${result.phone}`, '_self')}
+                onClick={handleGetDirections}
               >
-                <Phone className="w-4 h-4 mr-2" />
-                Call {result.phone}
+                <Navigation className="w-4 h-4 mr-2" />
+                Get Directions
               </Button>
-            )}
-            
-            {result.external_website && (
-              <Button 
-                className="flex-1"
-                onClick={() => window.open(result.external_website, '_blank', 'noopener,noreferrer')}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Visit Website
-              </Button>
-            )}
+              
+              {result.phone && (
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => window.open(`tel:${result.phone}`, '_self')}
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  Call {result.phone}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </DialogContent>
