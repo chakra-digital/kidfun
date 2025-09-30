@@ -60,6 +60,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     if (!query.trim() || isSearching) return;
 
     setIsSearching(true);
+    console.log('Starting AI search...');
     
     try {
       // Build enhanced query with filters and categories
@@ -77,13 +78,27 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         enhancedQuery += ` in ${whereFilter}`;
       }
 
+      console.log('Enhanced query:', enhancedQuery);
+      console.log('Calling ai-provider-search edge function...');
+
       const { data, error } = await supabase.functions.invoke('ai-provider-search', {
-        body: { query: enhancedQuery }
+        body: { query: enhancedQuery, location: whereFilter || 'Austin, TX' }
       });
 
-      if (error) throw error;
+      console.log('Edge function response:', { data, error });
+
+      if (error) {
+        console.error('Edge function error:', error);
+        throw error;
+      }
 
       const { results, searchAnalysis, newProvidersFound } = data;
+      
+      console.log('Search results:', {
+        resultsCount: results?.length,
+        searchAnalysis,
+        newProvidersFound
+      });
       
       // Cache results for quick filtering
       setCachedResults(results || []);
@@ -105,7 +120,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         setQuery('');
       }
     } catch (error: any) {
-      console.error('Search error:', error);
+      console.error('Search error details:', error);
       toast({
         title: "Search Error",
         description: error.message || "Failed to search providers. Please try again.",
