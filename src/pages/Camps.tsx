@@ -3,23 +3,15 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CampCard from "@/components/camps/CampCard";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar, MapPin, User, Loader2, Search } from "lucide-react";
+import { Calendar, MapPin, User, Loader2 } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
-import ConversationalSearch from "@/components/search/ConversationalSearch";
-import AIResultCard from "@/components/search/AIResultCard";
-import AIResultModal from "@/components/search/AIResultModal";
 import FilterBar from "@/components/filters/FilterBar";
-import { Badge } from "@/components/ui/badge";
 import { generateProviderIcon } from "@/lib/imageUtils";
 import { useLocation } from "react-router-dom";
 
 const Camps = () => {
   const [activeFilter, setActiveFilter] = useState("");
-  const [searchLocation, setSearchLocation] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [aiResults, setAiResults] = useState<any[]>([]);
-  const [showAIResults, setShowAIResults] = useState(false);
   const { profiles: providers, loading, error } = usePublicProviderProfiles();
 
   // Read search query from URL params and update when it changes
@@ -30,11 +22,8 @@ const Camps = () => {
     setSearchQuery(search || '');
   }, [location.search]);
 
-  // Choose which results to show - AI results take precedence when available
-  const displayResults = showAIResults && aiResults.length > 0 ? aiResults : providers;
-
-  // Filter providers based on search query and active filter (only for database results)
-  const filteredProviders = (!showAIResults ? displayResults?.filter((provider) => {
+  // Filter providers based on search query and active filter
+  const filteredProviders = providers?.filter((provider) => {
     // Apply search query filter
     const matchesSearch = !searchQuery || (() => {
       const query = searchQuery.toLowerCase();
@@ -52,31 +41,10 @@ const Camps = () => {
       provider.specialties?.includes(activeFilter);
 
     return matchesSearch && matchesCategory;
-  }) : displayResults) || [];
+  }) || [];
 
-  const handleAIResultsUpdate = (results: any[]) => {
-    setAiResults(results);
-    setShowAIResults(results.length > 0);
-    // Clear traditional search when AI search is used
-    setSearchQuery("");
-    setActiveFilter("all");
-  };
-
-  const handleClearAIResults = () => {
-    setAiResults([]);
-    setShowAIResults(false);
-  };
-
-  const [selectedAIResult, setSelectedAIResult] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleAIResultClick = (result: any) => {
-    setSelectedAIResult(result);
-    setIsModalOpen(true);
-  };
-
-  // Transform provider profiles to camp card format (only for traditional results)
-  const transformedProviders = !showAIResults ? filteredProviders.map(provider => ({
+  // Transform provider profiles to camp card format
+  const transformedProviders = filteredProviders.map(provider => ({
     id: provider.id,
     title: provider.business_name,
     image: generateProviderIcon(provider.business_name, provider.specialties, provider.id),
@@ -91,10 +59,9 @@ const Camps = () => {
     distance: "Austin area",
     age: provider.age_groups?.join(", ") || "All ages",
     external_website: provider.external_website
-  })) : [];
+  }));
 
-  const allResults = showAIResults ? filteredProviders : transformedProviders;
-  const totalResults = allResults.length;
+  const totalResults = transformedProviders.length;
 
   const handleFilterChange = (filter: string) => {
     setActiveFilter(filter === activeFilter ? "" : filter);
@@ -135,49 +102,17 @@ const Camps = () => {
       <Navbar />
       <main className="flex-grow">
         {/* Header */}
-        <section className="bg-gradient-to-r from-camps-primary to-camps-secondary text-white py-12">
+        <section className="bg-gradient-to-r from-camps-primary to-camps-secondary text-white py-8">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold mb-4">Summer Camps & Activities</h1>
-              <p className="text-xl mb-8">Discover amazing camps and activities for your kids</p>
-            </div>
-            
-            {/* AI Conversational Search */}
-            <div className="mb-8">
-              <ConversationalSearch 
-                onResultsUpdate={handleAIResultsUpdate}
-                className=""
-              />
-            </div>
+            <h1 className="text-3xl font-bold text-center">Browse All Camps & Activities</h1>
           </div>
         </section>
 
-        {/* Only show filter bar for traditional search */}
-        {!showAIResults && (
-          <FilterBar 
-            onFilterChange={handleFilterChange} 
-            activeFilter={activeFilter}
-          />
-        )}
-        
-        {/* AI Results Header */}
-        {showAIResults && aiResults.length > 0 && (
-          <div className="border-b bg-primary/5">
-            <div className="container mx-auto py-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">AI-Powered Search Results</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Found {aiResults.length} relevant providers ranked by AI relevance
-                  </p>
-                </div>
-                <Button variant="outline" onClick={handleClearAIResults}>
-                  Back to Browse All
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Filter bar */}
+        <FilterBar 
+          onFilterChange={handleFilterChange} 
+          activeFilter={activeFilter}
+        />
 
         {/* Main Content */}
         <section className="py-12">
@@ -185,29 +120,25 @@ const Camps = () => {
             {totalResults === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600 text-lg mb-4">
-                  {showAIResults ? "No AI results found. Try a different search." : 
-                   searchQuery ? `No results found for "${searchQuery}"` : "No camps found."}
+                  {searchQuery ? `No results found for "${searchQuery}"` : "No camps found."}
                 </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    if (showAIResults) {
-                      handleClearAIResults();
-                    } else if (searchQuery) {
+                {searchQuery && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
                       setSearchQuery("");
                       window.history.pushState({}, '', '/camps');
-                    }
-                  }}
-                >
-                  {showAIResults ? "Back to Browse All" : "Clear Search"}
-                </Button>
+                    }}
+                  >
+                    Clear Search
+                  </Button>
+                )}
               </div>
             ) : (
               <>
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold">
-                    {showAIResults ? "AI Search Results" :
-                     searchQuery ? `Search Results for "${searchQuery}"` : 
+                    {searchQuery ? `Search Results for "${searchQuery}"` : 
                      activeFilter && activeFilter !== "all" ? `${activeFilter} Activities` : 
                      "All Activities"}
                   </h2>
@@ -217,43 +148,31 @@ const Camps = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {showAIResults ? (
-                    // Render AI Results
-                    allResults.map((result, index) => (
-                    <AIResultCard
-                      key={result.id || result.google_place_id || index}
-                      {...result}
-                      onClick={() => handleAIResultClick(result)}
-                      />
-                    ))
-                  ) : (
-                    // Render Traditional Camp Cards
-                    allResults.map((result) => (
-                      <div key={result.id} className="relative">
-                        <div 
-                          className="cursor-pointer"
-                          onClick={() => window.location.href = `/provider/${result.id}`}
-                        >
-                          <CampCard {...result} />
-                        </div>
-                        {'external_website' in result && result.external_website && (
-                          <div className="mt-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="w-full"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(`${result.external_website}?utm_source=kidfun&utm_medium=camps_page&utm_campaign=provider_referral`, '_blank');
-                              }}
-                            >
-                              Visit Website
-                            </Button>
-                          </div>
-                        )}
+                  {transformedProviders.map((result) => (
+                    <div key={result.id} className="relative">
+                      <div 
+                        className="cursor-pointer"
+                        onClick={() => window.location.href = `/provider/${result.id}`}
+                      >
+                        <CampCard {...result} />
                       </div>
-                    ))
-                  )}
+                      {result.external_website && (
+                        <div className="mt-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(`${result.external_website}?utm_source=kidfun&utm_medium=camps_page&utm_campaign=provider_referral`, '_blank');
+                            }}
+                          >
+                            Visit Website
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </>
             )}
@@ -344,13 +263,6 @@ const Camps = () => {
         </section>
       </main>
       <Footer />
-      
-      {/* AI Result Modal */}
-      <AIResultModal
-        result={selectedAIResult}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </div>
   );
 };

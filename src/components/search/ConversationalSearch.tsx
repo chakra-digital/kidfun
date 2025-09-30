@@ -41,6 +41,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   const [whenFilter, setWhenFilter] = useState('');
   const [whereFilter, setWhereFilter] = useState('');
   const [lastSearchAnalysis, setLastSearchAnalysis] = useState<any>(null);
+  const [cachedResults, setCachedResults] = useState<SearchResult[]>([]);
+  const [lastQuery, setLastQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -73,6 +75,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
       const { results, searchAnalysis, newProvidersFound } = data;
       
+      // Cache results for quick filtering
+      setCachedResults(results || []);
+      setLastQuery(enhancedQuery);
+      
       // Update results
       onResultsUpdate(results || []);
       setLastSearchAnalysis(searchAnalysis);
@@ -100,6 +106,30 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     }
   };
 
+  // Quick filter cached results by category without re-running AI search
+  const applyQuickFilter = (categories: string[]) => {
+    if (cachedResults.length === 0) return;
+    
+    if (categories.length === 0) {
+      // No category filter - show all cached results
+      onResultsUpdate(cachedResults);
+    } else {
+      // Filter by selected categories
+      const filtered = cachedResults.filter(result => {
+        const resultCategories = result.specialties?.map(s => s.toLowerCase()) || [];
+        return categories.some(cat => 
+          resultCategories.some(rc => rc.includes(cat.toLowerCase()))
+        );
+      });
+      onResultsUpdate(filtered);
+      
+      toast({
+        title: "Filter Applied",
+        description: `Showing ${filtered.length} of ${cachedResults.length} results`,
+      });
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -123,11 +153,16 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   ];
 
   const toggleCategory = (categoryValue: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryValue) 
-        ? prev.filter(c => c !== categoryValue)
-        : [...prev, categoryValue]
-    );
+    const newCategories = selectedCategories.includes(categoryValue) 
+      ? selectedCategories.filter(c => c !== categoryValue)
+      : [...selectedCategories, categoryValue];
+    
+    setSelectedCategories(newCategories);
+    
+    // If we have cached results, apply quick filter instead of re-searching
+    if (cachedResults.length > 0) {
+      applyQuickFilter(newCategories);
+    }
   };
 
   if (compact) {
@@ -193,18 +228,18 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           <Button
             variant={whenFilter ? "default" : "outline"}
             onClick={() => setWhenFilter(whenFilter ? '' : 'this summer')}
-            className="rounded-full px-6"
+            className={`rounded-full px-6 ${whenFilter ? '' : 'bg-background text-foreground border-input hover:bg-accent'}`}
           >
             <Calendar className="w-4 h-4 mr-2" />
-            When
+            {whenFilter || 'When'}
           </Button>
           <Button
             variant={whereFilter ? "default" : "outline"}
             onClick={() => setWhereFilter(whereFilter ? '' : 'near me')}
-            className="rounded-full px-6"
+            className={`rounded-full px-6 ${whereFilter ? '' : 'bg-background text-foreground border-input hover:bg-accent'}`}
           >
             <MapPin className="w-4 h-4 mr-2" />
-            Where
+            {whereFilter || 'Where'}
           </Button>
         </div>
       </div>
