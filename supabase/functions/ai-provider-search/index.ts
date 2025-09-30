@@ -76,27 +76,33 @@ async function analyzeSearchQuery(query: string) {
         role: 'system',
         content: `You are a search query analyzer for children's activity providers. Extract structured information from user queries.
         
-        Respond with JSON containing:
+        Respond ONLY with valid JSON (no markdown, no code blocks) containing:
         - activities: array of activity types (e.g., ["soccer", "swimming", "art"])
         - ageGroups: array of age ranges (e.g., ["5-8", "9-12"])
         - keywords: array of relevant search terms
         - location: specific location if mentioned
         - googlePlacesQuery: a Google Places search query to find relevant businesses
         
-        Example activities: soccer, swimming, art, music, dance, coding, science, martial arts, gymnastics, tennis, basketball`
+        Example activities: soccer, swimming, art, music, dance, coding, science, martial arts, gymnastics, tennis, basketball, camps, daycare, tutoring`
       }, {
         role: 'user',
         content: query
       }],
+      response_format: { type: "json_object" },
       max_tokens: 300,
       temperature: 0.3
     }),
   });
 
   const data = await response.json();
+  console.log('Query analysis raw response:', data.choices[0].message.content);
+  
   try {
-    return JSON.parse(data.choices[0].message.content);
-  } catch {
+    const parsed = JSON.parse(data.choices[0].message.content);
+    console.log('Parsed query analysis:', parsed);
+    return parsed;
+  } catch (error) {
+    console.error('Failed to parse query analysis:', error);
     // Fallback if JSON parsing fails
     return {
       activities: [],
@@ -119,21 +125,13 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
   const baseQueries = [
     searchAnalysis.googlePlacesQuery,
     // More generic activity-based searches
-    ...searchAnalysis.activities.map((activity: string) => `${activity} lessons kids`),
-    ...searchAnalysis.activities.map((activity: string) => `${activity} classes children`),
-    // Fallback generic searches if no activities detected
-    ...(searchAnalysis.activities.length === 0 ? [
-      'swimming lessons kids',
-      'children swimming classes',
-      'youth swimming instruction',
-      'kids swim school'
-    ] : [])
+    ...searchAnalysis.activities.map((activity: string) => `${activity} lessons kids ${location}`),
+    ...searchAnalysis.activities.map((activity: string) => `children ${activity} classes ${location}`),
   ];
 
   const searchQueries = baseQueries
-    .slice(0, 4) // Limit to 4 base queries
-    .map(query => `${query} ${location}`)
-    .concat(baseQueries.slice(0, 2).map(query => query)); // Also try without location
+    .filter(q => q && q.trim())
+    .slice(0, 6); // Limit to 6 queries
 
   console.log('Google Places search queries:', searchQueries);
 
@@ -166,7 +164,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
             google_rating: place.rating,
             google_reviews_count: place.user_ratings_total,
             description: `${place.name} offers activities and services for children and families in the ${location} area.`,
-            specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : ['Swimming', 'Water Activities'],
+            specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
             amenities: ['Outdoor Space', 'Safety Equipment'],
             pricing_model: 'per_session',
             base_price: 25.00,
@@ -225,7 +223,10 @@ async function rankAndCombineResults(existingProviders: any[], googlePlacesResul
         - Rating and reviews
         - Source reliability (database providers are pre-verified)
         
-        Respond with JSON array of provider IDs in ranked order, each with a "relevanceScore" (0-100) and "explanation" of why it matches.`
+        Respond ONLY with a JSON array (no markdown, no code blocks). Each item should have:
+        - id: provider ID or google_place_id
+        - relevanceScore: number 0-100
+        - explanation: brief reason for match`
       }, {
         role: 'user',
         content: `Search query: "${originalQuery}"
@@ -247,12 +248,14 @@ async function rankAndCombineResults(existingProviders: any[], googlePlacesResul
   });
 
   const data = await response.json();
+  console.log('Ranking raw response:', data.choices[0].message.content);
   
   try {
     let content = data.choices[0].message.content;
     // Remove markdown formatting if present
-    content = content.replace(/```json\n?/g, '').replace(/\n?```/g, '');
+    content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const rankings = JSON.parse(content);
+    console.log('Parsed rankings:', rankings);
     // Apply rankings to providers
     const rankedProviders = rankings
       .filter((ranking: any) => ranking.relevanceScore >= 30) // Filter low relevance
