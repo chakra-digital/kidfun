@@ -72,10 +72,10 @@ const Index = () => {
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-4xl mx-auto text-center mb-12">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg">
-                Summer Camps & Activities
+                The best camps, activities and more
               </h1>
               <p className="text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto drop-shadow-md">
-                Discover amazing camps and activities for your kids
+                Find trusted providers, book with confidence, and create unforgettable experiences
               </p>
             </div>
             

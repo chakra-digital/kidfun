@@ -3,9 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Send, Sparkles, MapPin, Star, ExternalLink, Calendar, Palette, Crown, ChefHat, Music, Languages, Trees, Drama, Gamepad2, FlaskConical, GraduationCap, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface SearchResult {
   id?: string;
@@ -38,13 +42,19 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [whenFilter, setWhenFilter] = useState('');
-  const [whereFilter, setWhereFilter] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [locationInput, setLocationInput] = useState('');
   const [lastSearchAnalysis, setLastSearchAnalysis] = useState<any>(null);
   const [cachedResults, setCachedResults] = useState<SearchResult[]>([]);
   const [lastQuery, setLastQuery] = useState('');
+  const [isWhenOpen, setIsWhenOpen] = useState(false);
+  const [isWhereOpen, setIsWhereOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Computed display values
+  const whenFilter = selectedDate ? format(selectedDate, 'MMM d, yyyy') : '';
+  const whereFilter = locationInput;
 
   const handleSearch = async () => {
     if (!query.trim() || isSearching) return;
@@ -225,22 +235,118 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
         {/* When and Where Filters */}
         <div className="flex gap-3 justify-center">
-          <Button
-            variant={whenFilter ? "default" : "outline"}
-            onClick={() => setWhenFilter(whenFilter ? '' : 'this summer')}
-            className={`rounded-full px-6 ${whenFilter ? '' : 'bg-background text-foreground border-input hover:bg-accent'}`}
-          >
-            <Calendar className="w-4 h-4 mr-2" />
-            {whenFilter || 'When'}
-          </Button>
-          <Button
-            variant={whereFilter ? "default" : "outline"}
-            onClick={() => setWhereFilter(whereFilter ? '' : 'near me')}
-            className={`rounded-full px-6 ${whereFilter ? '' : 'bg-background text-foreground border-input hover:bg-accent'}`}
-          >
-            <MapPin className="w-4 h-4 mr-2" />
-            {whereFilter || 'Where'}
-          </Button>
+          {/* Date Picker Popover */}
+          <Popover open={isWhenOpen} onOpenChange={setIsWhenOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={whenFilter ? "default" : "outline"}
+                className={cn(
+                  "rounded-full px-6",
+                  !whenFilter && "bg-background text-foreground border-input hover:bg-accent"
+                )}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                {whenFilter || 'When'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="center">
+              <div className="p-4 space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Select date</h4>
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      setSelectedDate(date);
+                      setIsWhenOpen(false);
+                    }}
+                    initialFocus
+                    className={cn("pointer-events-auto")}
+                  />
+                </div>
+                {selectedDate && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedDate(undefined);
+                      setIsWhenOpen(false);
+                    }}
+                  >
+                    Clear date
+                  </Button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Location Input Popover */}
+          <Popover open={isWhereOpen} onOpenChange={setIsWhereOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={whereFilter ? "default" : "outline"}
+                className={cn(
+                  "rounded-full px-6",
+                  !whereFilter && "bg-background text-foreground border-input hover:bg-accent"
+                )}
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                {whereFilter || 'Where'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="center">
+              <div className="p-4 space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Location</h4>
+                  <Input
+                    placeholder="Enter city or zip code"
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                    className="mb-3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setLocationInput('Near me');
+                      setIsWhereOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent flex items-center gap-3"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    <div>
+                      <div className="font-medium">Nearby</div>
+                      <div className="text-sm text-muted-foreground">Use my current location</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLocationInput('Austin, TX');
+                      setIsWhereOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent flex items-center gap-3"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    <div className="font-medium">Austin, TX</div>
+                  </button>
+                </div>
+                {locationInput && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setLocationInput('');
+                      setIsWhereOpen(false);
+                    }}
+                  >
+                    Clear location
+                  </Button>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
