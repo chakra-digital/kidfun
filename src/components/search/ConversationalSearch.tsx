@@ -191,13 +191,13 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           <Button 
             onClick={handleSearch}
             disabled={!query.trim() || isSearching}
-            size="sm"
-            className="rounded-full px-4"
+            size="icon"
+            className="rounded-full h-10 w-10 flex-shrink-0"
           >
             {isSearching ? (
-              <Sparkles className="w-4 h-4 animate-spin" />
+              <Sparkles className="w-5 h-5 animate-spin text-white" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             )}
           </Button>
         </div>
@@ -222,13 +222,15 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           <Button 
             onClick={handleSearch}
             disabled={!query.trim() || isSearching}
-            size="sm"
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full px-4"
+            size="icon"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full h-10 w-10"
           >
             {isSearching ? (
-              <Sparkles className="w-4 h-4 animate-spin" />
+              <div className="relative">
+                <Sparkles className="w-5 h-5 animate-spin text-white" />
+              </div>
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             )}
           </Button>
         </div>
@@ -375,8 +377,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         })}
       </div>
 
-      {/* Search Analysis Display */}
-      {lastSearchAnalysis && (
+      {/* Search Analysis Display - Only show if there's actual data */}
+      {lastSearchAnalysis && (lastSearchAnalysis.activities?.length > 0 || lastSearchAnalysis.ageGroups?.length > 0) && (
         <Card className="border-l-4 border-l-primary bg-muted/20">
           <CardContent className="p-4">
             <div className="space-y-2">

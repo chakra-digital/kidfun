@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Star, ExternalLink, Sparkles, Phone, Navigation } from 'lucide-react';
+import LocationMap from '@/components/maps/LocationMap';
 
 interface AIResult {
   id?: string;
@@ -107,6 +108,27 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
                     {specialty}
                   </Badge>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Map */}
+          {(result.latitude && result.longitude) && (
+            <div>
+              <h3 className="font-semibold mb-3">Location</h3>
+              <div className="w-full h-64 rounded-lg overflow-hidden">
+                <LocationMap 
+                  providers={[{
+                    id: result.id || result.google_place_id || '',
+                    business_name: result.business_name,
+                    location: result.location,
+                    latitude: result.latitude,
+                    longitude: result.longitude,
+                    google_rating: result.google_rating,
+                    external_website: result.external_website
+                  }]}
+                  className="w-full h-full"
+                />
               </div>
             </div>
           )}
