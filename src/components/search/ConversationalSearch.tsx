@@ -140,7 +140,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask anything..."
-            className="flex-1 rounded-full border-2 border-muted focus:border-primary"
+            className="flex-1 rounded-full border-2 border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
             disabled={isSearching}
           />
           <Button 
@@ -171,7 +171,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask anything"
-            className="w-full h-14 px-6 rounded-full border-2 border-muted text-lg placeholder:text-muted-foreground focus:border-primary bg-background"
+            className="w-full h-14 px-6 rounded-full border-2 border-input bg-background text-foreground text-lg placeholder:text-muted-foreground focus:border-primary"
             disabled={isSearching}
           />
           <Button 
@@ -222,7 +222,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 hover:scale-105 ${
                 isSelected 
                   ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                  : 'bg-background border-muted hover:border-primary hover:bg-muted/50'
+                  : 'bg-card text-card-foreground border-border hover:border-primary hover:bg-accent'
               }`}
             >
               <IconComponent className="w-8 h-8 mb-2" />
