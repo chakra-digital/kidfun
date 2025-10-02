@@ -93,9 +93,9 @@ const Index = () => {
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold">AI Search Results</h2>
+                  <h2 className="text-2xl font-bold">Search Results</h2>
                   <p className="text-muted-foreground mt-1">
-                    Found {aiResults.length} relevant providers ranked by AI
+                    Found {aiResults.length} relevant providers
                   </p>
                 </div>
                 <Button variant="outline" onClick={() => setShowAIResults(false)}>

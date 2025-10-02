@@ -42,7 +42,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [locationInput, setLocationInput] = useState('');
   const [lastSearchAnalysis, setLastSearchAnalysis] = useState<any>(null);
   const [cachedResults, setCachedResults] = useState<SearchResult[]>([]);
@@ -53,7 +53,11 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   const { toast } = useToast();
 
   // Computed display values
-  const whenFilter = selectedDate ? format(selectedDate, 'MMM d, yyyy') : '';
+  const whenFilter = selectedDates.length > 0 
+    ? selectedDates.length === 1
+      ? format(selectedDates[0], 'MMM d, yyyy')
+      : `${format(selectedDates[0], 'MMM d')} - ${format(selectedDates[selectedDates.length - 1], 'MMM d, yyyy')}`
+    : '';
   const whereFilter = locationInput;
 
   const handleSearch = async () => {
@@ -269,29 +273,28 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             <PopoverContent className="w-auto p-0" align="center">
               <div className="p-4 space-y-4">
                 <div>
-                  <h4 className="font-semibold mb-2">Select date</h4>
+                  <h4 className="font-semibold mb-2">Select dates</h4>
                   <CalendarComponent
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      setSelectedDate(date);
-                      setIsWhenOpen(false);
+                    mode="multiple"
+                    selected={selectedDates}
+                    onSelect={(dates) => {
+                      setSelectedDates(dates || []);
                     }}
                     initialFocus
-                    className={cn("pointer-events-auto")}
+                    className="pointer-events-auto"
                   />
                 </div>
-                {selectedDate && (
+                {selectedDates.length > 0 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="w-full"
                     onClick={() => {
-                      setSelectedDate(undefined);
+                      setSelectedDates([]);
                       setIsWhenOpen(false);
                     }}
                   >
-                    Clear date
+                    Clear dates
                   </Button>
                 )}
               </div>

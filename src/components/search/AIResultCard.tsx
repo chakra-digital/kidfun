@@ -95,9 +95,8 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
             </p>
           )}
 
-          {/* AI Explanation */}
+          {/* Match Explanation */}
           <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-            <div className="text-xs text-primary font-medium mb-1">Why this matches:</div>
             <p className="text-xs text-muted-foreground">{explanation}</p>
           </div>
 

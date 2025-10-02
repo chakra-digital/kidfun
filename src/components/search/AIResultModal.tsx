@@ -87,21 +87,18 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
           {/* Description */}
           {result.description && (
             <div>
-              <h3 className="font-semibold mb-2">About</h3>
               <p className="text-muted-foreground leading-relaxed">{result.description}</p>
             </div>
           )}
 
-          {/* AI Explanation */}
+          {/* Match Explanation */}
           <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-            <h3 className="font-semibold text-primary mb-2">Why this matches your search:</h3>
             <p className="text-muted-foreground">{result.explanation}</p>
           </div>
 
           {/* Specialties */}
           {result.specialties && result.specialties.length > 0 && (
             <div>
-              <h3 className="font-semibold mb-3">Activities & Specialties</h3>
               <div className="flex flex-wrap gap-2">
                 {result.specialties.map((specialty, index) => (
                   <Badge key={index} variant="secondary" className="text-sm">
@@ -114,22 +111,19 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
 
           {/* Map */}
           {(result.latitude && result.longitude) && (
-            <div>
-              <h3 className="font-semibold mb-3">Location</h3>
-              <div className="w-full h-64 rounded-lg overflow-hidden">
-                <LocationMap 
-                  providers={[{
-                    id: result.id || result.google_place_id || '',
-                    business_name: result.business_name,
-                    location: result.location,
-                    latitude: result.latitude,
-                    longitude: result.longitude,
-                    google_rating: result.google_rating,
-                    external_website: result.external_website
-                  }]}
-                  className="w-full h-full"
-                />
-              </div>
+            <div className="w-full h-64 rounded-lg overflow-hidden">
+              <LocationMap 
+                providers={[{
+                  id: result.id || result.google_place_id || '',
+                  business_name: result.business_name,
+                  location: result.location,
+                  latitude: result.latitude,
+                  longitude: result.longitude,
+                  google_rating: result.google_rating,
+                  external_website: result.external_website
+                }]}
+                className="w-full h-full"
+              />
             </div>
           )}
 

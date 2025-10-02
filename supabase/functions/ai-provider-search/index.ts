@@ -148,32 +148,70 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
       console.log(`Google Places API response status: ${data.status}, results count: ${data.results?.length || 0}`);
 
       if (data.status === 'OK' && data.results) {
-        const relevantResults = data.results
+        const relevantPlaces = data.results
           .filter((place: any) => {
             const isOperational = !place.business_status || place.business_status === 'OPERATIONAL';
-            const hasMinRating = !place.rating || place.rating >= 3.0; // Lower threshold
+            const hasMinRating = !place.rating || place.rating >= 3.0;
             return isOperational && hasMinRating;
           })
-          .slice(0, 8) // More results per query
-          .map((place: any) => ({
-            google_place_id: place.place_id,
-            business_name: place.name,
-            location: place.formatted_address,
-            latitude: place.geometry?.location?.lat,
-            longitude: place.geometry?.location?.lng,
-            google_rating: place.rating,
-            google_reviews_count: place.user_ratings_total,
-            description: `${place.name} offers activities and services for children and families in the ${location} area.`,
-            specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
-            amenities: ['Outdoor Space', 'Safety Equipment'],
-            pricing_model: 'per_session',
-            base_price: 25.00,
-            capacity: 20,
-            age_groups: ['3-5', '6-12', '13-17'],
-            source: 'google_places'
-          }));
+          .slice(0, 8);
 
-        allResults.push(...relevantResults);
+        // Fetch detailed info including phone and website for each place
+        const detailedResults = await Promise.all(
+          relevantPlaces.map(async (place: any) => {
+            try {
+              const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_address,geometry,rating,user_ratings_total,formatted_phone_number,international_phone_number,website,business_status&key=${googlePlacesApiKey}`;
+              const detailsResponse = await fetch(detailsUrl);
+              const detailsData = await detailsResponse.json();
+              
+              if (detailsData.status === 'OK' && detailsData.result) {
+                const details = detailsData.result;
+                return {
+                  google_place_id: place.place_id,
+                  business_name: place.name,
+                  location: place.formatted_address,
+                  latitude: place.geometry?.location?.lat,
+                  longitude: place.geometry?.location?.lng,
+                  google_rating: place.rating,
+                  google_reviews_count: place.user_ratings_total,
+                  description: `${place.name} offers activities and services for children and families in the ${location} area.`,
+                  specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
+                  amenities: ['Outdoor Space', 'Safety Equipment'],
+                  pricing_model: 'per_session',
+                  base_price: 25.00,
+                  capacity: 20,
+                  age_groups: ['3-5', '6-12', '13-17'],
+                  phone: details.formatted_phone_number || details.international_phone_number,
+                  external_website: details.website,
+                  source: 'google_places'
+                };
+              }
+            } catch (error) {
+              console.error(`Error fetching details for ${place.name}:`, error);
+            }
+            
+            // Fallback if details fetch fails
+            return {
+              google_place_id: place.place_id,
+              business_name: place.name,
+              location: place.formatted_address,
+              latitude: place.geometry?.location?.lat,
+              longitude: place.geometry?.location?.lng,
+              google_rating: place.rating,
+              google_reviews_count: place.user_ratings_total,
+              description: `${place.name} offers activities and services for children and families in the ${location} area.`,
+              specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
+              amenities: ['Outdoor Space', 'Safety Equipment'],
+              pricing_model: 'per_session',
+              base_price: 25.00,
+              capacity: 20,
+              age_groups: ['3-5', '6-12', '13-17'],
+              source: 'google_places'
+            };
+          })
+        );
+
+        allResults.push(...detailedResults);
         console.log(`Added ${relevantResults.length} results from query: "${searchQuery}"`);
       } else if (data.status !== 'ZERO_RESULTS') {
         console.log(`Google Places API error for query "${searchQuery}":`, data.status, data.error_message);
