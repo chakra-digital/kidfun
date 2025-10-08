@@ -278,7 +278,14 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                     mode="multiple"
                     selected={selectedDates}
                     onSelect={(dates) => {
-                      setSelectedDates(dates || []);
+                      if (!dates || dates.length === 0) {
+                        setSelectedDates([]);
+                        return;
+                      }
+                      
+                      // Sort dates chronologically
+                      const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
+                      setSelectedDates(sortedDates);
                     }}
                     initialFocus
                     className="pointer-events-auto"

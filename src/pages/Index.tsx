@@ -6,6 +6,7 @@ import CampCard from "@/components/camps/CampCard";
 import ConversationalSearch from "@/components/search/ConversationalSearch";
 import AIResultCard from "@/components/search/AIResultCard";
 import AIResultModal from "@/components/search/AIResultModal";
+import LocationMap from "@/components/maps/LocationMap";
 import { Button } from "@/components/ui/button";
 import { User, Calendar, Star } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
@@ -87,7 +88,7 @@ const Index = () => {
           </div>
         </section>
 
-        {/* AI Results Section */}
+        {/* AI Results Section with Map */}
         {showAIResults && aiResults.length > 0 && (
           <section className="py-12 bg-background">
             <div className="container mx-auto px-4">
@@ -103,14 +104,33 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {aiResults.map((result, index) => (
-                  <AIResultCard
-                    key={result.id || result.google_place_id || index}
-                    {...result}
-                    onClick={() => handleAIResultClick(result)}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Results Cards - Left Side */}
+                <div className="space-y-4 lg:max-h-[calc(100vh-16rem)] lg:overflow-y-auto lg:pr-2">
+                  {aiResults.map((result, index) => (
+                    <AIResultCard
+                      key={result.id || result.google_place_id || index}
+                      {...result}
+                      onClick={() => handleAIResultClick(result)}
+                    />
+                  ))}
+                </div>
+                
+                {/* Map - Right Side */}
+                <div className="lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-16rem)] rounded-lg overflow-hidden border">
+                  <LocationMap 
+                    providers={aiResults.filter(r => r.latitude && r.longitude).map(r => ({
+                      id: r.id || r.google_place_id || '',
+                      business_name: r.business_name,
+                      location: r.location,
+                      latitude: r.latitude!,
+                      longitude: r.longitude!,
+                      google_rating: r.google_rating,
+                      external_website: r.external_website
+                    }))}
+                    className="w-full h-full"
                   />
-                ))}
+                </div>
               </div>
             </div>
           </section>
