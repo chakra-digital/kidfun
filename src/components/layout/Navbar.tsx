@@ -1,23 +1,12 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, User, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import ConversationalSearch from "@/components/search/ConversationalSearch";
 
 const Navbar = () => {
-  const [searchQuery, setSearchQuery] = useState("");
   const { user, signOut, loading } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/camps?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
 
   return (
     <header className="border-b sticky top-0 z-50 bg-white">
@@ -27,19 +16,6 @@ const Navbar = () => {
           <div className="text-2xl transform scale-x-[-1]">🏃‍♀️</div>
           <span className="text-xl font-bold text-camps-dark">KidFun</span>
         </Link>
-
-        {/* AI Search Bar */}
-        <div className="flex items-center max-w-lg w-full mx-4">
-          <ConversationalSearch 
-            onResultsUpdate={(results) => {
-              if (results.length > 0) {
-                navigate('/camps');
-              }
-            }} 
-            compact={true}
-            className="w-full"
-          />
-        </div>
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-2">

@@ -8,6 +8,7 @@ import AIResultCard from "@/components/search/AIResultCard";
 import AIResultModal from "@/components/search/AIResultModal";
 import LocationMap from "@/components/maps/LocationMap";
 import { Button } from "@/components/ui/button";
+import type { AIResult } from "@/components/search/AIResultModal";
 import { User, Calendar, Star } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
@@ -128,6 +129,15 @@ const Index = () => {
                       google_rating: r.google_rating,
                       external_website: r.external_website
                     }))}
+                    onMarkerClick={(provider) => {
+                      // Find the full AI result data to show in modal
+                      const fullResult = aiResults.find(
+                        r => (r.id || r.google_place_id) === provider.id
+                      );
+                      if (fullResult) {
+                        handleAIResultClick(fullResult);
+                      }
+                    }}
                     className="w-full h-full"
                   />
                 </div>

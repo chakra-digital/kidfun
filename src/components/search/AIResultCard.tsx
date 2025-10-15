@@ -44,19 +44,19 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
   };
 
   return (
-    <Card className={`h-full cursor-pointer transition-all duration-200 hover:shadow-lg ${
+    <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
       isNewDiscovery ? 'border-l-4 border-l-primary' : ''
     }`} onClick={onClick}>
-      <CardContent className="p-4">
-        <div className="space-y-3">
+      <CardContent className="p-3">
+        <div className="space-y-2">
           {/* Header */}
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg leading-tight mb-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base leading-tight mb-1">
                 {business_name}
               </h3>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4 flex-shrink-0" />
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
                 <span className="truncate">{formatLocation(location)}</span>
               </div>
             </div>
@@ -70,34 +70,27 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
 
           {/* Rating */}
           {google_rating && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm">
               <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{google_rating.toFixed(1)}</span>
+                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                <span className="font-medium text-sm">{google_rating.toFixed(1)}</span>
               </div>
               {google_reviews_count && (
-                <span className="text-sm text-muted-foreground">
-                  ({google_reviews_count} reviews)
+                <span className="text-xs text-muted-foreground">
+                  ({google_reviews_count})
                 </span>
               )}
               <div className="ml-auto">
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs py-0 h-5">
                   {relevanceScore}% match
                 </Badge>
               </div>
             </div>
           )}
 
-          {/* Description */}
-          {description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {description}
-            </p>
-          )}
-
           {/* Match Explanation */}
-          <div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
-            <p className="text-xs text-muted-foreground">{explanation}</p>
+          <div className="bg-primary/5 rounded-md p-2 border border-primary/10">
+            <p className="text-xs text-muted-foreground line-clamp-2">{explanation}</p>
           </div>
 
           {/* Specialties */}
@@ -118,7 +111,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0 flex gap-2">
+      <CardFooter className="p-3 pt-0 flex gap-2">
         {phone && (
           <Button 
             size="sm" 

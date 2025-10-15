@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Star, ExternalLink, Sparkles, Phone, Navigation } from 'lucide-react';
 import LocationMap from '@/components/maps/LocationMap';
 
-interface AIResult {
+export interface AIResult {
   id?: string;
   google_place_id?: string;
   business_name: string;
