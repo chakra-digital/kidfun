@@ -3,12 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Sparkles, MapPin, Star, ExternalLink, Calendar, Palette, Crown, ChefHat, Music, Languages, Trees, Drama, Gamepad2, FlaskConical, GraduationCap, Users } from 'lucide-react';
+import { Send, Sparkles, MapPin, Palette, Crown, ChefHat, Music, Languages, Trees, Drama, Gamepad2, FlaskConical, GraduationCap, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface SearchResult {
@@ -42,51 +40,67 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [locationInput, setLocationInput] = useState('');
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [lastSearchAnalysis, setLastSearchAnalysis] = useState<any>(null);
-  const [cachedResults, setCachedResults] = useState<SearchResult[]>([]);
-  const [lastQuery, setLastQuery] = useState('');
-  const [isWhenOpen, setIsWhenOpen] = useState(false);
   const [isWhereOpen, setIsWhereOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Computed display values
-  const whenFilter = selectedDates.length > 0 
-    ? selectedDates.length === 1
-      ? format(selectedDates[0], 'MMM d, yyyy')
-      : `${format(selectedDates[0], 'MMM d')} - ${format(selectedDates[selectedDates.length - 1], 'MMM d, yyyy')}`
-    : '';
+  // Computed display value
   const whereFilter = locationInput;
 
-  const handleSearch = async () => {
-    if (!query.trim() || isSearching) return;
+  // Get user's location on mount
+  useEffect(() => {
+    if (navigator.geolocation && !userLocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Geolocation not available:', error);
+        }
+      );
+    }
+  }, []);
+
+  const handleSearch = async (categoryOverride?: string) => {
+    const searchQuery = query.trim();
+    const searchCategory = categoryOverride || (selectedCategories.length > 0 ? selectedCategories.join(', ') : '');
+    
+    if (!searchQuery && !searchCategory) return;
+    if (isSearching) return;
 
     setIsSearching(true);
     console.log('Starting AI search...');
     
     try {
-      // Build enhanced query with filters and categories
-      let enhancedQuery = query.trim();
+      // Build enhanced query with category
+      let enhancedQuery = searchQuery || `Find ${searchCategory} activities`;
       
-      if (selectedCategories.length > 0) {
-        enhancedQuery += ` focusing on ${selectedCategories.join(', ')}`;
-      }
-      
-      if (whenFilter) {
-        enhancedQuery += ` for ${whenFilter}`;
-      }
-      
-      if (whereFilter) {
-        enhancedQuery += ` in ${whereFilter}`;
+      if (searchCategory && searchQuery) {
+        enhancedQuery += ` focusing on ${searchCategory}`;
       }
 
-      console.log('Enhanced query:', enhancedQuery);
-      console.log('Calling ai-provider-search edge function...');
+      // Determine location to use
+      let searchLocation = whereFilter;
+      
+      if (!searchLocation && userLocation) {
+        // Use reverse geocoding to get location name from coordinates
+        searchLocation = `${userLocation.lat},${userLocation.lng}`;
+      }
+      
+      if (!searchLocation) {
+        searchLocation = 'Austin, TX'; // Final fallback
+      }
+
+      console.log('Enhanced query:', enhancedQuery, 'Location:', searchLocation);
 
       const { data, error } = await supabase.functions.invoke('ai-provider-search', {
-        body: { query: enhancedQuery, location: whereFilter || 'Austin, TX' }
+        body: { query: enhancedQuery, location: searchLocation }
       });
 
       console.log('Edge function response:', { data, error });
@@ -96,17 +110,14 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         throw error;
       }
 
-      const { results, searchAnalysis, newProvidersFound } = data;
+      const { results, searchAnalysis, newProvidersFound, fromCache } = data;
       
       console.log('Search results:', {
         resultsCount: results?.length,
         searchAnalysis,
-        newProvidersFound
+        newProvidersFound,
+        fromCache
       });
-      
-      // Cache results for quick filtering
-      setCachedResults(results || []);
-      setLastQuery(enhancedQuery);
       
       // Update results
       onResultsUpdate(results || []);
@@ -114,10 +125,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
       // Show success message
       toast({
-        title: "Search Complete",
+        title: fromCache ? "Instant Results" : "Search Complete",
         description: `Found ${results?.length || 0} relevant providers${
           newProvidersFound > 0 ? ` (${newProvidersFound} new discoveries!)` : ''
-        }`,
+        }${fromCache ? ' (from cache)' : ''}`,
       });
 
       if (!compact) {
@@ -135,29 +146,6 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     }
   };
 
-  // Quick filter cached results by category without re-running AI search
-  const applyQuickFilter = (categories: string[]) => {
-    if (cachedResults.length === 0) return;
-    
-    if (categories.length === 0) {
-      // No category filter - show all cached results
-      onResultsUpdate(cachedResults);
-    } else {
-      // Filter by selected categories
-      const filtered = cachedResults.filter(result => {
-        const resultCategories = result.specialties?.map(s => s.toLowerCase()) || [];
-        return categories.some(cat => 
-          resultCategories.some(rc => rc.includes(cat.toLowerCase()))
-        );
-      });
-      onResultsUpdate(filtered);
-      
-      toast({
-        title: "Filter Applied",
-        description: `Showing ${filtered.length} of ${cachedResults.length} results`,
-      });
-    }
-  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -182,15 +170,16 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   ];
 
   const toggleCategory = (categoryValue: string) => {
+    // Toggle selection
     const newCategories = selectedCategories.includes(categoryValue) 
       ? selectedCategories.filter(c => c !== categoryValue)
-      : [...selectedCategories, categoryValue];
+      : [categoryValue]; // Only allow one category at a time for clearer searches
     
     setSelectedCategories(newCategories);
     
-    // If we have cached results, apply quick filter instead of re-searching
-    if (cachedResults.length > 0) {
-      applyQuickFilter(newCategories);
+    // Trigger a new search with the category
+    if (newCategories.length > 0) {
+      handleSearch(categoryValue);
     }
   };
 
@@ -208,7 +197,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             disabled={isSearching}
           />
           <Button 
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
             disabled={!query.trim() || isSearching}
             size="icon"
             className="rounded-full h-10 w-10 flex-shrink-0"
@@ -239,7 +228,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             disabled={isSearching}
           />
           <Button 
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
             disabled={!query.trim() || isSearching}
             size="icon"
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full h-10 w-10"
@@ -254,61 +243,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           </Button>
         </div>
 
-        {/* When and Where Filters */}
+        {/* Location Filter */}
         <div className="flex gap-3 justify-center">
-          {/* Date Picker Popover */}
-          <Popover open={isWhenOpen} onOpenChange={setIsWhenOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant={whenFilter ? "default" : "outline"}
-                className={cn(
-                  "rounded-full px-6",
-                  !whenFilter && "bg-background text-foreground border-input hover:bg-accent"
-                )}
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                {whenFilter || 'When'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-              <div className="p-4 space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Select dates</h4>
-                  <CalendarComponent
-                    mode="multiple"
-                    selected={selectedDates}
-                    onSelect={(dates) => {
-                      if (!dates || dates.length === 0) {
-                        setSelectedDates([]);
-                        return;
-                      }
-                      
-                      // Sort dates chronologically
-                      const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
-                      setSelectedDates(sortedDates);
-                    }}
-                    initialFocus
-                    className="pointer-events-auto"
-                  />
-                </div>
-                {selectedDates.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setSelectedDates([]);
-                      setIsWhenOpen(false);
-                    }}
-                  >
-                    Clear dates
-                  </Button>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Location Input Popover */}
           <Popover open={isWhereOpen} onOpenChange={setIsWhereOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -334,19 +270,21 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                   />
                 </div>
                 <div className="space-y-2">
-                  <button
-                    onClick={() => {
-                      setLocationInput('Near me');
-                      setIsWhereOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent flex items-center gap-3"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    <div>
-                      <div className="font-medium">Nearby</div>
-                      <div className="text-sm text-muted-foreground">Use my current location</div>
-                    </div>
-                  </button>
+                  {userLocation && (
+                    <button
+                      onClick={() => {
+                        setLocationInput(`${userLocation.lat},${userLocation.lng}`);
+                        setIsWhereOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent flex items-center gap-3"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      <div>
+                        <div className="font-medium">Nearby</div>
+                        <div className="text-sm text-muted-foreground">Use my current location</div>
+                      </div>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setLocationInput('Austin, TX');

@@ -22,6 +22,33 @@ serve(async (req) => {
     
     console.log("AI Provider Search request:", { query, location });
 
+    // Create a hash for caching (simple hash: query + location)
+    const cacheKey = `${query.toLowerCase().trim()}_${location.toLowerCase().trim()}`;
+    const queryHash = await crypto.subtle.digest(
+      'SHA-256',
+      new TextEncoder().encode(cacheKey)
+    ).then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''));
+
+    // Check cache first
+    const { data: cachedResult } = await supabase
+      .from('search_cache')
+      .select('*')
+      .eq('query_hash', queryHash)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (cachedResult) {
+      console.log('Returning cached results');
+      return new Response(JSON.stringify({
+        results: cachedResult.results,
+        searchAnalysis: cachedResult.search_analysis,
+        newProvidersFound: 0,
+        fromCache: true
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Step 1: Use OpenAI to analyze the search query and extract structured information
     const searchAnalysis = await analyzeSearchQuery(query);
     console.log("Search analysis:", searchAnalysis);
@@ -41,10 +68,20 @@ serve(async (req) => {
       query
     );
 
+    // Step 5: Cache the results
+    await supabase.from('search_cache').insert({
+      query_hash: queryHash,
+      original_query: query,
+      location: location,
+      results: rankedResults,
+      search_analysis: searchAnalysis
+    }).catch(err => console.error('Failed to cache results:', err));
+
     return new Response(JSON.stringify({
       results: rankedResults,
       searchAnalysis,
-      newProvidersFound: googlePlacesResults.length
+      newProvidersFound: googlePlacesResults.length,
+      fromCache: false
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -121,12 +158,13 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
     return [];
   }
 
-  // Create more effective search queries for Google Places
+  // Create more specific search queries for Google Places with better keywords
   const baseQueries = [
     searchAnalysis.googlePlacesQuery,
-    // More generic activity-based searches
-    ...searchAnalysis.activities.map((activity: string) => `${activity} lessons kids ${location}`),
-    ...searchAnalysis.activities.map((activity: string) => `children ${activity} classes ${location}`),
+    // Add specific program-type keywords to filter out irrelevant results
+    ...searchAnalysis.activities.map((activity: string) => `${activity} camp for kids ${location}`),
+    ...searchAnalysis.activities.map((activity: string) => `${activity} classes children ${location}`),
+    ...searchAnalysis.activities.map((activity: string) => `${activity} program youth ${location}`),
   ];
 
   const searchQueries = baseQueries

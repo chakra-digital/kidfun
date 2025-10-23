@@ -212,17 +212,48 @@ export type Database = {
         }
         Relationships: []
       }
+      search_cache: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          location: string
+          original_query: string
+          query_hash: string
+          results: Json
+          search_analysis: Json | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          location: string
+          original_query: string
+          query_hash: string
+          results: Json
+          search_analysis?: Json | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          location?: string
+          original_query?: string
+          query_hash?: string
+          results?: Json
+          search_analysis?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_current_user_type: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      clean_expired_search_cache: { Args: never; Returns: undefined }
+      get_current_user_type: { Args: never; Returns: string }
       get_public_provider_info: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           age_groups: string[]
           amenities: string[]
