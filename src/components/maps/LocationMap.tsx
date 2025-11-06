@@ -12,6 +12,7 @@ interface LocationMapProps {
     google_rating?: number;
     external_website?: string;
   }>;
+  center?: { lat: number; lng: number };
   onMarkerClick?: (provider: { id: string; business_name: string; location: string }) => void;
   className?: string;
 }
@@ -24,7 +25,7 @@ declare global {
   }
 }
 
-const LocationMap: React.FC<LocationMapProps> = ({ providers = [], onMarkerClick, className = "" }) => {
+const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMarkerClick, className = "" }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any>(null);
   const initialized = useRef(false);
@@ -122,9 +123,21 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], onMarkerClick
       // Use classic constructors for maximum compatibility
       const MapCtor = (window as any).google.maps.Map;
 
-      // Initialize map centered on Austin, TX
+      // Calculate center from providers or use provided center or default to Austin
+      let mapCenter = center || { lat: 30.2672, lng: -97.7431 };
+      
+      if (!center && providers.length > 0) {
+        const validProviders = providers.filter(p => p.latitude && p.longitude);
+        if (validProviders.length > 0) {
+          const avgLat = validProviders.reduce((sum, p) => sum + (p.latitude || 0), 0) / validProviders.length;
+          const avgLng = validProviders.reduce((sum, p) => sum + (p.longitude || 0), 0) / validProviders.length;
+          mapCenter = { lat: avgLat, lng: avgLng };
+        }
+      }
+
+      // Initialize map
       map.current = new (window as any).google.maps.Map(mapContainer.current, {
-        center: { lat: 30.2672, lng: -97.7431 },
+        center: mapCenter,
         zoom: 11,
         styles: [
           { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] }

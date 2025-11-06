@@ -227,7 +227,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="What are you looking for?"
-            className="glass-input w-full h-16 px-6 rounded-full text-lg placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+            className="glass-input w-full h-16 px-6 rounded-full text-lg text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
             disabled={isSearching}
           />
           <Button 

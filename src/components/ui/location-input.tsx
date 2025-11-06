@@ -1,15 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LocationSuggestion {
-  id: string;
-  display: string;
-  city: string;
-  state: string;
-  zip?: string;
+  place_id: string;
+  description: string;
+  main_text: string;
+  secondary_text: string;
 }
 
 interface LocationInputProps {
@@ -18,26 +18,6 @@ interface LocationInputProps {
   placeholder?: string;
   className?: string;
 }
-
-// Mock location data - in production this would come from a geocoding API
-const MOCK_LOCATIONS: LocationSuggestion[] = [
-  // Florida locations
-  { id: "fl1", display: "Fort Myers, FL 33901", city: "Fort Myers", state: "FL", zip: "33901" },
-  { id: "fl2", display: "Fort Myers, FL 33907", city: "Fort Myers", state: "FL", zip: "33907" },
-  { id: "fl3", display: "Fort Myers, FL 33916", city: "Fort Myers", state: "FL", zip: "33916" },
-  { id: "fl4", display: "Naples, FL 34102", city: "Naples", state: "FL", zip: "34102" },
-  { id: "fl5", display: "Cape Coral, FL 33904", city: "Cape Coral", state: "FL", zip: "33904" },
-  { id: "fl6", display: "Miami, FL 33101", city: "Miami", state: "FL", zip: "33101" },
-  { id: "fl7", display: "Tampa, FL 33602", city: "Tampa", state: "FL", zip: "33602" },
-  { id: "fl8", display: "Orlando, FL 32801", city: "Orlando", state: "FL", zip: "32801" },
-  // Texas locations
-  { id: "tx1", display: "Austin, TX 78745", city: "Austin", state: "TX", zip: "78745" },
-  { id: "tx2", display: "Austin, TX 78701", city: "Austin", state: "TX", zip: "78701" },
-  { id: "tx3", display: "Austin, TX 78704", city: "Austin", state: "TX", zip: "78704" },
-  { id: "tx4", display: "Round Rock, TX 78681", city: "Round Rock", state: "TX", zip: "78681" },
-  { id: "tx5", display: "Cedar Park, TX 78613", city: "Cedar Park", state: "TX", zip: "78613" },
-  { id: "tx6", display: "Pflugerville, TX 78660", city: "Pflugerville", state: "TX", zip: "78660" },
-];
 
 export const LocationInput: React.FC<LocationInputProps> = ({ 
   value, 
@@ -48,8 +28,10 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [inputValue, setInputValue] = useState(value);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setInputValue(value);
@@ -66,29 +48,73 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (inputValue.length < 2) {
+        setSuggestions([]);
+        setIsOpen(false);
+        return;
+      }
+
+      // Cancel previous request by setting a flag
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      abortControllerRef.current = new AbortController();
+      const currentController = abortControllerRef.current;
+      setIsLoading(true);
+
+      try {
+        const { data, error } = await supabase.functions.invoke('get-place-autocomplete', {
+          body: { input: inputValue }
+        });
+
+        // Check if this request was cancelled
+        if (currentController.signal.aborted) {
+          return;
+        }
+
+        if (error) throw error;
+
+        if (data?.predictions) {
+          const formattedSuggestions: LocationSuggestion[] = data.predictions.map((pred: any) => ({
+            place_id: pred.place_id,
+            description: pred.description,
+            main_text: pred.structured_formatting?.main_text || pred.description,
+            secondary_text: pred.structured_formatting?.secondary_text || ''
+          }));
+          setSuggestions(formattedSuggestions);
+          setIsOpen(formattedSuggestions.length > 0);
+        }
+      } catch (err: any) {
+        if (!currentController.signal.aborted) {
+          console.error('Error fetching location suggestions:', err);
+        }
+      } finally {
+        if (!currentController.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    return () => {
+      clearTimeout(debounceTimer);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [inputValue]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    
-    if (newValue.length > 2) {
-      // Filter suggestions based on input
-      const filtered = MOCK_LOCATIONS.filter(location =>
-        location.display.toLowerCase().includes(newValue.toLowerCase()) ||
-        location.city.toLowerCase().includes(newValue.toLowerCase()) ||
-        location.state.toLowerCase().includes(newValue.toLowerCase()) ||
-        (location.zip && location.zip.includes(newValue))
-      );
-      setSuggestions(filtered);
-      setIsOpen(true);
-    } else {
-      setSuggestions([]);
-      setIsOpen(false);
-    }
   };
 
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
-    setInputValue(suggestion.display);
-    onChange(suggestion.display);
+    setInputValue(suggestion.description);
+    onChange(suggestion.description);
     setIsOpen(false);
     setSuggestions([]);
   };
@@ -124,9 +150,13 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             }
           }}
           placeholder={placeholder}
-          className={cn("pr-10 text-foreground placeholder:text-muted-foreground", className)}
+          className={cn("pr-10 text-foreground placeholder:text-muted-foreground/70", className)}
         />
-        {inputValue && (
+        {isLoading ? (
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : inputValue ? (
           <Button
             type="button"
             variant="ghost"
@@ -136,21 +166,26 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           >
             <X className="h-4 w-4 text-foreground" />
           </Button>
-        )}
+        ) : null}
       </div>
       
       {isOpen && suggestions.length > 0 && (
         <div className="absolute z-50 mt-2 w-full bg-white/95 backdrop-blur-md border border-white/40 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.2)] max-h-60 overflow-auto">
           {suggestions.map((suggestion) => (
             <button
-              key={suggestion.id}
+              key={suggestion.place_id}
               type="button"
-              className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-primary/10 transition-colors border-b border-border/50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
+              className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 transition-colors border-b border-border/50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
               onClick={() => handleSuggestionClick(suggestion)}
             >
-              <div className="flex items-center">
-                <MapPin className="h-4 w-4 mr-2 text-primary/60 flex-shrink-0" />
-                <span className="font-medium">{suggestion.display}</span>
+              <div className="flex items-start">
+                <MapPin className="h-4 w-4 mr-2 mt-0.5 text-primary/60 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="font-medium text-foreground">{suggestion.main_text}</div>
+                  {suggestion.secondary_text && (
+                    <div className="text-xs text-muted-foreground mt-0.5">{suggestion.secondary_text}</div>
+                  )}
+                </div>
               </div>
             </button>
           ))}
