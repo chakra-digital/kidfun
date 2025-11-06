@@ -89,7 +89,13 @@ const Index = () => {
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-4xl mx-auto text-center mb-12">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-10 leading-tight drop-shadow-lg">
-                The best camps, activities and childhood experiences
+                <span className="inline-block" style={{ color: '#FF6B7A' }}>The</span>{' '}
+                <span className="inline-block" style={{ color: '#FFD166' }}>best</span>{' '}
+                <span className="inline-block" style={{ color: '#06D6A0' }}>camps,</span>{' '}
+                <span className="inline-block" style={{ color: '#4ECDC4' }}>activities</span>{' '}
+                <span className="inline-block" style={{ color: '#FF6B7A' }}>and</span>{' '}
+                <span className="inline-block" style={{ color: '#A78BFA' }}>childhood</span>{' '}
+                <span className="inline-block" style={{ color: '#F59E0B' }}>experiences</span>
               </h1>
             </div>
             
