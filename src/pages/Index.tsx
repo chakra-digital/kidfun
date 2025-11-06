@@ -89,13 +89,21 @@ const Index = () => {
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-4xl mx-auto text-center mb-12">
               <h1 
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-10 leading-tight text-white"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-white"
                 style={{
                   textShadow: '0 2px 4px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.4)'
                 }}
               >
-                The best camps, activities and childhood experiences
+                Where childhood memories are made
               </h1>
+              <p 
+                className="text-lg sm:text-xl md:text-2xl text-white/95 mb-8"
+                style={{
+                  textShadow: '0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)'
+                }}
+              >
+                Discover trusted camps, activities and more near you
+              </p>
             </div>
             
             {/* AI Conversational Search */}
