@@ -89,12 +89,9 @@ const Index = () => {
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-4xl mx-auto text-center mb-12">
               <h1 
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-10 leading-tight drop-shadow-lg"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-10 leading-tight text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.4)'
                 }}
               >
                 The best camps, activities and childhood experiences
