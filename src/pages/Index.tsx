@@ -89,7 +89,7 @@ const Index = () => {
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-4xl mx-auto text-center mb-12">
               <h1 
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight text-white"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight text-white"
                 style={{
                   textShadow: '0 2px 4px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.4)'
                 }}
