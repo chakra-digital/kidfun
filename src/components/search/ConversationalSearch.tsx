@@ -227,7 +227,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="What are you looking for?"
-            className="w-full h-14 px-6 rounded-full border-2 border-input bg-background text-foreground text-lg placeholder:text-muted-foreground focus:border-primary shadow-sm"
+            className="glass-input w-full h-16 px-6 rounded-full text-lg placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
             disabled={isSearching}
           />
           <Button 
@@ -235,18 +235,18 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
             size="icon"
             className={cn(
-              "absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-12 w-12 shadow-lg transition-all duration-300",
+              "absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-14 w-14 bg-gradient-to-br from-primary to-primary/80 transition-all duration-300",
               isSearching 
-                ? "bg-primary scale-110 animate-pulse" 
-                : "hover:scale-110 hover:shadow-xl"
+                ? "scale-110 animate-pulse search-button-glow" 
+                : "hover:scale-110 search-button-glow hover:from-primary/90 hover:to-primary/70"
             )}
           >
             {isSearching ? (
               <div className="flex flex-col items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin" />
+                <Loader2 className="w-7 h-7 animate-spin" />
               </div>
             ) : (
-              <Send className="w-6 h-6" />
+              <Send className="w-7 h-7" />
             )}
           </Button>
         </div>
@@ -258,9 +258,9 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               value={locationInput}
               onChange={(value) => setLocationInput(value)}
               placeholder="Enter city, state, or ZIP code"
-              className="h-12 rounded-full px-12 text-base shadow-sm border-2"
+              className="glass-input h-12 rounded-full px-12 text-base focus:ring-2 focus:ring-primary/20"
             />
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/60 pointer-events-none" />
           </div>
         </div>
       </div>
@@ -278,20 +278,23 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               onClick={() => toggleCategory(category.value)}
               disabled={isSearching}
               className={cn(
-                "flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 hover:scale-105 relative",
+                "category-tile flex flex-col items-center justify-center p-5 rounded-2xl relative group",
                 isSelected 
-                  ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                  : 'bg-card text-card-foreground border-border hover:border-primary hover:bg-accent',
+                  ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/50 shadow-[0_8px_24px_0_rgba(52,144,220,0.3)]' 
+                  : 'text-foreground hover:border-primary/40',
                 isCategorySearching && 'animate-pulse'
               )}
             >
               {isCategorySearching && (
-                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 rounded-2xl">
-                  <Loader2 className="w-6 h-6 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm rounded-2xl">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
                 </div>
               )}
-              <IconComponent className="w-8 h-8 mb-2" />
-              <span className="text-sm font-medium text-center leading-tight">
+              <IconComponent className={cn(
+                "w-9 h-9 mb-2 transition-transform duration-300",
+                !isSelected && "group-hover:scale-110"
+              )} />
+              <span className="text-sm font-semibold text-center leading-tight">
                 {category.label}
               </span>
             </button>

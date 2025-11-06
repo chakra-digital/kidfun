@@ -124,7 +124,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             }
           }}
           placeholder={placeholder}
-          className={cn("pr-10", className)}
+          className={cn("pr-10 text-foreground placeholder:text-muted-foreground", className)}
         />
         {inputValue && (
           <Button
@@ -132,25 +132,25 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted rounded-full"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/60 rounded-full"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 text-foreground" />
           </Button>
         )}
       </div>
       
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 mt-1 w-full bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 mt-2 w-full bg-white/95 backdrop-blur-md border border-white/40 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.2)] max-h-60 overflow-auto">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.id}
               type="button"
-              className="w-full px-3 py-2 text-left text-sm hover:bg-muted transition-colors border-b border-border last:border-b-0"
+              className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-primary/10 transition-colors border-b border-border/50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
               onClick={() => handleSuggestionClick(suggestion)}
             >
               <div className="flex items-center">
-                <MapPin className="h-3 w-3 mr-2 text-muted-foreground flex-shrink-0" />
-                <span>{suggestion.display}</span>
+                <MapPin className="h-4 w-4 mr-2 text-primary/60 flex-shrink-0" />
+                <span className="font-medium">{suggestion.display}</span>
               </div>
             </button>
           ))}
