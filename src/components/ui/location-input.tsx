@@ -150,10 +150,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onFocus={() => {
-            // Only open if we have suggestions and not just selected one
-            if (inputValue.length >= 2 && suggestions.length > 0 && isOpen === false) {
-              setIsOpen(true);
-            }
+            // Don't automatically reopen - let user type to trigger suggestions
           }}
           placeholder={placeholder}
           className={cn("pr-10 text-foreground bg-background/80 placeholder:text-muted-foreground/80", className)}
