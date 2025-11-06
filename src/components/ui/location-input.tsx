@@ -110,22 +110,29 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
+    // Don't automatically call onChange here - only on blur or selection
   };
 
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
     const formattedValue = suggestion.description;
     setInputValue(formattedValue);
     onChange(formattedValue);
-    setIsOpen(false);
     setSuggestions([]);
-    inputRef.current?.blur(); // Remove focus to prevent any blur handlers
+    setIsOpen(false);
+    setIsLoading(false);
+    
+    // Blur immediately and prevent further dropdown opens
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
   };
 
   const handleInputBlur = () => {
     // Delay to allow suggestion click to fire first
     setTimeout(() => {
-      if (inputValue !== value && suggestions.length === 0) {
-        // Only update if no suggestions were clicked (they would have cleared suggestions)
+      setIsOpen(false);
+      // Update parent with final value
+      if (inputValue !== value) {
         onChange(inputValue);
       }
     }, 200);
@@ -148,7 +155,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onFocus={() => {
-            if (inputValue.length > 2 && suggestions.length > 0) {
+            if (inputValue.length >= 2 && suggestions.length > 0) {
               setIsOpen(true);
             }
           }}

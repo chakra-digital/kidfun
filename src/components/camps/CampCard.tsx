@@ -42,39 +42,45 @@ const CampCard = ({
   const handleClick = (e: React.MouseEvent) => {
     if (external_website) {
       e.preventDefault();
-      // TODO: Add URL tracking here
-      window.open(external_website, '_blank', 'noopener,noreferrer');
+      // Add UTM tracking parameters
+      const url = new URL(external_website);
+      url.searchParams.append('utm_source', 'kidfun');
+      url.searchParams.append('utm_medium', 'featured');
+      url.searchParams.append('utm_campaign', 'provider_card');
+      window.open(url.toString(), '_blank', 'noopener,noreferrer');
     }
     // If no external website, let the Link component handle navigation to provider page
   };
   return (
     <Link to={`/provider/${id}`} className="block" onClick={handleClick}>
       <div className="rounded-xl overflow-hidden shadow-sm border card-hover">
-        {/* Card Image */}
-        <div className="relative aspect-[4/3]">
-          <img
-            src={image}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
-          {age && (
-            <div className="absolute top-3 left-3">
-              <Badge variant="secondary" className="bg-white/90 text-camps-dark shadow-sm">
-                Ages {age}
-              </Badge>
-            </div>
-          )}
-          {availability.includes("spots") && (
-            <div className="absolute bottom-3 left-3">
-              <Badge className="bg-camps-primary text-white shadow-sm">
-                {availability}
-              </Badge>
-            </div>
-          )}
-        </div>
+        {/* Card Image - Only show if image exists */}
+        {image && (
+          <div className="relative aspect-[4/3]">
+            <img
+              src={image}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
+            {age && (
+              <div className="absolute top-3 left-3">
+                <Badge variant="secondary" className="bg-white/90 text-camps-dark shadow-sm">
+                  Ages {age}
+                </Badge>
+              </div>
+            )}
+            {availability.includes("spots") && (
+              <div className="absolute bottom-3 left-3">
+                <Badge className="bg-camps-primary text-white shadow-sm">
+                  {availability}
+                </Badge>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Card Content */}
-        <div className="p-3">
+        <div className={image ? "p-3" : "p-4"}>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center space-x-1 text-sm text-gray-600">
               <MapPin className="h-3.5 w-3.5" />

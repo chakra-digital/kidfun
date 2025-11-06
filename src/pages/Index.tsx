@@ -53,7 +53,7 @@ const Index = () => {
   const transformedProviders = providers.map((provider) => ({
     id: provider.id,
     title: provider.business_name,
-    image: getProviderImage(provider.id), // Use real activity images
+    image: '', // Remove images to avoid duplicative/irrelevant content
     location: provider.location,
     price: provider.base_price || 35,
     priceUnit: "session" as const,
@@ -88,12 +88,9 @@ const Index = () => {
           
           <div className="container mx-auto px-4 relative z-10 w-full">
             <div className="max-w-4xl mx-auto text-center mb-12">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight drop-shadow-lg">
-                The best camps, activities and more
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-8 md:mb-10 leading-tight drop-shadow-lg">
+                The best camps, activities and childhood experiences
               </h1>
-              <p className="text-lg md:text-xl mb-8 text-white/95 max-w-2xl mx-auto drop-shadow-md">
-                Find trusted providers, book with confidence, and create unforgettable experiences
-              </p>
             </div>
             
             {/* AI Conversational Search */}
