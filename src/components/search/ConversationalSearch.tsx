@@ -104,6 +104,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
       console.log('Enhanced query:', enhancedQuery, 'Location:', searchLocation);
 
+      console.log('Invoking ai-provider-search with:', { enhancedQuery, searchLocation });
+      
       const { data, error } = await supabase.functions.invoke('ai-provider-search', {
         body: { query: enhancedQuery, location: searchLocation }
       });
@@ -112,7 +114,11 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
       if (error) {
         console.error('Edge function error:', error);
-        throw error;
+        throw new Error(error.message || 'Failed to invoke search function');
+      }
+
+      if (!data) {
+        throw new Error('No data returned from search function');
       }
 
       const { results, searchAnalysis, newProvidersFound, fromCache } = data;
