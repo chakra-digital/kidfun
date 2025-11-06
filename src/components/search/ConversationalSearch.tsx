@@ -4,10 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Sparkles, MapPin, Palette, Crown, ChefHat, Music, Languages, Trees, Drama, Gamepad2, FlaskConical, GraduationCap, Users } from 'lucide-react';
+import { Send, Sparkles, MapPin, Palette, Crown, ChefHat, Music, Languages, Trees, Drama, Gamepad2, FlaskConical, GraduationCap, Users, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { LocationInput } from '@/components/ui/location-input';
 
 interface SearchResult {
   id?: string;
@@ -192,7 +193,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask anything..."
+            placeholder="What are you looking for?"
             className="flex-1 rounded-full border-2 border-input bg-background text-foreground placeholder:text-muted-foreground focus:border-primary"
             disabled={isSearching}
           />
@@ -200,12 +201,14 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             onClick={() => handleSearch()}
             disabled={!query.trim() || isSearching}
             size="icon"
-            className="rounded-full h-10 w-10 flex-shrink-0"
+            className="rounded-full h-12 w-12 flex-shrink-0 shadow-lg hover:scale-110 transition-all duration-200"
           >
             {isSearching ? (
-              <Sparkles className="w-5 h-5 animate-spin text-white" />
+              <div className="flex flex-col items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin" />
+              </div>
             ) : (
-              <Send className="w-5 h-5" />
+              <Send className="w-6 h-6" />
             )}
           </Button>
         </div>
@@ -223,95 +226,42 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask anything"
-            className="w-full h-14 px-6 rounded-full border-2 border-input bg-background text-foreground text-lg placeholder:text-muted-foreground focus:border-primary"
+            placeholder="What are you looking for?"
+            className="w-full h-14 px-6 rounded-full border-2 border-input bg-background text-foreground text-lg placeholder:text-muted-foreground focus:border-primary shadow-sm"
             disabled={isSearching}
           />
           <Button 
             onClick={() => handleSearch()}
-            disabled={!query.trim() || isSearching}
+            disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
             size="icon"
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full h-10 w-10"
+            className={cn(
+              "absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-12 w-12 shadow-lg transition-all duration-300",
+              isSearching 
+                ? "bg-primary scale-110 animate-pulse" 
+                : "hover:scale-110 hover:shadow-xl"
+            )}
           >
             {isSearching ? (
-              <div className="relative">
-                <Sparkles className="w-5 h-5 animate-spin text-white" />
+              <div className="flex flex-col items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin" />
               </div>
             ) : (
-              <Send className="w-5 h-5" />
+              <Send className="w-6 h-6" />
             )}
           </Button>
         </div>
 
-        {/* Location Filter */}
+        {/* Location Filter - Enhanced with Autocomplete */}
         <div className="flex gap-3 justify-center">
-          <Popover open={isWhereOpen} onOpenChange={setIsWhereOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant={whereFilter ? "default" : "outline"}
-                className={cn(
-                  "rounded-full px-6",
-                  !whereFilter && "bg-background text-foreground border-input hover:bg-accent"
-                )}
-              >
-                <MapPin className="w-4 h-4 mr-2" />
-                {whereFilter || 'Where'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="center">
-              <div className="p-4 space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-2">Location</h4>
-                  <Input
-                    placeholder="Enter city or zip code"
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                    className="mb-3"
-                  />
-                </div>
-                <div className="space-y-2">
-                  {userLocation && (
-                    <button
-                      onClick={() => {
-                        setLocationInput(`${userLocation.lat},${userLocation.lng}`);
-                        setIsWhereOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent flex items-center gap-3"
-                    >
-                      <MapPin className="w-4 h-4" />
-                      <div>
-                        <div className="font-medium">Nearby</div>
-                        <div className="text-sm text-muted-foreground">Use my current location</div>
-                      </div>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      setLocationInput('Austin, TX');
-                      setIsWhereOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-accent flex items-center gap-3"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    <div className="font-medium">Austin, TX</div>
-                  </button>
-                </div>
-                {locationInput && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      setLocationInput('');
-                      setIsWhereOpen(false);
-                    }}
-                  >
-                    Clear location
-                  </Button>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+          <div className="relative w-full max-w-md">
+            <LocationInput
+              value={locationInput}
+              onChange={(value) => setLocationInput(value)}
+              placeholder="Enter city, state, or ZIP code"
+              className="h-12 rounded-full px-12 text-base shadow-sm border-2"
+            />
+            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          </div>
         </div>
       </div>
 
@@ -320,17 +270,26 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
+          const isCategorySearching = isSearching && isSelected;
           
           return (
             <button
               key={category.value}
               onClick={() => toggleCategory(category.value)}
-              className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 hover:scale-105 ${
+              disabled={isSearching}
+              className={cn(
+                "flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200 hover:scale-105 relative",
                 isSelected 
                   ? 'bg-primary text-primary-foreground border-primary shadow-lg' 
-                  : 'bg-card text-card-foreground border-border hover:border-primary hover:bg-accent'
-              }`}
+                  : 'bg-card text-card-foreground border-border hover:border-primary hover:bg-accent',
+                isCategorySearching && 'animate-pulse'
+              )}
             >
+              {isCategorySearching && (
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 rounded-2xl">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                </div>
+              )}
               <IconComponent className="w-8 h-8 mb-2" />
               <span className="text-sm font-medium text-center leading-tight">
                 {category.label}

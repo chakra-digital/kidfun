@@ -12,7 +12,7 @@ import type { AIResult } from "@/components/search/AIResultModal";
 import { User, Calendar, Star } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
-import { generateProviderIcon } from "@/lib/imageUtils";
+import { getProviderImage } from "@/lib/imageUtils";
 
 // Mock data for camps
 
@@ -38,7 +38,7 @@ const Index = () => {
   const transformedProviders = providers.map((provider) => ({
     id: provider.id,
     title: provider.business_name,
-    image: generateProviderIcon(provider.business_name, provider.specialties, provider.id),
+    image: getProviderImage(provider.id), // Use real activity images
     location: provider.location,
     price: provider.base_price || 35,
     priceUnit: "session" as const,

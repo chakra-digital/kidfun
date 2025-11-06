@@ -162,6 +162,24 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
     return [];
   }
 
+  // First, geocode the location to get lat/lng for better location bias
+  let locationBias = '';
+  try {
+    const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${googlePlacesApiKey}`;
+    const geocodeResponse = await fetch(geocodeUrl);
+    const geocodeData = await geocodeResponse.json();
+    
+    if (geocodeData.status === 'OK' && geocodeData.results.length > 0) {
+      const coords = geocodeData.results[0].geometry.location;
+      locationBias = `&location=${coords.lat},${coords.lng}&radius=40000`; // 40km radius
+      console.log(`Geocoded location: ${location} -> ${coords.lat},${coords.lng}`);
+    } else {
+      console.log(`Geocoding failed for "${location}": ${geocodeData.status}`);
+    }
+  } catch (error) {
+    console.error('Error geocoding location:', error);
+  }
+
   // Create more specific search queries for Google Places with better keywords
   const baseQueries = [
     searchAnalysis.googlePlacesQuery,
@@ -181,7 +199,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
 
   for (const searchQuery of searchQueries) {
     try {
-      const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${googlePlacesApiKey}&type=establishment&radius=25000`;
+      const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${googlePlacesApiKey}&type=establishment${locationBias}`;
       
       console.log(`Searching Google Places: "${searchQuery}"`);
       const response = await fetch(url);

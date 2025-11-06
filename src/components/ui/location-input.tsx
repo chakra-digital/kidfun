@@ -21,12 +21,22 @@ interface LocationInputProps {
 
 // Mock location data - in production this would come from a geocoding API
 const MOCK_LOCATIONS: LocationSuggestion[] = [
-  { id: "1", display: "Austin, TX 78745", city: "Austin", state: "TX", zip: "78745" },
-  { id: "2", display: "Austin, TX 78701", city: "Austin", state: "TX", zip: "78701" },
-  { id: "3", display: "Austin, TX 78704", city: "Austin", state: "TX", zip: "78704" },
-  { id: "4", display: "Round Rock, TX 78681", city: "Round Rock", state: "TX", zip: "78681" },
-  { id: "5", display: "Cedar Park, TX 78613", city: "Cedar Park", state: "TX", zip: "78613" },
-  { id: "6", display: "Pflugerville, TX 78660", city: "Pflugerville", state: "TX", zip: "78660" },
+  // Florida locations
+  { id: "fl1", display: "Fort Myers, FL 33901", city: "Fort Myers", state: "FL", zip: "33901" },
+  { id: "fl2", display: "Fort Myers, FL 33907", city: "Fort Myers", state: "FL", zip: "33907" },
+  { id: "fl3", display: "Fort Myers, FL 33916", city: "Fort Myers", state: "FL", zip: "33916" },
+  { id: "fl4", display: "Naples, FL 34102", city: "Naples", state: "FL", zip: "34102" },
+  { id: "fl5", display: "Cape Coral, FL 33904", city: "Cape Coral", state: "FL", zip: "33904" },
+  { id: "fl6", display: "Miami, FL 33101", city: "Miami", state: "FL", zip: "33101" },
+  { id: "fl7", display: "Tampa, FL 33602", city: "Tampa", state: "FL", zip: "33602" },
+  { id: "fl8", display: "Orlando, FL 32801", city: "Orlando", state: "FL", zip: "32801" },
+  // Texas locations
+  { id: "tx1", display: "Austin, TX 78745", city: "Austin", state: "TX", zip: "78745" },
+  { id: "tx2", display: "Austin, TX 78701", city: "Austin", state: "TX", zip: "78701" },
+  { id: "tx3", display: "Austin, TX 78704", city: "Austin", state: "TX", zip: "78704" },
+  { id: "tx4", display: "Round Rock, TX 78681", city: "Round Rock", state: "TX", zip: "78681" },
+  { id: "tx5", display: "Cedar Park, TX 78613", city: "Cedar Park", state: "TX", zip: "78613" },
+  { id: "tx6", display: "Pflugerville, TX 78660", city: "Pflugerville", state: "TX", zip: "78660" },
 ];
 
 export const LocationInput: React.FC<LocationInputProps> = ({ 
@@ -103,7 +113,6 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           ref={inputRef}
           value={inputValue}
@@ -115,7 +124,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             }
           }}
           placeholder={placeholder}
-          className={cn("pl-10 pr-10", className)}
+          className={cn("pr-10", className)}
         />
         {inputValue && (
           <Button
@@ -123,9 +132,9 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted rounded-full"
           >
-            <X className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </Button>
         )}
       </div>
