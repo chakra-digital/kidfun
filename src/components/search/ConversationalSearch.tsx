@@ -74,6 +74,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     
     if (!searchQuery && !searchCategory) return;
     if (isSearching) return;
+    
+    // Clear previous search results and analysis when starting new search
+    onResultsUpdate([]);
+    setLastSearchAnalysis(null);
 
     setIsSearching(true);
     console.log('Starting AI search...');
@@ -178,8 +182,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     
     setSelectedCategories(newCategories);
     
-    // Trigger a new search with the category
-    if (newCategories.length > 0) {
+    // Only auto-trigger search if user has entered a query or location
+    if (newCategories.length > 0 && (query.trim() || locationInput.trim())) {
       handleSearch(categoryValue);
     }
   };

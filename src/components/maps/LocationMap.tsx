@@ -33,6 +33,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   const [apiKeySubmitted, setApiKeySubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const infoWindowsRef = useRef<any[]>([]);
 
   console.log('LocationMap render:', { 
     providersCount: providers.length, 
@@ -153,7 +154,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       });
 
       console.log('Map initialized, adding markers...');
-      // Add markers for providers using AdvancedMarkerElement when available, else fall back
+      // Add markers for providers
       providers.forEach((provider) => {
         // Mock coordinates around Austin area since we don't have lat/lng yet
         const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
@@ -172,44 +173,57 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
             strokeWeight: 2,
           }
         });
-      const infoWindow = new (window as any).google.maps.InfoWindow({
-        content: `
-          <div style="padding: 12px; max-width: 280px; font-family: Arial, sans-serif;">
-            <h3 style="font-weight: 600; font-size: 16px; margin: 0 0 8px 0; color: #1f2937;">${provider.business_name}</h3>
-            <p style="font-size: 14px; color: #6b7280; margin: 0 0 8px 0;">${provider.location}</p>
-            ${provider.google_rating ? `
-              <div style="display: flex; align-items: center; font-size: 14px; margin: 0 0 12px 0;">
-                <span style="color: #f59e0b;">★</span>
-                <span style="margin-left: 4px; color: #374151;">${provider.google_rating}</span>
-              </div>
-            ` : '<div style="margin-bottom: 12px;"></div>'}
-            <button 
-              id="view-details-${provider.id}"
-              style="display: block; width: 100%; background-color: #3b82f6; color: white; text-align: center; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: background-color 0.2s;"
-              onmouseover="this.style.backgroundColor='#2563eb'" 
-              onmouseout="this.style.backgroundColor='#3b82f6'">
-              View Details
-            </button>
-          </div>
-        `
-      });
-      
-      marker.addListener('click', () => {
-        infoWindow.open(map.current, marker);
-        // Wait for InfoWindow to render, then attach click handler
-        setTimeout(() => {
-          const button = document.getElementById(`view-details-${provider.id}`);
-          if (button && onMarkerClick) {
-            button.addEventListener('click', () => {
-              onMarkerClick({
-                id: provider.id,
-                business_name: provider.business_name,
-                location: provider.location
+        
+        const infoWindow = new (window as any).google.maps.InfoWindow({
+          content: `
+            <div style="padding: 12px; max-width: 280px; font-family: Arial, sans-serif;">
+              <h3 style="font-weight: 600; font-size: 16px; margin: 0 0 8px 0; color: #1f2937;">${provider.business_name}</h3>
+              <p style="font-size: 14px; color: #6b7280; margin: 0 0 8px 0;">${provider.location}</p>
+              ${provider.google_rating ? `
+                <div style="display: flex; align-items: center; font-size: 14px; margin: 0 0 12px 0;">
+                  <span style="color: #f59e0b;">★</span>
+                  <span style="margin-left: 4px; color: #374151;">${provider.google_rating}</span>
+                </div>
+              ` : '<div style="margin-bottom: 12px;"></div>'}
+              <button 
+                id="view-details-init-${provider.id}"
+                style="display: block; width: 100%; background-color: #3b82f6; color: white; text-align: center; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: background-color 0.2s;"
+                onmouseover="this.style.backgroundColor='#2563eb'" 
+                onmouseout="this.style.backgroundColor='#3b82f6'">
+                View Details
+              </button>
+            </div>
+          `
+        });
+        
+        // Store reference to info window
+        infoWindowsRef.current.push(infoWindow);
+        
+        marker.addListener('click', () => {
+          // Close all other info windows
+          infoWindowsRef.current.forEach((iw) => {
+            if (iw !== infoWindow) {
+              iw.close();
+            }
+          });
+          
+          infoWindow.open(map.current, marker);
+          
+          // Wait for InfoWindow to render, then attach click handler
+          setTimeout(() => {
+            const button = document.getElementById(`view-details-init-${provider.id}`);
+            if (button && onMarkerClick) {
+              button.addEventListener('click', () => {
+                infoWindow.close(); // Close popup when opening modal
+                onMarkerClick({
+                  id: provider.id,
+                  business_name: provider.business_name,
+                  location: provider.location
+                });
               });
-            });
-          }
-        }, 100);
-      });
+            }
+          }, 100);
+        });
       });
       console.log('Markers added successfully');
 
@@ -263,7 +277,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
   useEffect(() => {
     return () => {
-      // Google Maps cleanup is handled automatically
+      // Close all info windows on cleanup
+      infoWindowsRef.current.forEach(iw => iw.close());
+      infoWindowsRef.current = [];
     };
   }, []);
 
@@ -337,13 +353,25 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         `
       });
       
+      // Store reference to info window
+      infoWindowsRef.current.push(infoWindow);
+      
       marker.addListener('click', () => {
+        // Close all other info windows
+        infoWindowsRef.current.forEach((iw) => {
+          if (iw !== infoWindow) {
+            iw.close();
+          }
+        });
+        
         infoWindow.open(map.current, marker);
+        
         // Wait for InfoWindow to render, then attach click handler
         setTimeout(() => {
           const button = document.getElementById(`view-details-${provider.id}`);
           if (button && onMarkerClick) {
             button.addEventListener('click', () => {
+              infoWindow.close(); // Close popup when opening modal
               onMarkerClick({
                 id: provider.id,
                 business_name: provider.business_name,

@@ -136,7 +136,7 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
                 onClick={() => {
                   try {
                     const url = new URL(result.external_website);
-                    url.searchParams.append('utm_source', 'campconnect');
+                    url.searchParams.append('utm_source', 'kidfun');
                     url.searchParams.append('utm_medium', 'ai_search');
                     url.searchParams.append('utm_campaign', 'provider_discovery');
                     window.open(url.toString(), '_blank', 'noopener,noreferrer');

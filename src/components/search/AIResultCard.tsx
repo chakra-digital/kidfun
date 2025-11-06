@@ -133,7 +133,15 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
             className="flex-1"
             onClick={(e) => {
               e.stopPropagation();
-              window.open(external_website, '_blank', 'noopener,noreferrer');
+              try {
+                const url = new URL(external_website);
+                url.searchParams.append('utm_source', 'kidfun');
+                url.searchParams.append('utm_medium', 'ai_search');
+                url.searchParams.append('utm_campaign', 'provider_discovery');
+                window.open(url.toString(), '_blank', 'noopener,noreferrer');
+              } catch {
+                window.open(external_website, '_blank', 'noopener,noreferrer');
+              }
             }}
           >
             <ExternalLink className="w-3 h-3 mr-1" />
