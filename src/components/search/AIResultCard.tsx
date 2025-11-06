@@ -55,7 +55,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
               <h3 className="font-semibold text-base leading-tight mb-1">
                 {business_name}
               </h3>
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 text-xs md:text-sm text-muted-foreground/90">
                 <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
                 <span className="truncate">{formatLocation(location)}</span>
               </div>
@@ -76,7 +76,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
                 <span className="font-medium text-sm">{google_rating.toFixed(1)}</span>
               </div>
               {google_reviews_count && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs md:text-sm text-muted-foreground/90">
                   ({google_reviews_count})
                 </span>
               )}
@@ -90,7 +90,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
 
           {/* Match Explanation */}
           <div className="bg-primary/5 rounded-md p-2 border border-primary/10">
-            <p className="text-xs text-muted-foreground line-clamp-2">{explanation}</p>
+            <p className="text-xs md:text-sm text-muted-foreground/90 line-clamp-2">{explanation}</p>
           </div>
 
           {/* Specialties */}

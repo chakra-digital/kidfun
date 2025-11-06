@@ -21,17 +21,18 @@ serve(async (req) => {
       );
     }
 
-    const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+    const GOOGLE_PLACES_API_KEY = Deno.env.get('GOOGLE_PLACES_API_KEY') || Deno.env.get('GOOGLE_MAPS_API_KEY');
     
-    if (!GOOGLE_MAPS_API_KEY) {
-      throw new Error('Google Maps API key not configured');
+    if (!GOOGLE_PLACES_API_KEY) {
+      throw new Error('Google Places API key not configured');
     }
 
     // Call Google Places Autocomplete API
     const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
     url.searchParams.append('input', input);
     url.searchParams.append('types', '(cities)'); // Only cities
-    url.searchParams.append('key', GOOGLE_MAPS_API_KEY);
+    url.searchParams.append('components', 'country:us');
+    url.searchParams.append('key', GOOGLE_PLACES_API_KEY);
 
     const response = await fetch(url.toString());
     const data = await response.json();

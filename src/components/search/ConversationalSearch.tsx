@@ -227,7 +227,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="What are you looking for?"
-            className="glass-input w-full h-16 px-6 rounded-full text-lg text-foreground placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+            className="glass-input w-full h-16 px-6 rounded-full text-lg text-foreground bg-background/80 placeholder:text-muted-foreground/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
             disabled={isSearching}
           />
           <Button 
@@ -258,7 +258,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               value={locationInput}
               onChange={(value) => setLocationInput(value)}
               placeholder="Enter city, state, or ZIP code"
-              className="glass-input h-12 rounded-full px-12 text-base focus:ring-2 focus:ring-primary/20"
+              className="glass-input h-12 rounded-full px-12 text-base bg-background/80 focus:ring-2 focus:ring-primary/20"
             />
             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/60 pointer-events-none" />
           </div>
