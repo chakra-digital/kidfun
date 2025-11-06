@@ -367,12 +367,30 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         </div>
       )}
       {error && (
-        <div className="absolute top-4 left-4 right-4 bg-destructive/90 text-destructive-foreground p-3 rounded-md text-sm z-20">
-          <div className="flex justify-between items-start gap-2">
-            <span>{error}</span>
-            <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs">
-              Reset Key
-            </Button>
+        <div className="absolute top-4 left-4 right-4 bg-destructive/95 text-destructive-foreground p-4 rounded-lg text-sm z-20 backdrop-blur-sm border border-destructive/20">
+          <div className="space-y-3">
+            <div className="flex justify-between items-start gap-2">
+              <div className="flex-1">
+                <p className="font-semibold mb-1">Map Authorization Required</p>
+                <p className="text-xs leading-relaxed opacity-90">{error}</p>
+              </div>
+              <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs shrink-0">
+                Reset Key
+              </Button>
+            </div>
+            {error.includes('RefererNotAllowed') || error.includes('referrer') ? (
+              <div className="text-xs bg-background/20 rounded p-2 space-y-1">
+                <p className="font-medium">To fix this:</p>
+                <ol className="list-decimal list-inside space-y-0.5 opacity-90 ml-1">
+                  <li>Go to Google Cloud Console → APIs & Services → Credentials</li>
+                  <li>Select your API key</li>
+                  <li>Under "Application restrictions", add this URL:</li>
+                  <li className="font-mono text-[11px] bg-background/30 p-1 rounded mt-1 break-all">
+                    {window.location.origin}/*
+                  </li>
+                </ol>
+              </div>
+            ) : null}
           </div>
         </div>
       )}

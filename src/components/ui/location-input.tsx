@@ -113,16 +113,19 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   };
 
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
-    setInputValue(suggestion.description);
-    onChange(suggestion.description);
+    const formattedValue = suggestion.description;
+    setInputValue(formattedValue);
+    onChange(formattedValue);
     setIsOpen(false);
     setSuggestions([]);
+    inputRef.current?.blur(); // Remove focus to prevent any blur handlers
   };
 
   const handleInputBlur = () => {
-    // Only update if user manually typed (not from suggestion click)
+    // Delay to allow suggestion click to fire first
     setTimeout(() => {
-      if (inputValue !== value) {
+      if (inputValue !== value && suggestions.length === 0) {
+        // Only update if no suggestions were clicked (they would have cleared suggestions)
         onChange(inputValue);
       }
     }, 200);
