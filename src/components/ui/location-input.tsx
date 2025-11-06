@@ -117,25 +117,20 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     const formattedValue = suggestion.description;
     setInputValue(formattedValue);
     onChange(formattedValue);
-    setSuggestions([]);
     setIsOpen(false);
+    setSuggestions([]);
     setIsLoading(false);
-    
-    // Blur immediately and prevent further dropdown opens
-    if (inputRef.current) {
-      inputRef.current.blur();
-    }
   };
 
   const handleInputBlur = () => {
-    // Delay to allow suggestion click to fire first
+    // Small delay to allow suggestion click to fire first
     setTimeout(() => {
       setIsOpen(false);
-      // Update parent with final value
+      // Update parent with final value only if changed
       if (inputValue !== value) {
         onChange(inputValue);
       }
-    }, 200);
+    }, 150);
   };
 
   const handleClear = () => {
@@ -155,7 +150,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onFocus={() => {
-            if (inputValue.length >= 2 && suggestions.length > 0) {
+            // Only open if we have suggestions and not just selected one
+            if (inputValue.length >= 2 && suggestions.length > 0 && isOpen === false) {
               setIsOpen(true);
             }
           }}
@@ -186,7 +182,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
               key={suggestion.place_id}
               type="button"
               className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 transition-colors border-b border-border/50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
-              onClick={() => handleSuggestionClick(suggestion)}
+              onMouseDown={(e) => {
+                // Prevent blur from firing before click
+                e.preventDefault();
+                handleSuggestionClick(suggestion);
+              }}
             >
               <div className="flex items-start">
                 <MapPin className="h-4 w-4 mr-2 mt-0.5 text-primary/60 flex-shrink-0" />

@@ -181,11 +181,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       : [categoryValue]; // Only allow one category at a time for clearer searches
     
     setSelectedCategories(newCategories);
-    
-    // Only auto-trigger search if user has entered a query or location
-    if (newCategories.length > 0 && (query.trim() || locationInput.trim())) {
-      handleSearch(categoryValue);
-    }
+    // Don't auto-trigger search - let user click the search button
   };
 
   if (compact) {
@@ -241,13 +237,18 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             className={cn(
               "absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-14 w-14 bg-gradient-to-br from-primary to-primary/80 transition-all duration-300",
               isSearching 
-                ? "scale-110 animate-pulse search-button-glow" 
-                : "hover:scale-110 search-button-glow hover:from-primary/90 hover:to-primary/70"
+                ? "scale-110 animate-[pulse_1s_ease-in-out_infinite]" 
+                : "hover:scale-110 hover:from-primary/90 hover:to-primary/70"
             )}
+            style={isSearching ? {
+              boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.4)',
+              animation: 'pulse 1s ease-in-out infinite, sparkle 2s ease-in-out infinite'
+            } : {}}
           >
             {isSearching ? (
-              <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center justify-center relative">
                 <Loader2 className="w-7 h-7 animate-spin" />
+                <Sparkles className="w-4 h-4 absolute -top-1 -right-1 animate-ping opacity-75" />
               </div>
             ) : (
               <Send className="w-7 h-7" />
