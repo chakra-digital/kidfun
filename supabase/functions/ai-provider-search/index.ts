@@ -69,13 +69,17 @@ serve(async (req) => {
     );
 
     // Step 5: Cache the results
-    await supabase.from('search_cache').insert({
+    const { error: cacheError } = await supabase.from('search_cache').insert({
       query_hash: queryHash,
       original_query: query,
       location: location,
       results: rankedResults,
       search_analysis: searchAnalysis
-    }).catch(err => console.error('Failed to cache results:', err));
+    });
+    
+    if (cacheError) {
+      console.error('Failed to cache results:', cacheError);
+    }
 
     return new Response(JSON.stringify({
       results: rankedResults,
@@ -250,7 +254,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
         );
 
         allResults.push(...detailedResults);
-        console.log(`Added ${relevantResults.length} results from query: "${searchQuery}"`);
+        console.log(`Added ${detailedResults.length} results from query: "${searchQuery}"`);
       } else if (data.status !== 'ZERO_RESULTS') {
         console.log(`Google Places API error for query "${searchQuery}":`, data.status, data.error_message);
       }
