@@ -71,7 +71,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     }
   }, []);
 
-  const handleSearch = async (categoryOverride?: string) => {
+  const handleSearch = async (categoryOverride?: string, locationOverride?: string) => {
     const searchQuery = query.trim();
     const searchCategory = categoryOverride || (selectedCategories.length > 0 ? selectedCategories.join(', ') : '');
     
@@ -85,8 +85,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       enhancedQuery += ` focusing on ${searchCategory}`;
     }
 
-    // Determine location to use
-    let searchLocation = whereFilter;
+    // Determine location to use - prioritize override to avoid stale state
+    let searchLocation = locationOverride || whereFilter;
     
     if (!searchLocation && userLocation) {
       searchLocation = `${userLocation.lat},${userLocation.lng}`;
@@ -270,8 +270,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               onSelect={(val) => {
                 setLocationInput(val);
                 if ((query.trim() || selectedCategories.length > 0) && !isSearching) {
-                  // Auto-submit immediately after a selection
-                  handleSearch();
+                  // Pass location directly to avoid stale state
+                  setTimeout(() => handleSearch(undefined, val), 100);
                 }
               }}
               placeholder="Enter city, state, or ZIP code"
