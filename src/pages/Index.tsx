@@ -192,6 +192,7 @@ const Index = () => {
                       external_website: r.external_website
                     }))}
                     center={mapCenter}
+                    isSearching={isLoadingResults}
                     onMarkerClick={(provider) => {
                       // Find the full AI result data to show in modal
                       const fullResult = aiResults.find(

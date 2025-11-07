@@ -44,7 +44,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
   };
 
   return (
-    <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+    <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg animate-fade-in ${
       isNewDiscovery ? 'border-l-4 border-l-primary' : ''
     }`} onClick={onClick}>
       <CardContent className="p-3">

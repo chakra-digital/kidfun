@@ -15,6 +15,7 @@ interface LocationMapProps {
   center?: { lat: number; lng: number };
   onMarkerClick?: (provider: { id: string; business_name: string; location: string }) => void;
   className?: string;
+  isSearching?: boolean; // Whether the search results are currently loading
 }
 
 // Add Google Maps types
@@ -25,7 +26,7 @@ declare global {
   }
 }
 
-const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMarkerClick, className = "" }) => {
+const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMarkerClick, className = "", isSearching = false }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<any>(null);
   const initialized = useRef(false);
@@ -386,13 +387,21 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
   return (
     <div className={`relative ${className}`}>
-      {(isLoading || providers.length === 0) && (
+      {(isSearching || isLoading || !map.current || providers.length === 0) && (
         <div className="absolute inset-0 bg-muted rounded-lg flex items-center justify-center z-10">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-            <p className="text-sm text-muted-foreground">
-              {isLoading ? 'Loading map...' : 'No providers to display on map'}
-            </p>
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <span className="animate-bounce" aria-hidden>🏃‍♀️</span>
+              <span>
+                {isSearching
+                  ? 'Searching for providers...'
+                  : isLoading
+                  ? 'Loading map...'
+                  : !map.current
+                  ? 'Preparing map...'
+                  : 'No providers to display on map'}
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -401,30 +410,18 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           <div className="space-y-3">
             <div className="flex justify-between items-start gap-2">
               <div className="flex-1">
-                <p className="font-semibold mb-1">Map Authorization Required</p>
+                <p className="font-semibold mb-1">Map temporarily unavailable</p>
                 <p className="text-xs leading-relaxed opacity-90">{error}</p>
               </div>
               <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs shrink-0">
                 Reset Key
               </Button>
             </div>
-            {error.includes('RefererNotAllowed') || error.includes('referrer') ? (
-              <div className="text-xs bg-background/20 rounded p-2 space-y-1">
-                <p className="font-medium">To fix this:</p>
-                <ol className="list-decimal list-inside space-y-0.5 opacity-90 ml-1">
-                  <li>Go to Google Cloud Console → APIs & Services → Credentials</li>
-                  <li>Select your API key</li>
-                  <li>Under "Application restrictions", add this URL:</li>
-                  <li className="font-mono text-[11px] bg-background/30 p-1 rounded mt-1 break-all">
-                    {window.location.origin}/*
-                  </li>
-                </ol>
-              </div>
-            ) : null}
           </div>
         </div>
       )}
 
+      {/* Underlying container (covered by overlays when loading/error) */}
       <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" />
     </div>
   );

@@ -15,13 +15,15 @@ interface LocationSuggestion {
 interface LocationInputProps {
   value: string;
   onChange: (value: string) => void;
+  onSelect?: (value: string) => void; // Fires when a suggestion is picked
   placeholder?: string;
   className?: string;
 }
 
 export const LocationInput: React.FC<LocationInputProps> = ({ 
   value, 
-  onChange, 
+  onChange,
+  onSelect,
   placeholder = "Enter city, state, or ZIP code", 
   className 
 }) => {
@@ -117,6 +119,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     const formattedValue = suggestion.description;
     setInputValue(formattedValue);
     onChange(formattedValue); // Immediately update parent
+    onSelect?.(formattedValue); // Signal selection so parent can auto-submit
     setIsOpen(false);
     setSuggestions([]);
     setIsLoading(false);
@@ -150,6 +153,12 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           value={inputValue}
           onChange={handleInputChange}
           onBlur={handleInputBlur}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && suggestions[0]) {
+              e.preventDefault();
+              handleSuggestionClick(suggestions[0]);
+            }
+          }}
           onFocus={() => {
             // Don't automatically reopen - let user type to trigger suggestions
           }}
