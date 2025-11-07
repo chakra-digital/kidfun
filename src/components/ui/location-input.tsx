@@ -118,23 +118,22 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
     const formattedValue = suggestion.description;
     setInputValue(formattedValue);
-    onChange(formattedValue); // Immediately update parent
-    onSelect?.(formattedValue); // Signal selection so parent can auto-submit
     setIsOpen(false);
     setSuggestions([]);
     setIsLoading(false);
-    inputRef.current?.blur(); // Remove focus to allow immediate search submission
+    // Update parent state immediately
+    onChange(formattedValue);
+    // Small delay to ensure state updates, then trigger selection
+    setTimeout(() => {
+      onSelect?.(formattedValue);
+    }, 50);
   };
 
   const handleInputBlur = () => {
     // Small delay to allow suggestion click to fire first
     setTimeout(() => {
       setIsOpen(false);
-      // Update parent with final value only if changed
-      if (inputValue !== value) {
-        onChange(inputValue);
-      }
-    }, 150);
+    }, 200);
   };
 
   const handleClear = () => {
@@ -154,9 +153,15 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && suggestions[0]) {
-              e.preventDefault();
-              handleSuggestionClick(suggestions[0]);
+            if (e.key === 'Enter') {
+              if (suggestions[0]) {
+                e.preventDefault();
+                handleSuggestionClick(suggestions[0]);
+              } else if (inputValue) {
+                // User pressed Enter with typed text but no suggestions
+                onChange(inputValue);
+                setIsOpen(false);
+              }
             }
           }}
           onFocus={() => {

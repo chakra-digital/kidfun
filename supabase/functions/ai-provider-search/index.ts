@@ -164,6 +164,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
 
   // First, geocode the location to get lat/lng for better location bias
   let locationBias = '';
+  let resolvedLocation = location;
   try {
     const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${googlePlacesApiKey}`;
     const geocodeResponse = await fetch(geocodeUrl);
@@ -172,7 +173,9 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
     if (geocodeData.status === 'OK' && geocodeData.results.length > 0) {
       const coords = geocodeData.results[0].geometry.location;
       locationBias = `&location=${coords.lat},${coords.lng}&radius=40000`; // 40km radius
-      console.log(`Geocoded location: ${location} -> ${coords.lat},${coords.lng}`);
+      // Use the resolved location from geocoding for search context
+      resolvedLocation = geocodeData.results[0].formatted_address;
+      console.log(`Geocoded location: ${location} -> ${resolvedLocation} (${coords.lat},${coords.lng})`);
     } else {
       console.log(`Geocoding failed for "${location}": ${geocodeData.status}`);
     }
@@ -181,12 +184,13 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
   }
 
   // Create more specific search queries for Google Places with better keywords
+  // Use resolvedLocation for more precise results
   const baseQueries = [
-    searchAnalysis.googlePlacesQuery,
+    `${searchAnalysis.googlePlacesQuery} ${resolvedLocation}`,
     // Add specific program-type keywords to filter out irrelevant results
-    ...searchAnalysis.activities.map((activity: string) => `${activity} camp for kids ${location}`),
-    ...searchAnalysis.activities.map((activity: string) => `${activity} classes children ${location}`),
-    ...searchAnalysis.activities.map((activity: string) => `${activity} program youth ${location}`),
+    ...searchAnalysis.activities.map((activity: string) => `${activity} camp for kids ${resolvedLocation}`),
+    ...searchAnalysis.activities.map((activity: string) => `${activity} classes children ${resolvedLocation}`),
+    ...searchAnalysis.activities.map((activity: string) => `${activity} program youth ${resolvedLocation}`),
   ];
 
   const searchQueries = baseQueries
@@ -234,7 +238,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
                   longitude: place.geometry?.location?.lng,
                   google_rating: place.rating,
                   google_reviews_count: place.user_ratings_total,
-                  description: `${place.name} offers activities and services for children and families in the ${location} area.`,
+                  description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
                   specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
                   amenities: ['Outdoor Space', 'Safety Equipment'],
                   pricing_model: 'per_session',
@@ -259,7 +263,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
               longitude: place.geometry?.location?.lng,
               google_rating: place.rating,
               google_reviews_count: place.user_ratings_total,
-              description: `${place.name} offers activities and services for children and families in the ${location} area.`,
+              description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
               specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
               amenities: ['Outdoor Space', 'Safety Equipment'],
               pricing_model: 'per_session',

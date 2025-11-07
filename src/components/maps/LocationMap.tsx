@@ -405,7 +405,25 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           </div>
         </div>
       )}
-      {error && (
+      {error && providers.length > 0 && (
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 dark:from-emerald-950 dark:via-teal-950 dark:to-blue-950 rounded-lg flex items-center justify-center z-20 backdrop-blur-sm">
+          <div className="text-center p-8 max-w-md">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+              <span className="text-3xl">📍</span>
+            </div>
+            <p className="text-lg font-semibold text-foreground mb-2">
+              {providers.length} provider{providers.length !== 1 ? 's' : ''} found nearby
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Map temporarily unavailable, but your results are ready below
+            </p>
+            <Button onClick={handleResetApiKey} variant="outline" size="sm">
+              Retry Map
+            </Button>
+          </div>
+        </div>
+      )}
+      {error && providers.length === 0 && (
         <div className="absolute top-4 left-4 right-4 bg-destructive/95 text-destructive-foreground p-4 rounded-lg text-sm z-20 backdrop-blur-sm border border-destructive/20">
           <div className="space-y-3">
             <div className="flex justify-between items-start gap-2">
