@@ -116,10 +116,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
     const formattedValue = suggestion.description;
     setInputValue(formattedValue);
-    onChange(formattedValue);
+    onChange(formattedValue); // Immediately update parent
     setIsOpen(false);
     setSuggestions([]);
     setIsLoading(false);
+    inputRef.current?.blur(); // Remove focus to allow immediate search submission
   };
 
   const handleInputBlur = () => {

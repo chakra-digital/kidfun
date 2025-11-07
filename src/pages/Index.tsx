@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -7,6 +7,7 @@ import ConversationalSearch from "@/components/search/ConversationalSearch";
 import AIResultCard from "@/components/search/AIResultCard";
 import AIResultModal from "@/components/search/AIResultModal";
 import LocationMap from "@/components/maps/LocationMap";
+import { SearchResultSkeletonList } from "@/components/search/SearchResultSkeleton";
 import { Button } from "@/components/ui/button";
 import type { AIResult } from "@/components/search/AIResultModal";
 import { User, Calendar, Star } from "lucide-react";
@@ -19,15 +20,41 @@ import { getProviderImage } from "@/lib/imageUtils";
 const Index = () => {
   const [aiResults, setAiResults] = useState<any[]>([]);
   const [showAIResults, setShowAIResults] = useState(false);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [selectedAIResult, setSelectedAIResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { profiles: providers, loading: providersLoading } = usePublicProviderProfiles();
   const navigate = useNavigate();
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  const handleSearchStart = () => {
+    setIsLoadingResults(true);
+    setShowAIResults(true);
+    
+    // Scroll to results section smoothly after brief delay
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start'
+      });
+    }, 300);
+  };
 
   const handleAIResultsUpdate = (results: any[]) => {
     console.log('AI Results received:', results);
     setAiResults(results);
+    setIsLoadingResults(false);
     setShowAIResults(results.length > 0);
+    
+    // Scroll to results when they load
+    if (results.length > 0) {
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start'
+        });
+      }, 100);
+    }
   };
 
   // Calculate map center from AI results
@@ -109,37 +136,47 @@ const Index = () => {
             {/* AI Conversational Search */}
             <ConversationalSearch 
               onResultsUpdate={handleAIResultsUpdate}
+              onSearchStart={handleSearchStart}
               className=""
             />
           </div>
         </section>
 
         {/* AI Results Section with Map */}
-        {showAIResults && aiResults.length > 0 && (
-          <section className="py-12 bg-background">
+        {showAIResults && (
+          <section ref={resultsRef} className="py-12 bg-background scroll-mt-20">
             <div className="container mx-auto px-4">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-bold">Search Results</h2>
                   <p className="text-muted-foreground mt-1">
-                    Found {aiResults.length} relevant providers
+                    {isLoadingResults ? 'Searching...' : `Found ${aiResults.length} relevant providers`}
                   </p>
                 </div>
-                <Button variant="outline" onClick={() => setShowAIResults(false)}>
-                  Clear Results
-                </Button>
+                {!isLoadingResults && (
+                  <Button variant="outline" onClick={() => {
+                    setShowAIResults(false);
+                    setAiResults([]);
+                  }}>
+                    Clear Results
+                  </Button>
+                )}
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Results Cards - Left Side */}
                 <div className="space-y-4 lg:max-h-[calc(100vh-16rem)] lg:overflow-y-auto lg:pr-2">
-                  {aiResults.map((result, index) => (
-                    <AIResultCard
-                      key={result.id || result.google_place_id || index}
-                      {...result}
-                      onClick={() => handleAIResultClick(result)}
-                    />
-                  ))}
+                  {isLoadingResults ? (
+                    <SearchResultSkeletonList count={5} />
+                  ) : (
+                    aiResults.map((result, index) => (
+                      <AIResultCard
+                        key={result.id || result.google_place_id || index}
+                        {...result}
+                        onClick={() => handleAIResultClick(result)}
+                      />
+                    ))
+                  )}
                 </div>
                 
                 {/* Map - Right Side */}

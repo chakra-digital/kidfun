@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { LocationInput } from '@/components/ui/location-input';
+import { searchCache } from '@/lib/searchCache';
 
 interface SearchResult {
   id?: string;
@@ -29,12 +30,14 @@ interface SearchResult {
 
 interface ConversationalSearchProps {
   onResultsUpdate: (results: SearchResult[]) => void;
+  onSearchStart?: () => void;
   className?: string;
   compact?: boolean;
 }
 
 const ConversationalSearch: React.FC<ConversationalSearchProps> = ({ 
-  onResultsUpdate, 
+  onResultsUpdate,
+  onSearchStart,
   className = "",
   compact = false 
 }) => {
@@ -75,42 +78,52 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     if (!searchQuery && !searchCategory) return;
     if (isSearching) return;
     
-    // Clear previous search results and analysis when starting new search
+    // Build enhanced query with category
+    let enhancedQuery = searchQuery || `Find ${searchCategory} activities`;
+    
+    if (searchCategory && searchQuery) {
+      enhancedQuery += ` focusing on ${searchCategory}`;
+    }
+
+    // Determine location to use
+    let searchLocation = whereFilter;
+    
+    if (!searchLocation && userLocation) {
+      searchLocation = `${userLocation.lat},${userLocation.lng}`;
+    }
+    
+    if (!searchLocation) {
+      searchLocation = 'Austin, TX';
+    }
+
+    // Check cache first
+    const cached = searchCache.get(enhancedQuery, searchLocation);
+    if (cached) {
+      console.log('Using cached results');
+      onResultsUpdate(cached.results);
+      setLastSearchAnalysis(cached.searchAnalysis);
+      toast({
+        title: "Instant Results",
+        description: `Found ${cached.results.length} providers (from cache)`,
+      });
+      if (!compact) {
+        setQuery('');
+      }
+      return;
+    }
+    
+    // Clear previous results and trigger loading state
     onResultsUpdate([]);
     setLastSearchAnalysis(null);
+    onSearchStart?.();
 
     setIsSearching(true);
     console.log('Starting AI search...');
     
     try {
-      // Build enhanced query with category
-      let enhancedQuery = searchQuery || `Find ${searchCategory} activities`;
-      
-      if (searchCategory && searchQuery) {
-        enhancedQuery += ` focusing on ${searchCategory}`;
-      }
-
-      // Determine location to use
-      let searchLocation = whereFilter;
-      
-      if (!searchLocation && userLocation) {
-        // Use reverse geocoding to get location name from coordinates
-        searchLocation = `${userLocation.lat},${userLocation.lng}`;
-      }
-      
-      if (!searchLocation) {
-        searchLocation = 'Austin, TX'; // Final fallback
-      }
-
-      console.log('Enhanced query:', enhancedQuery, 'Location:', searchLocation);
-
-      console.log('Invoking ai-provider-search with:', { enhancedQuery, searchLocation });
-      
       const { data, error } = await supabase.functions.invoke('ai-provider-search', {
         body: { query: enhancedQuery, location: searchLocation }
       });
-
-      console.log('Edge function response:', { data, error });
 
       if (error) {
         console.error('Edge function error:', error);
@@ -121,14 +134,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         throw new Error('No data returned from search function');
       }
 
-      const { results, searchAnalysis, newProvidersFound, fromCache } = data;
+      const { results, searchAnalysis, newProvidersFound } = data;
       
-      console.log('Search results:', {
-        resultsCount: results?.length,
-        searchAnalysis,
-        newProvidersFound,
-        fromCache
-      });
+      // Cache the results
+      searchCache.set(enhancedQuery, searchLocation, results || [], searchAnalysis, newProvidersFound);
       
       // Update results
       onResultsUpdate(results || []);
@@ -136,10 +145,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
       // Show success message
       toast({
-        title: fromCache ? "Instant Results" : "Search Complete",
+        title: "Search Complete",
         description: `Found ${results?.length || 0} relevant providers${
           newProvidersFound > 0 ? ` (${newProvidersFound} new discoveries!)` : ''
-        }${fromCache ? ' (from cache)' : ''}`,
+        }`,
       });
 
       if (!compact) {
@@ -273,7 +282,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       </div>
 
       {/* Category Tiles */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 md:gap-4">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
@@ -285,7 +294,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               onClick={() => toggleCategory(category.value)}
               disabled={isSearching}
               className={cn(
-                "category-tile flex flex-col items-center justify-center p-5 rounded-2xl relative group",
+                "category-tile flex flex-col items-center justify-center p-3 md:p-5 rounded-2xl relative group",
                 isSelected 
                   ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/50 shadow-[0_8px_24px_0_rgba(52,144,220,0.3)]' 
                   : 'text-foreground hover:border-primary/40',
@@ -294,14 +303,14 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             >
               {isCategorySearching && (
                 <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm rounded-2xl">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin text-primary" />
                 </div>
               )}
               <IconComponent className={cn(
-                "w-9 h-9 mb-2 transition-transform duration-300",
+                "w-7 h-7 md:w-9 md:h-9 mb-1 md:mb-2 transition-transform duration-300",
                 !isSelected && "group-hover:scale-110"
               )} />
-              <span className="text-sm font-semibold text-center leading-tight">
+              <span className="text-xs md:text-sm font-semibold text-center leading-tight">
                 {category.label}
               </span>
             </button>
