@@ -137,20 +137,29 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         }
       }
 
-      // Initialize map
+      // Initialize map with error handling
       map.current = new (window as any).google.maps.Map(mapContainer.current, {
         center: mapCenter,
         zoom: 11,
         styles: [
           { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] }
         ],
-        // Minimize Google branding and controls
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,
         zoomControl: true,
         zoomControlOptions: {
           position: (window as any).google.maps.ControlPosition.RIGHT_CENTER
+        }
+      });
+
+      // Listen for map errors
+      (window as any).google.maps.event.addListener(map.current, 'tilesloaded', () => {
+        // Check if Google error message appeared
+        const errorDiv = mapContainer.current?.querySelector('.gm-err-message, .gm-err-container');
+        if (errorDiv) {
+          console.error('Google Maps failed to load properly');
+          setError('Google Maps configuration issue - check API key restrictions');
         }
       });
 
@@ -441,11 +450,14 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         </div>
       )}
 
-      {/* Map container - hidden when overlays show */}
+      {/* Map container - completely hidden if error or loading to prevent Google error UI */}
       <div 
         ref={mapContainer} 
         className="w-full h-full rounded-lg bg-muted" 
-        style={{ visibility: (error || isLoading || isSearching) ? 'hidden' : 'visible' }}
+        style={{ 
+          display: error ? 'none' : 'block',
+          visibility: (isLoading || isSearching) ? 'hidden' : 'visible'
+        }}
       />
     </div>
   );
