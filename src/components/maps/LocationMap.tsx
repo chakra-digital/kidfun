@@ -230,8 +230,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
     } catch (error: any) {
       console.error('Error loading Google Maps:', error);
-      setError(error.message || 'Failed to load Google Maps. Please check your API key and try again.');
-      setApiKeySubmitted(false);
+      setError(error.message || 'Failed to load Google Maps');
+      // Keep apiKeySubmitted true so we show fallback instead of loading
     } finally {
       setIsLoading(false);
     }
@@ -387,8 +387,28 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
   return (
     <div className={`relative ${className}`}>
-      {(isSearching || isLoading || !map.current || providers.length === 0) && (
-        <div className="absolute inset-0 bg-muted rounded-lg flex items-center justify-center z-10">
+      {/* Beautiful earthy gradient fallback when error with results */}
+      {error && providers.length > 0 && (
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-green-50 to-emerald-100 dark:from-amber-900/30 dark:via-green-900/30 dark:to-emerald-900/30 rounded-lg flex items-center justify-center z-30">
+          <div className="text-center p-8 max-w-md">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4 backdrop-blur-sm">
+              <span className="text-4xl">🗺️</span>
+            </div>
+            <p className="text-xl font-bold text-foreground mb-2">
+              {providers.length} provider{providers.length !== 1 ? 's' : ''} found nearby
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Map view temporarily unavailable—scroll down to see your results
+            </p>
+            <Button onClick={handleResetApiKey} variant="outline" size="sm" className="backdrop-blur-sm">
+              Retry Map
+            </Button>
+          </div>
+        </div>
+      )}
+      {/* Loading states - only show when no error */}
+      {!error && (isSearching || isLoading || !map.current || providers.length === 0) && (
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg flex items-center justify-center z-10">
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <span className="animate-bounce" aria-hidden>🏃‍♀️</span>
@@ -399,48 +419,34 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
                   ? 'Loading map...'
                   : !map.current
                   ? 'Preparing map...'
-                  : 'No providers to display on map'}
+                  : 'No providers to display'}
               </span>
             </div>
           </div>
         </div>
       )}
-      {error && providers.length > 0 && (
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 dark:from-emerald-950 dark:via-teal-950 dark:to-blue-950 rounded-lg flex items-center justify-center z-20 backdrop-blur-sm">
+      {/* Error without results */}
+      {error && providers.length === 0 && (
+        <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg flex items-center justify-center z-20">
           <div className="text-center p-8 max-w-md">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-              <span className="text-3xl">📍</span>
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 mb-4">
+              <span className="text-3xl">⚠️</span>
             </div>
-            <p className="text-lg font-semibold text-foreground mb-2">
-              {providers.length} provider{providers.length !== 1 ? 's' : ''} found nearby
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Map temporarily unavailable, but your results are ready below
-            </p>
+            <p className="text-lg font-semibold text-foreground mb-2">Map unavailable</p>
+            <p className="text-sm text-muted-foreground mb-4">{error}</p>
             <Button onClick={handleResetApiKey} variant="outline" size="sm">
-              Retry Map
+              Retry
             </Button>
           </div>
         </div>
       )}
-      {error && providers.length === 0 && (
-        <div className="absolute top-4 left-4 right-4 bg-destructive/95 text-destructive-foreground p-4 rounded-lg text-sm z-20 backdrop-blur-sm border border-destructive/20">
-          <div className="space-y-3">
-            <div className="flex justify-between items-start gap-2">
-              <div className="flex-1">
-                <p className="font-semibold mb-1">Map temporarily unavailable</p>
-                <p className="text-xs leading-relaxed opacity-90">{error}</p>
-              </div>
-              <Button onClick={handleResetApiKey} variant="outline" size="sm" className="text-xs shrink-0">
-                Reset Key
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Underlying container (covered by overlays when loading/error) */}
-      <div ref={mapContainer} className="w-full h-full rounded-lg bg-muted" />
+      {/* Map container - hidden when overlays show */}
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full rounded-lg bg-muted" 
+        style={{ visibility: (error || isLoading || isSearching) ? 'hidden' : 'visible' }}
+      />
     </div>
   );
 };
