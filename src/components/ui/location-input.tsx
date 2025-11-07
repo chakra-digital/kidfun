@@ -34,6 +34,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const suppressFetchRef = useRef<boolean>(false);
 
   useEffect(() => {
     setInputValue(value);
@@ -52,6 +53,9 @@ export const LocationInput: React.FC<LocationInputProps> = ({
 
   useEffect(() => {
     const fetchSuggestions = async () => {
+      if (suppressFetchRef.current) {
+        return;
+      }
       if (inputValue.length < 2) {
         setSuggestions([]);
         setIsOpen(false);
@@ -111,19 +115,22 @@ export const LocationInput: React.FC<LocationInputProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    suppressFetchRef.current = false;
     setInputValue(newValue);
-    // Don't automatically call onChange here - only on blur or selection
+    // Don't call onChange here - require a selection
   };
 
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
     const formattedValue = suggestion.description;
+    suppressFetchRef.current = true; // prevent immediate refetch/reopen
     setInputValue(formattedValue);
     setIsOpen(false);
     setSuggestions([]);
     setIsLoading(false);
-    // Update parent state immediately
+    // Commit to parent and blur to finalize selection
     onChange(formattedValue);
-    // Small delay to ensure state updates, then trigger selection
+    inputRef.current?.blur();
+    // Small delay to ensure state updates, then trigger selection callback
     setTimeout(() => {
       onSelect?.(formattedValue);
     }, 50);
@@ -133,7 +140,13 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     // Small delay to allow suggestion click to fire first
     setTimeout(() => {
       setIsOpen(false);
-    }, 200);
+      // Allow fetching suggestions again after blur
+      suppressFetchRef.current = false;
+      // Revert to last committed value if user typed but didn't select
+      if (inputValue !== value) {
+        setInputValue(value);
+      }
+    }, 150);
   };
 
   const handleClear = () => {
@@ -154,18 +167,19 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           onBlur={handleInputBlur}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
+              e.preventDefault();
               if (suggestions[0]) {
-                e.preventDefault();
                 handleSuggestionClick(suggestions[0]);
-              } else if (inputValue) {
-                // User pressed Enter with typed text but no suggestions
-                onChange(inputValue);
+              } else {
+                // Require proper autocomplete selection; ignore raw text
                 setIsOpen(false);
+                setInputValue(value);
               }
             }
           }}
           onFocus={() => {
-            // Don't automatically reopen - let user type to trigger suggestions
+            // Allow suggestions when user starts typing again
+            suppressFetchRef.current = false;
           }}
           placeholder={placeholder}
           className={cn("pr-10 text-foreground bg-background/80 placeholder:text-muted-foreground/80", className)}

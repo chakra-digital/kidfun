@@ -106,9 +106,6 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         title: "Instant Results",
         description: `Found ${cached.results.length} providers (from cache)`,
       });
-      if (!compact) {
-        setQuery('');
-      }
       return;
     }
     
@@ -151,9 +148,6 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         }`,
       });
 
-      if (!compact) {
-        setQuery('');
-      }
     } catch (error: any) {
       console.error('Search error details:', error);
       toast({
