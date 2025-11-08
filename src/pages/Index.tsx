@@ -57,19 +57,7 @@ const Index = () => {
     }
   };
 
-  // Calculate map center from AI results
-  const mapCenter = React.useMemo(() => {
-    if (aiResults.length === 0) return undefined;
-    
-    const validResults = aiResults.filter(r => r.latitude && r.longitude);
-    if (validResults.length === 0) return undefined;
-
-    const avgLat = validResults.reduce((sum, r) => sum + r.latitude, 0) / validResults.length;
-    const avgLng = validResults.reduce((sum, r) => sum + r.longitude, 0) / validResults.length;
-    
-    console.log('Calculated map center:', { lat: avgLat, lng: avgLng });
-    return { lat: avgLat, lng: avgLng };
-  }, [aiResults]);
+  // Let the map component calculate its own center from providers
 
   const handleAIResultClick = (result: any) => {
     setSelectedAIResult(result);
@@ -191,7 +179,6 @@ const Index = () => {
                       google_rating: r.google_rating,
                       external_website: r.external_website
                     }))}
-                    center={mapCenter}
                     isSearching={isLoadingResults}
                     onMarkerClick={(provider) => {
                       // Find the full AI result data to show in modal

@@ -85,8 +85,11 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       enhancedQuery += ` focusing on ${searchCategory}`;
     }
 
-    // Determine location to use - prioritize override to avoid stale state
-    let searchLocation = locationOverride || whereFilter;
+    // Capture current location input to avoid stale state
+    const currentLocationInput = locationInput || locationOverride || '';
+    
+    // Determine location to use
+    let searchLocation = currentLocationInput;
     
     if (!searchLocation && userLocation) {
       searchLocation = `${userLocation.lat},${userLocation.lng}`;
@@ -95,6 +98,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     if (!searchLocation) {
       searchLocation = 'Austin, TX';
     }
+    
+    console.log('Search params:', { query: enhancedQuery, location: searchLocation, locationInput: currentLocationInput });
 
     // Check cache first
     const cached = searchCache.get(enhancedQuery, searchLocation);

@@ -125,39 +125,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       // Use classic constructors for maximum compatibility
       const MapCtor = (window as any).google.maps.Map;
 
-      // Calculate center from providers or use provided center
-      let mapCenter = center || { lat: 30.2672, lng: -97.7431 };
-      let mapZoom = 11;
-      
-      if (providers.length > 0) {
-        const validProviders = providers.filter(p => p.latitude && p.longitude);
-        if (validProviders.length > 0) {
-          // Calculate bounds to fit all markers
-          const bounds = new (window as any).google.maps.LatLngBounds();
-          validProviders.forEach(p => {
-            bounds.extend({ lat: p.latitude!, lng: p.longitude! });
-          });
-          
-          // Calculate center from bounds
-          const ne = bounds.getNorthEast();
-          const sw = bounds.getSouthWest();
-          mapCenter = {
-            lat: (ne.lat() + sw.lat()) / 2,
-            lng: (ne.lng() + sw.lng()) / 2
-          };
-          
-          // Adjust zoom based on bounds size
-          const latDiff = Math.abs(ne.lat() - sw.lat());
-          const lngDiff = Math.abs(ne.lng() - sw.lng());
-          const maxDiff = Math.max(latDiff, lngDiff);
-          
-          if (maxDiff > 2) mapZoom = 7;
-          else if (maxDiff > 1) mapZoom = 8;
-          else if (maxDiff > 0.5) mapZoom = 9;
-          else if (maxDiff > 0.2) mapZoom = 10;
-          else mapZoom = 11;
-        }
-      }
+      // Start with a default center - markers will adjust the view
+      const mapCenter = center || { lat: 30.2672, lng: -97.7431 };
+      const mapZoom = 11;
 
       // Initialize map with error handling and natural earthy styling
       map.current = new (window as any).google.maps.Map(mapContainer.current, {
@@ -388,12 +358,24 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       });
     });
 
-    // Fit map to new markers
-    map.current.fitBounds(bounds);
-    (window as any).google.maps.event.addListenerOnce(map.current, 'idle', () => {
-      const z = map.current.getZoom();
-      if (z > 14) map.current.setZoom(14);
-    });
+    // Fit map to new markers with proper padding
+    if (validProviders.length === 1) {
+      // Single marker - just center on it with reasonable zoom
+      map.current.setCenter(validProviders[0].latitude && validProviders[0].longitude 
+        ? { lat: validProviders[0].latitude, lng: validProviders[0].longitude }
+        : bounds.getCenter()
+      );
+      map.current.setZoom(12);
+    } else {
+      // Multiple markers - fit to bounds
+      map.current.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
+      
+      // Limit max zoom after fitting
+      (window as any).google.maps.event.addListenerOnce(map.current, 'idle', () => {
+        const z = map.current.getZoom();
+        if (z > 14) map.current.setZoom(14);
+      });
+    }
   }, [providers]);
 
   return (
