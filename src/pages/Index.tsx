@@ -171,7 +171,7 @@ const Index = () => {
                   ) : (
                     aiResults.map((result, index) => (
                       <AIResultCard
-                        key={result.id || result.google_place_id || index}
+                        key={`${result.id || result.google_place_id || 'idx'}-${index}`}
                         {...result}
                         onClick={() => handleAIResultClick(result)}
                       />

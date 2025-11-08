@@ -184,15 +184,43 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         }
       });
 
-      // Listen for map errors
-      (window as any).google.maps.event.addListener(map.current, 'tilesloaded', () => {
-        // Check if Google error message appeared
-        const errorDiv = mapContainer.current?.querySelector('.gm-err-message, .gm-err-container');
-        if (errorDiv) {
-          console.error('Google Maps failed to load properly');
-          setError('Google Maps configuration issue - check API key restrictions');
+      // Listen for map errors (detect Google error overlay reliably)
+      try {
+        const container = mapContainer.current;
+        if (container) {
+          // 1) Immediate check
+          const errNow = container.querySelector('.gm-err-message, .gm-err-container');
+          if (errNow) {
+            console.error('Google Maps error overlay detected immediately');
+            setError('Google Maps configuration issue - check API key restrictions');
+          }
+
+          // 2) Observe DOM mutations to catch async error overlays
+          const observer = new MutationObserver(() => {
+            const errEl = container.querySelector('.gm-err-message, .gm-err-container');
+            if (errEl) {
+              console.error('Google Maps error overlay detected via observer');
+              setError('Google Maps configuration issue - check API key restrictions');
+            }
+          });
+          observer.observe(container, { childList: true, subtree: true });
+
+          // 3) Also try tilesloaded in case it fires
+          (window as any).google.maps.event.addListener(map.current, 'tilesloaded', () => {
+            const errorDiv = container.querySelector('.gm-err-message, .gm-err-container');
+            if (errorDiv) {
+              console.error('Google Maps failed to load properly (tilesloaded check)');
+              setError('Google Maps configuration issue - check API key restrictions');
+            }
+          });
+
+          // Cleanup observer when component unmounts or error triggers
+          // We rely on the global cleanup effect to close info windows; observer will be GC'd when container is removed
         }
-      });
+      } catch (e) {
+        console.warn('Map error detection setup failed:', e);
+      }
+
 
       // Markers will be managed in the providers effect when results change
       console.log('Map initialized. Waiting for providers to render markers...');
