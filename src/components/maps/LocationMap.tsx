@@ -137,12 +137,21 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         }
       }
 
-      // Initialize map with error handling
+      // Initialize map with error handling and natural earthy styling
       map.current = new (window as any).google.maps.Map(mapContainer.current, {
         center: mapCenter,
         zoom: 11,
         styles: [
-          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] }
+          // Softer, more natural colors for landscape
+          { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#e8f5e9' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#b3e5fc' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+          { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e0e0e0' }] },
+          // Muted green for parks/natural areas
+          { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#c8e6c9' }] },
+          // Keep POI labels visible but subtle
+          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] },
+          { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] }
         ],
         mapTypeControl: false,
         streetViewControl: false,
