@@ -268,11 +268,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               value={locationInput}
               onChange={(value) => setLocationInput(value)}
               onSelect={(val) => {
+                // Just set the location, don't auto-fire search
                 setLocationInput(val);
-                if ((query.trim() || selectedCategories.length > 0) && !isSearching) {
-                  // Pass location directly to avoid stale state
-                  setTimeout(() => handleSearch(undefined, val), 100);
-                }
               }}
               placeholder="Enter city, state, or ZIP code"
               className="glass-input h-12 rounded-full px-12 text-base bg-background/80 focus:ring-2 focus:ring-primary/20"

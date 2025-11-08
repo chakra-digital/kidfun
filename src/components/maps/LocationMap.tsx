@@ -125,22 +125,44 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       // Use classic constructors for maximum compatibility
       const MapCtor = (window as any).google.maps.Map;
 
-      // Calculate center from providers or use provided center or default to Austin
+      // Calculate center from providers or use provided center
       let mapCenter = center || { lat: 30.2672, lng: -97.7431 };
+      let mapZoom = 11;
       
-      if (!center && providers.length > 0) {
+      if (providers.length > 0) {
         const validProviders = providers.filter(p => p.latitude && p.longitude);
         if (validProviders.length > 0) {
-          const avgLat = validProviders.reduce((sum, p) => sum + (p.latitude || 0), 0) / validProviders.length;
-          const avgLng = validProviders.reduce((sum, p) => sum + (p.longitude || 0), 0) / validProviders.length;
-          mapCenter = { lat: avgLat, lng: avgLng };
+          // Calculate bounds to fit all markers
+          const bounds = new (window as any).google.maps.LatLngBounds();
+          validProviders.forEach(p => {
+            bounds.extend({ lat: p.latitude!, lng: p.longitude! });
+          });
+          
+          // Calculate center from bounds
+          const ne = bounds.getNorthEast();
+          const sw = bounds.getSouthWest();
+          mapCenter = {
+            lat: (ne.lat() + sw.lat()) / 2,
+            lng: (ne.lng() + sw.lng()) / 2
+          };
+          
+          // Adjust zoom based on bounds size
+          const latDiff = Math.abs(ne.lat() - sw.lat());
+          const lngDiff = Math.abs(ne.lng() - sw.lng());
+          const maxDiff = Math.max(latDiff, lngDiff);
+          
+          if (maxDiff > 2) mapZoom = 7;
+          else if (maxDiff > 1) mapZoom = 8;
+          else if (maxDiff > 0.5) mapZoom = 9;
+          else if (maxDiff > 0.2) mapZoom = 10;
+          else mapZoom = 11;
         }
       }
 
       // Initialize map with error handling and natural earthy styling
       map.current = new (window as any).google.maps.Map(mapContainer.current, {
         center: mapCenter,
-        zoom: 11,
+        zoom: mapZoom,
         styles: [
           // Softer, more natural colors for landscape
           { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#e8f5e9' }] },
