@@ -117,7 +117,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     const newValue = e.target.value;
     suppressFetchRef.current = false;
     setInputValue(newValue);
-    // Don't call onChange here - require a selection
+    // Keep parent in sync so searches use the typed value
+    onChange(newValue);
   };
 
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
@@ -142,9 +143,10 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       setIsOpen(false);
       // Allow fetching suggestions again after blur
       suppressFetchRef.current = false;
-      // Revert to last committed value if user typed but didn't select
+      // Commit whatever is typed so subsequent searches use it
       if (inputValue !== value) {
-        setInputValue(value);
+        onChange(inputValue);
+        onSelect?.(inputValue);
       }
     }, 150);
   };
@@ -171,9 +173,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
               if (suggestions[0]) {
                 handleSuggestionClick(suggestions[0]);
               } else {
-                // Require proper autocomplete selection; ignore raw text
+                // Commit free-typed value when no suggestion is chosen
                 setIsOpen(false);
-                setInputValue(value);
+                onChange(inputValue);
+                onSelect?.(inputValue);
+                inputRef.current?.blur();
               }
             }
           }}

@@ -35,7 +35,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const infoWindowsRef = useRef<any[]>([]);
-
+  const markersRef = useRef<any[]>([]);
   console.log('LocationMap render:', { 
     providersCount: providers.length, 
     apiKeySubmitted, 
@@ -194,79 +194,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         }
       });
 
-      console.log('Map initialized, adding markers...');
-      // Add markers for providers
-      providers.forEach((provider) => {
-        // Mock coordinates around Austin area since we don't have lat/lng yet
-        const lat = 30.2672 + (Math.random() - 0.5) * 0.2;
-        const lng = -97.7431 + (Math.random() - 0.5) * 0.2;
-
-        const marker = new (window as any).google.maps.Marker({
-          position: { lat, lng },
-          map: map.current,
-          title: provider.business_name,
-          icon: {
-            path: (window as any).google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: '#3b82f6',
-            fillOpacity: 1,
-            strokeColor: '#1e40af',
-            strokeWeight: 2,
-          }
-        });
-        
-        const infoWindow = new (window as any).google.maps.InfoWindow({
-          content: `
-            <div style="padding: 12px; max-width: 280px; font-family: Arial, sans-serif;">
-              <h3 style="font-weight: 600; font-size: 16px; margin: 0 0 8px 0; color: #1f2937;">${provider.business_name}</h3>
-              <p style="font-size: 14px; color: #6b7280; margin: 0 0 8px 0;">${provider.location}</p>
-              ${provider.google_rating ? `
-                <div style="display: flex; align-items: center; font-size: 14px; margin: 0 0 12px 0;">
-                  <span style="color: #f59e0b;">★</span>
-                  <span style="margin-left: 4px; color: #374151;">${provider.google_rating}</span>
-                </div>
-              ` : '<div style="margin-bottom: 12px;"></div>'}
-              <button 
-                id="view-details-init-${provider.id}"
-                style="display: block; width: 100%; background-color: #3b82f6; color: white; text-align: center; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: background-color 0.2s;"
-                onmouseover="this.style.backgroundColor='#2563eb'" 
-                onmouseout="this.style.backgroundColor='#3b82f6'">
-                View Details
-              </button>
-            </div>
-          `
-        });
-        
-        // Store reference to info window
-        infoWindowsRef.current.push(infoWindow);
-        
-        marker.addListener('click', () => {
-          // Close all other info windows
-          infoWindowsRef.current.forEach((iw) => {
-            if (iw !== infoWindow) {
-              iw.close();
-            }
-          });
-          
-          infoWindow.open(map.current, marker);
-          
-          // Wait for InfoWindow to render, then attach click handler
-          setTimeout(() => {
-            const button = document.getElementById(`view-details-init-${provider.id}`);
-            if (button && onMarkerClick) {
-              button.addEventListener('click', () => {
-                infoWindow.close(); // Close popup when opening modal
-                onMarkerClick({
-                  id: provider.id,
-                  business_name: provider.business_name,
-                  location: provider.location
-                });
-              });
-            }
-          }, 100);
-        });
-      });
-      console.log('Markers added successfully');
+      // Markers will be managed in the providers effect when results change
+      console.log('Map initialized. Waiting for providers to render markers...');
 
     } catch (error: any) {
       console.error('Error loading Google Maps:', error);
@@ -350,16 +279,28 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
   // Add markers when providers change and map is ready
   useEffect(() => {
-    if (!map.current || !providers.length) return;
-    
-    console.log('Adding markers for providers:', providers.length);
-    providers.forEach((provider) => {
-      // Use real coordinates if available, otherwise use Austin area with slight random offset
-      const lat = provider.latitude || (30.2672 + (Math.random() - 0.5) * 0.1);
-      const lng = provider.longitude || (-97.7431 + (Math.random() - 0.5) * 0.1);
+    if (!map.current) return;
+
+    // Clear prior UI
+    infoWindowsRef.current.forEach(iw => iw.close());
+    infoWindowsRef.current = [];
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+
+    if (!providers || providers.length === 0) return;
+
+    const validProviders = providers.filter(p => typeof p.latitude === 'number' && typeof p.longitude === 'number');
+    if (validProviders.length === 0) return;
+
+    console.log('Rendering markers for providers:', validProviders.length);
+
+    const bounds = new (window as any).google.maps.LatLngBounds();
+
+    validProviders.forEach((provider) => {
+      const position = { lat: provider.latitude as number, lng: provider.longitude as number };
 
       const marker = new (window as any).google.maps.Marker({
-        position: { lat, lng },
+        position,
         map: map.current,
         title: provider.business_name,
         icon: {
@@ -371,7 +312,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           strokeWeight: 2,
         }
       });
-      
+      markersRef.current.push(marker);
+      bounds.extend(position);
+
       const infoWindow = new (window as any).google.maps.InfoWindow({
         content: `
           <div style="padding: 12px; max-width: 280px; font-family: Arial, sans-serif;">
@@ -393,26 +336,19 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           </div>
         `
       });
-      
-      // Store reference to info window
       infoWindowsRef.current.push(infoWindow);
-      
+
       marker.addListener('click', () => {
         // Close all other info windows
         infoWindowsRef.current.forEach((iw) => {
-          if (iw !== infoWindow) {
-            iw.close();
-          }
+          if (iw !== infoWindow) iw.close();
         });
-        
         infoWindow.open(map.current, marker);
-        
-        // Wait for InfoWindow to render, then attach click handler
         setTimeout(() => {
           const button = document.getElementById(`view-details-${provider.id}`);
           if (button && onMarkerClick) {
             button.addEventListener('click', () => {
-              infoWindow.close(); // Close popup when opening modal
+              infoWindow.close();
               onMarkerClick({
                 id: provider.id,
                 business_name: provider.business_name,
@@ -423,7 +359,14 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         }, 100);
       });
     });
-  }, [providers, map.current]);
+
+    // Fit map to new markers
+    map.current.fitBounds(bounds);
+    (window as any).google.maps.event.addListenerOnce(map.current, 'idle', () => {
+      const z = map.current.getZoom();
+      if (z > 14) map.current.setZoom(14);
+    });
+  }, [providers]);
 
   return (
     <div className={`relative ${className}`}>
