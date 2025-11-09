@@ -18,6 +18,7 @@ interface LocationInputProps {
   onSelect?: (value: string) => void; // Fires when a suggestion is picked
   placeholder?: string;
   className?: string;
+  disabled?: boolean; // For hiding clear button during search
 }
 
 export const LocationInput: React.FC<LocationInputProps> = ({ 
@@ -25,7 +26,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   onChange,
   onSelect,
   placeholder = "Enter city, state, or ZIP code", 
-  className 
+  className,
+  disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
@@ -192,7 +194,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           </div>
-        ) : inputValue ? (
+        ) : inputValue && !disabled ? (
           <Button
             type="button"
             variant="ghost"
