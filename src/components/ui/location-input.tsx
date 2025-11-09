@@ -231,12 +231,12 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       </div>
       
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full bg-white/95 backdrop-blur-md border border-white/40 rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.2)] max-h-60 overflow-auto">
+        <div className="absolute z-[100] mt-2 w-full bg-white dark:bg-gray-800 backdrop-blur-md border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.place_id}
               type="button"
-              className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 transition-colors border-b border-border/50 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
+              className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
               onMouseDown={(e) => {
                 // Prevent blur from firing before click
                 e.preventDefault();

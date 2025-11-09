@@ -327,32 +327,36 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 requireSelection={true}
                 onValidityChange={setIsLocationValid}
               />
+              {/* Absolutely positioned error to prevent layout shift */}
+              {locationInput && !isLocationValid && (
+                <div className="absolute left-16 -bottom-7 text-sm text-destructive font-medium whitespace-nowrap">
+                  Please choose a location from the suggestions.
+                </div>
+              )}
             </div>
-            {locationInput && !isLocationValid && (
-              <div className="px-16 py-2 text-sm text-destructive">Please choose a location from the suggestions.</div>
-            )}
           </CardContent>
         </Card>
         
-        {/* Floating Gold Search Button - High Contrast & Visible */}
+        {/* Ultra-Bright Search Button - Maximum Visibility */}
         <Button
           onClick={() => handleSearch()}
           disabled={((!query.trim() && selectedCategories.length === 0) || isSearching || (locationInput && !isLocationValid))}
           size="icon"
           className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-10",
-            "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600 shadow-2xl",
-            "hover:from-amber-300 hover:via-yellow-500 hover:to-amber-500 hover:scale-105",
+            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-20",
+            "bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 shadow-2xl",
+            "hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-400 hover:scale-110",
+            "disabled:opacity-50 disabled:cursor-not-allowed",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 12px 48px rgba(251, 146, 60, 0.75), 0 0 0 8px rgba(255, 255, 255, 1), 0 0 64px rgba(251, 146, 60, 0.4)'
+            boxShadow: '0 12px 56px rgba(251, 191, 36, 0.9), 0 0 0 8px rgba(255, 255, 255, 1), 0 0 80px rgba(251, 191, 36, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.4)'
           }}
         >
           {isSearching ? (
-            <Loader2 className="w-7 h-7 text-white animate-spin drop-shadow-lg" />
+            <Loader2 className="w-7 h-7 text-gray-900 animate-spin drop-shadow-md" />
           ) : (
-            <Search className="w-7 h-7 text-white drop-shadow-lg" />
+            <Search className="w-7 h-7 text-gray-900 drop-shadow-md" />
           )}
         </Button>
       </div>
