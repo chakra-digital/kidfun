@@ -36,6 +36,19 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   const [error, setError] = useState<string>('');
   const infoWindowsRef = useRef<any[]>([]);
   const markersRef = useRef<any[]>([]);
+  const [currentBallEmoji, setCurrentBallEmoji] = useState('⚽');
+  
+  // Animated sports balls for loading state
+  useEffect(() => {
+    const balls = ['🏀', '🎾', '⚽', '🏐', '⚾'];
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % balls.length;
+      setCurrentBallEmoji(balls[index]);
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+  
   console.log('LocationMap render:', { 
     providersCount: providers.length, 
     apiKeySubmitted, 
@@ -404,7 +417,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg flex items-center justify-center z-10">
           <div className="text-center space-y-2">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <span className="animate-bounce" aria-hidden>🏃‍♀️</span>
+              <span className="animate-bounce text-3xl" aria-hidden>{currentBallEmoji}</span>
               <span>
                 {isSearching
                   ? 'Searching for providers...'

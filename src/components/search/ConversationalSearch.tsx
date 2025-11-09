@@ -296,7 +296,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What are you looking for?"
-                className="h-16 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-20 pl-16 pr-6 border-0 bg-white/70 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isSearching}
               />
             </div>
@@ -311,7 +311,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-12 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-14 pl-16 pr-6 border-0 bg-white/70 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </CardContent>
