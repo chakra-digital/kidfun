@@ -271,10 +271,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     <div className={`max-w-2xl mx-auto space-y-6 ${className}`}>
       {/* Redesigned Stacked Search Box */}
       <div className="relative">
-        <Card className="backdrop-blur-md bg-white/90 dark:bg-background/90 border border-border/30 shadow-2xl rounded-3xl overflow-hidden">
+        <Card className="backdrop-blur-md bg-white dark:bg-white border-0 shadow-2xl rounded-3xl overflow-hidden">
           <CardContent className="p-0">
             {/* Activity Input - Taller */}
-            <div className="relative border-b border-border/20">
+            <div className="relative border-b-2 border-gray-200">
               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl pointer-events-none">
                 {currentEmoji}
               </span>
@@ -284,7 +284,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What are you looking for?"
-                className="h-18 pl-16 pr-6 border-0 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-18 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isSearching}
               />
             </div>
@@ -299,26 +299,25 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-16 pl-16 pr-6 border-0 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-16 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </CardContent>
         </Card>
         
-        {/* Floating Gold Search Button */}
+        {/* Floating Gold Search Button - Solid */}
         <Button
           onClick={() => handleSearch()}
           disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
           size="icon"
           className={cn(
             "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-20 w-20 rounded-full shadow-2xl transition-all duration-300",
-            "bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500",
-            "hover:from-amber-300 hover:via-yellow-400 hover:to-orange-400 hover:scale-105",
-            "border-4 border-white dark:border-background",
+            "bg-gradient-to-br from-amber-400 to-orange-500",
+            "hover:from-amber-500 hover:to-orange-600 hover:scale-105",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 8px 32px rgba(251, 191, 36, 0.5), 0 4px 16px rgba(251, 191, 36, 0.3)'
+            boxShadow: '0 10px 40px rgba(251, 146, 60, 0.6)'
           }}
         >
           {isSearching ? (
@@ -345,7 +344,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 "aspect-square flex flex-col items-center justify-center gap-1.5 rounded-xl relative group transition-all duration-200 border-2",
                 isSelected 
                   ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary shadow-lg' 
-                  : 'bg-background/50 border-border/30 text-foreground hover:border-primary/40 hover:shadow-md hover:bg-background/70',
+                  : 'bg-white/95 dark:bg-background/95 border-gray-200 dark:border-border text-gray-700 dark:text-foreground hover:border-primary/40 hover:shadow-md hover:bg-white dark:hover:bg-background',
                 isCategorySearching && 'animate-pulse'
               )}
             >
