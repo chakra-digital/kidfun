@@ -331,6 +331,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             {locationInput && !isLocationValid && (
               <div className="px-16 py-2 text-sm text-destructive">Please choose a location from the suggestions.</div>
             )}
+          </CardContent>
+        </Card>
         
         {/* Floating Gold Search Button - High Contrast & Visible */}
         <Button
@@ -413,28 +415,6 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             </div>
           </CardContent>
         </Card>
-        
-        {/* Floating Gold Search Button - High Contrast & Visible */}
-        <Button
-          onClick={() => handleSearch()}
-          disabled={((!query.trim() && selectedCategories.length === 0) || isSearching || (locationInput && !isLocationValid))}
-          size="icon"
-          className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-10",
-            "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600 shadow-2xl",
-            "hover:from-amber-300 hover:via-yellow-500 hover:to-amber-500 hover:scale-105",
-            isSearching && "animate-pulse"
-          )}
-          style={{
-            boxShadow: '0 12px 48px rgba(251, 146, 60, 0.75), 0 0 0 8px rgba(255, 255, 255, 1), 0 0 64px rgba(251, 146, 60, 0.4)'
-          }}
-        >
-          {isSearching ? (
-            <Loader2 className="w-7 h-7 text-white animate-spin drop-shadow-lg" />
-          ) : (
-            <Search className="w-7 h-7 text-white drop-shadow-lg" />
-          )}
-        </Button
       )}
     </div>
   );
