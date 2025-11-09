@@ -305,19 +305,25 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           </CardContent>
         </Card>
         
-        {/* Floating Gold Search Button - Properly Sized */}
+        {/* Floating Gold Search Button - High Contrast & Visible */}
         <Button
           onClick={() => handleSearch()}
           disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
           size="icon"
           className={cn(
             "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300",
-            "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600",
-            "hover:from-amber-500 hover:via-orange-600 hover:to-orange-700 hover:scale-105",
+            // Strong, glossy gradient
+            "bg-gradient-to-br from-amber-300 via-amber-400 to-orange-500",
+            // Outer white ring for contrast against any background
+            "relative ring-[6px] ring-white/90 ring-offset-2 ring-offset-transparent",
+            // Soft glow halo
+            "before:content-[''] before:absolute before:inset-[-12px] before:rounded-full before:bg-amber-400/25 before:blur-2xl before:pointer-events-none",
+            // Hover interaction
+            "hover:from-amber-400 hover:via-amber-500 hover:to-orange-600 hover:scale-105",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 4px 20px rgba(251, 146, 60, 0.5)'
+            boxShadow: '0 12px 40px rgba(251,146,60,0.55), 0 6px 14px rgba(0,0,0,0.12)'
           }}
         >
           {isSearching ? (
