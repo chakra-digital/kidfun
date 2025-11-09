@@ -271,10 +271,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     <div className={`max-w-2xl mx-auto space-y-6 ${className}`}>
       {/* Redesigned Stacked Search Box */}
       <div className="relative">
-        <Card className="backdrop-blur-md bg-white dark:bg-white border-0 shadow-2xl rounded-3xl overflow-hidden">
+        <Card className="backdrop-blur-md bg-white dark:bg-white border-0 rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
           <CardContent className="p-0">
             {/* Activity Input - Taller */}
-            <div className="relative border-b-2 border-gray-200">
+            <div className="relative border-b border-gray-300">
               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl pointer-events-none">
                 {currentEmoji}
               </span>
@@ -284,7 +284,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What are you looking for?"
-                className="h-20 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-16 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isSearching}
               />
             </div>
@@ -299,31 +299,31 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-14 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-12 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </CardContent>
         </Card>
         
-        {/* Floating Gold Search Button - More Visible */}
+        {/* Floating Gold Search Button - Properly Sized */}
         <Button
           onClick={() => handleSearch()}
           disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
           size="icon"
           className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-24 w-24 rounded-full transition-all duration-300",
-            "bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500",
-            "hover:from-amber-500 hover:via-orange-500 hover:to-orange-600 hover:scale-105",
+            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300",
+            "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600",
+            "hover:from-amber-500 hover:via-orange-600 hover:to-orange-700 hover:scale-105",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 12px 48px rgba(251, 146, 60, 0.7), 0 0 0 4px rgba(255, 255, 255, 0.9)'
+            boxShadow: '0 4px 20px rgba(251, 146, 60, 0.5)'
           }}
         >
           {isSearching ? (
-            <Loader2 className="w-8 h-8 text-white animate-spin" />
+            <Loader2 className="w-6 h-6 text-white animate-spin" />
           ) : (
-            <Search className="w-8 h-8 text-white drop-shadow-md" />
+            <Search className="w-6 h-6 text-white drop-shadow-md" />
           )}
         </Button>
       </div>
