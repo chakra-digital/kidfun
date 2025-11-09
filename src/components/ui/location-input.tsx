@@ -19,6 +19,8 @@ interface LocationInputProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean; // For hiding clear button during search
+  requireSelection?: boolean; // Only accept values chosen from suggestions
+  onValidityChange?: (isValid: boolean) => void; // Notify parent about validity
 }
 
 export const LocationInput: React.FC<LocationInputProps> = ({ 
@@ -27,7 +29,9 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   onSelect,
   placeholder = "Enter city, state, or ZIP code", 
   className,
-  disabled = false
+  disabled = false,
+  requireSelection = true,
+  onValidityChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
@@ -37,6 +41,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const suppressFetchRef = useRef<boolean>(false);
+  const selectedRef = useRef<boolean>(false);
 
   useEffect(() => {
     setInputValue(value);
@@ -118,20 +123,26 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     suppressFetchRef.current = false;
+    selectedRef.current = false;
     setInputValue(newValue);
     // Keep parent in sync so searches use the typed value
     onChange(newValue);
+    // Valid only when a suggestion is selected (or empty when requireSelection)
+    const valid = !requireSelection || newValue.trim().length === 0 ? true : false;
+    onValidityChange?.(valid);
   };
 
   const handleSuggestionClick = (suggestion: LocationSuggestion) => {
     const formattedValue = suggestion.description;
     suppressFetchRef.current = true; // prevent immediate refetch/reopen
+    selectedRef.current = true;
     setInputValue(formattedValue);
     setIsOpen(false);
     setSuggestions([]);
     setIsLoading(false);
     // Commit to parent and blur to finalize selection
     onChange(formattedValue);
+    onValidityChange?.(true);
     inputRef.current?.blur();
     // Small delay to ensure state updates, then trigger selection callback
     setTimeout(() => {
@@ -145,17 +156,25 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       setIsOpen(false);
       // Allow fetching suggestions again after blur
       suppressFetchRef.current = false;
-      // Commit whatever is typed so subsequent searches use it
-      if (inputValue !== value) {
-        onChange(inputValue);
-        onSelect?.(inputValue);
+      const val = inputValue.trim();
+      if (!requireSelection || val.length === 0 || selectedRef.current) {
+        if (inputValue !== value) {
+          onChange(inputValue);
+          onSelect?.(inputValue);
+        }
+        onValidityChange?.(true);
+      } else {
+        // Invalid free-typed value
+        onValidityChange?.(false);
       }
     }, 150);
   };
 
   const handleClear = () => {
     setInputValue("");
+    selectedRef.current = false;
     onChange("");
+    onValidityChange?.(true);
     setSuggestions([]);
     setIsOpen(false);
     inputRef.current?.focus();
@@ -175,7 +194,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
               if (suggestions[0]) {
                 handleSuggestionClick(suggestions[0]);
               } else {
-                // Commit free-typed value when no suggestion is chosen
+                if (requireSelection && inputValue.trim().length > 0) {
+                  onValidityChange?.(false);
+                  return; // keep focus until a suggestion is chosen
+                }
+                // Allow empty value when nothing is selected
                 setIsOpen(false);
                 onChange(inputValue);
                 onSelect?.(inputValue);
