@@ -68,15 +68,25 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Animated placeholders
-  const activityPlaceholder = useAnimatedPlaceholder(
-    ['⚽', '🎨', '🎭', '🏊', '⛺', '🎪'],
-    'What are you looking for?'
-  );
-  const locationPlaceholder = useAnimatedPlaceholder(
-    ['📍', '🗺️', '🌍', '✈️', '🧭'],
-    'Enter city, state, or ZIP code'
-  );
+  // Animated emojis (separate from placeholder text now)
+  const activityEmojis = ['⚽', '🎨', '🎭', '🏊', '⛺', '🎪'];
+  const locationEmojis = ['📍', '🗺️', '🌍', '✈️', '🧭'];
+  const [currentEmoji, setCurrentEmoji] = useState(activityEmojis[0]);
+  const [locationEmoji, setLocationEmoji] = useState(locationEmojis[0]);
+  
+  useEffect(() => {
+    let activityIndex = 0;
+    let locationIndex = 0;
+    
+    const interval = setInterval(() => {
+      activityIndex = (activityIndex + 1) % activityEmojis.length;
+      locationIndex = (locationIndex + 1) % locationEmojis.length;
+      setCurrentEmoji(activityEmojis[activityIndex]);
+      setLocationEmoji(locationEmojis[locationIndex]);
+    }, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   // Computed display value
   const whereFilter = locationInput;
@@ -261,60 +271,66 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     <div className={`max-w-2xl mx-auto space-y-6 ${className}`}>
       {/* Redesigned Stacked Search Box */}
       <div className="relative">
-        <Card className="backdrop-blur-md bg-background/60 border border-border/30 shadow-2xl rounded-3xl overflow-hidden">
+        <Card className="backdrop-blur-md bg-white/90 dark:bg-background/90 border border-border/30 shadow-2xl rounded-3xl overflow-hidden">
           <CardContent className="p-0">
             {/* Activity Input - Taller */}
             <div className="relative border-b border-border/20">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl pointer-events-none">
+                {currentEmoji}
+              </span>
               <Input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={activityPlaceholder}
-                className="h-16 px-6 border-0 bg-transparent text-base placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="What are you looking for?"
+                className="h-18 pl-16 pr-6 border-0 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isSearching}
               />
             </div>
             
             {/* Location Input - Standard height */}
             <div className="relative">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl pointer-events-none">
+                {locationEmoji}
+              </span>
               <LocationInput
                 value={locationInput}
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
-                placeholder={locationPlaceholder}
-                className="h-14 px-6 border-0 bg-transparent text-base placeholder:text-muted-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0"
+                placeholder="Location"
+                className="h-16 pl-16 pr-6 border-0 bg-transparent text-lg font-medium text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </CardContent>
         </Card>
         
-        {/* Floating Gold Glassmorphic Search Button */}
+        {/* Floating Gold Search Button */}
         <Button
           onClick={() => handleSearch()}
           disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
           size="icon"
           className={cn(
-            "absolute -right-2 top-1/2 -translate-y-1/2 h-16 w-16 rounded-full shadow-2xl transition-all duration-300",
+            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-20 w-20 rounded-full shadow-2xl transition-all duration-300",
             "bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-500",
-            "hover:from-amber-300 hover:via-yellow-400 hover:to-orange-400",
-            "border-2 border-white/30 backdrop-blur-sm",
+            "hover:from-amber-300 hover:via-yellow-400 hover:to-orange-400 hover:scale-105",
+            "border-4 border-white dark:border-background",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 8px 32px rgba(251, 191, 36, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2) inset'
+            boxShadow: '0 8px 32px rgba(251, 191, 36, 0.5), 0 4px 16px rgba(251, 191, 36, 0.3)'
           }}
         >
           {isSearching ? (
-            <Loader2 className="w-6 h-6 text-white animate-spin" />
+            <Loader2 className="w-7 h-7 text-white animate-spin" />
           ) : (
-            <Search className="w-6 h-6 text-white" />
+            <Search className="w-7 h-7 text-white" />
           )}
         </Button>
       </div>
 
-      {/* Category Tiles - Smaller and More Refined */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 md:gap-3">
+      {/* Category Tiles - Uniform Size and Spacing */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mt-8">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
@@ -326,23 +342,23 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               onClick={() => toggleCategory(category.value)}
               disabled={isSearching}
               className={cn(
-                "category-tile flex flex-col items-center justify-center p-2 md:p-3 rounded-xl relative group transition-all duration-200",
+                "aspect-square flex flex-col items-center justify-center gap-1.5 rounded-xl relative group transition-all duration-200 border-2",
                 isSelected 
-                  ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary/50 shadow-lg' 
-                  : 'text-foreground hover:border-primary/40 hover:shadow-md',
+                  ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary shadow-lg' 
+                  : 'bg-background/50 border-border/30 text-foreground hover:border-primary/40 hover:shadow-md hover:bg-background/70',
                 isCategorySearching && 'animate-pulse'
               )}
             >
               {isCategorySearching && (
                 <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm rounded-xl">
-                  <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-primary" />
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
                 </div>
               )}
               <IconComponent className={cn(
-                "w-5 h-5 md:w-6 md:h-6 mb-1 transition-transform duration-300",
+                "w-5 h-5 transition-transform duration-300",
                 !isSelected && "group-hover:scale-110"
               )} />
-              <span className="text-[10px] md:text-xs font-medium text-center leading-tight">
+              <span className="text-[10px] font-medium text-center leading-tight px-1">
                 {category.label}
               </span>
             </button>
