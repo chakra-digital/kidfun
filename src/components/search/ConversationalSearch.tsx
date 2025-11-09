@@ -234,41 +234,19 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     <div className={`max-w-2xl mx-auto space-y-6 ${className}`}>
       {/* Main Search Input */}
       <div className="space-y-4">
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="What are you looking for?"
-            className="glass-input w-full h-16 px-6 rounded-full text-lg text-foreground bg-background/80 placeholder:text-muted-foreground/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
-            disabled={isSearching}
-          />
-          <Button 
-            onClick={() => handleSearch()}
-            disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
-            size="icon"
-            className={cn(
-              "absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-14 w-14 bg-gradient-to-br from-primary to-primary/80 transition-all duration-300",
-              isSearching 
-                ? "scale-105" 
-                : "hover:scale-110 hover:from-primary/90 hover:to-primary/70"
-            )}
-            style={isSearching ? {
-              boxShadow: '0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.3)'
-            } : {}}
-          >
-            {isSearching ? (
-              <Sparkles className="w-7 h-7 animate-pulse" />
-            ) : (
-              <Send className="w-7 h-7" />
-            )}
-          </Button>
-        </div>
+        <Input
+          ref={inputRef}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="What are you looking for?"
+          className="glass-input w-full h-16 px-6 rounded-full text-lg text-foreground bg-background/80 placeholder:text-muted-foreground/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300"
+          disabled={isSearching}
+        />
 
         {/* Location Filter - Enhanced with Autocomplete */}
-        <div className="flex gap-3 justify-center">
-          <div className="relative w-full max-w-md">
+        <div className="flex gap-3 justify-center items-center">
+          <div className="relative flex-1 max-w-md">
             <LocationInput
               value={locationInput}
               onChange={(value) => setLocationInput(value)}
@@ -281,6 +259,27 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             />
             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/60 pointer-events-none" />
           </div>
+          
+          <Button 
+            onClick={() => handleSearch()}
+            disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
+            size="icon"
+            className={cn(
+              "rounded-full h-12 w-12 flex-shrink-0 bg-gradient-to-br from-primary to-primary/80 transition-all duration-300",
+              isSearching 
+                ? "scale-105" 
+                : "hover:scale-110 hover:from-primary/90 hover:to-primary/70"
+            )}
+            style={isSearching ? {
+              boxShadow: '0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.3)'
+            } : {}}
+          >
+            {isSearching ? (
+              <Sparkles className="w-6 h-6 animate-pulse" />
+            ) : (
+              <Send className="w-6 h-6" />
+            )}
+          </Button>
         </div>
       </div>
 
