@@ -186,7 +186,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             suppressFetchRef.current = false;
           }}
           placeholder={placeholder}
-          className={cn("pr-10 text-foreground bg-background/80 placeholder:text-muted-foreground/80", className)}
+          className={cn("pr-10", className)}
         />
         {isLoading ? (
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">

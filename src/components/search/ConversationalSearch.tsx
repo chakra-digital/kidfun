@@ -287,7 +287,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           <CardContent className="p-0">
             {/* Activity Input - Taller */}
             <div className="relative border-b border-gray-300">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[28px] pointer-events-none">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[28px] pointer-events-none z-10 opacity-100">
                 {currentEmoji}
               </span>
               <Input
@@ -296,14 +296,14 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What are you looking for?"
-                className="h-20 pl-16 pr-6 border-0 bg-white/70 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-20 pl-16 pr-6 border-0 bg-white/50 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isSearching}
               />
             </div>
             
             {/* Location Input - Shorter */}
             <div className="relative">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[26px] pointer-events-none">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[26px] pointer-events-none z-10 opacity-100">
                 {locationEmoji}
               </span>
               <LocationInput
@@ -311,7 +311,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-14 pl-16 pr-6 border-0 bg-white/70 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-14 pl-16 pr-6 border-0 bg-white/50 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </CardContent>
@@ -324,18 +324,18 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           size="icon"
           className={cn(
             "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-10",
-            "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600",
+            "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600 shadow-2xl",
             "hover:from-amber-500 hover:via-orange-600 hover:to-orange-700 hover:scale-105",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 8px 32px rgba(251, 146, 60, 0.6), 0 0 0 6px rgba(255, 255, 255, 0.9)'
+            boxShadow: '0 12px 48px rgba(251, 146, 60, 0.75), 0 0 0 8px rgba(255, 255, 255, 1), 0 0 64px rgba(251, 146, 60, 0.4)'
           }}
         >
           {isSearching ? (
-            <Loader2 className="w-6 h-6 text-white animate-spin" />
+            <Loader2 className="w-7 h-7 text-white animate-spin drop-shadow-lg" />
           ) : (
-            <Search className="w-6 h-6 text-white drop-shadow-md" />
+            <Search className="w-7 h-7 text-white drop-shadow-lg" />
           )}
         </Button>
       </div>
@@ -353,7 +353,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               onClick={() => toggleCategory(category.value)}
               disabled={isSearching}
               className={cn(
-                "aspect-square flex flex-col items-center justify-center gap-1.5 rounded-xl relative group transition-all duration-200 border",
+                "aspect-square flex flex-col items-center justify-center gap-2 rounded-xl relative group transition-all duration-200 border p-4",
                 isSelected 
                   ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary shadow-lg' 
                   : 'bg-white/60 dark:bg-background/60 backdrop-blur-sm border-gray-200/50 dark:border-border/50 text-gray-600 dark:text-foreground/80 hover:border-primary/30 hover:shadow-sm hover:bg-white/70 dark:hover:bg-background/70',
@@ -362,14 +362,14 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             >
               {isCategorySearching && (
                 <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm rounded-xl">
-                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
                 </div>
               )}
               <IconComponent className={cn(
-                "w-5 h-5 transition-transform duration-300",
+                "w-7 h-7 transition-transform duration-300",
                 !isSelected && "group-hover:scale-110"
               )} />
-              <span className="text-[10px] font-medium text-center leading-tight px-1">
+              <span className="text-xs font-medium text-center leading-tight">
                 {category.label}
               </span>
             </button>
