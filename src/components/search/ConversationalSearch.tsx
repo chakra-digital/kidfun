@@ -284,12 +284,12 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What are you looking for?"
-                className="h-18 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-20 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isSearching}
               />
             </div>
             
-            {/* Location Input - Standard height */}
+            {/* Location Input - Shorter */}
             <div className="relative">
               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl pointer-events-none">
                 {locationEmoji}
@@ -299,31 +299,31 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-16 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-14 pl-16 pr-6 border-0 bg-transparent text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </CardContent>
         </Card>
         
-        {/* Floating Gold Search Button - Solid */}
+        {/* Floating Gold Search Button - More Visible */}
         <Button
           onClick={() => handleSearch()}
           disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
           size="icon"
           className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-20 w-20 rounded-full shadow-2xl transition-all duration-300",
-            "bg-gradient-to-br from-amber-400 to-orange-500",
-            "hover:from-amber-500 hover:to-orange-600 hover:scale-105",
+            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-24 w-24 rounded-full transition-all duration-300",
+            "bg-gradient-to-br from-amber-400 via-orange-400 to-orange-500",
+            "hover:from-amber-500 hover:via-orange-500 hover:to-orange-600 hover:scale-105",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 10px 40px rgba(251, 146, 60, 0.6)'
+            boxShadow: '0 12px 48px rgba(251, 146, 60, 0.7), 0 0 0 4px rgba(255, 255, 255, 0.9)'
           }}
         >
           {isSearching ? (
-            <Loader2 className="w-7 h-7 text-white animate-spin" />
+            <Loader2 className="w-8 h-8 text-white animate-spin" />
           ) : (
-            <Search className="w-7 h-7 text-white" />
+            <Search className="w-8 h-8 text-white drop-shadow-md" />
           )}
         </Button>
       </div>
@@ -341,10 +341,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               onClick={() => toggleCategory(category.value)}
               disabled={isSearching}
               className={cn(
-                "aspect-square flex flex-col items-center justify-center gap-1.5 rounded-xl relative group transition-all duration-200 border-2",
+                "aspect-square flex flex-col items-center justify-center gap-1.5 rounded-xl relative group transition-all duration-200 border",
                 isSelected 
                   ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary shadow-lg' 
-                  : 'bg-white/95 dark:bg-background/95 border-gray-200 dark:border-border text-gray-700 dark:text-foreground hover:border-primary/40 hover:shadow-md hover:bg-white dark:hover:bg-background',
+                  : 'bg-white/60 dark:bg-background/60 backdrop-blur-sm border-gray-200/50 dark:border-border/50 text-gray-600 dark:text-foreground/80 hover:border-primary/30 hover:shadow-sm hover:bg-white/70 dark:hover:bg-background/70',
                 isCategorySearching && 'animate-pulse'
               )}
             >
