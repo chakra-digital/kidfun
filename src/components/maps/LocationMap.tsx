@@ -393,8 +393,32 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
   return (
     <div className={`relative ${className}`}>
+      {/* Loading states - ALWAYS show when searching, prioritize over errors */}
+      {(isSearching || isLoading || !map.current || (providers.length === 0 && !error)) && (
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-lg flex items-center justify-center z-40">
+          <div className="text-center">
+            <div className="text-5xl mb-4 animate-bounce">
+              {currentBallEmoji}
+            </div>
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-1">
+              {isSearching 
+                ? 'Searching providers...' 
+                : isLoading 
+                ? 'Loading map...' 
+                : !map.current
+                ? 'Preparing map...'
+                : 'No providers to display'}
+            </p>
+            {providers.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                Found {providers.length} location{providers.length !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
       {/* Beautiful earthy gradient fallback when error with results */}
-      {error && providers.length > 0 && (
+      {error && providers.length > 0 && !isSearching && (
         <div className="absolute inset-0 bg-gradient-to-br from-amber-50 via-green-50 to-emerald-100 dark:from-amber-900/30 dark:via-green-900/30 dark:to-emerald-900/30 rounded-lg flex items-center justify-center z-30">
           <div className="text-center p-8 max-w-md">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4 backdrop-blur-sm">
@@ -412,27 +436,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           </div>
         </div>
       )}
-      {/* Loading states - only show when no error */}
-      {!error && (isSearching || isLoading || !map.current || providers.length === 0) && (
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-lg flex items-center justify-center z-10">
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <span className="animate-bounce text-3xl" aria-hidden>{currentBallEmoji}</span>
-              <span>
-                {isSearching
-                  ? 'Searching for providers...'
-                  : isLoading
-                  ? 'Loading map...'
-                  : !map.current
-                  ? 'Preparing map...'
-                  : 'No providers to display'}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
       {/* Error without results */}
-      {error && providers.length === 0 && (
+      {error && providers.length === 0 && !isSearching && (
         <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg flex items-center justify-center z-20">
           <div className="text-center p-8 max-w-md">
             <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 mb-4">

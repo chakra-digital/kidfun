@@ -311,7 +311,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-14 pl-16 pr-6 border-0 bg-white/50 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="h-14 pl-16 pr-20 border-0 bg-white/50 text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </CardContent>
@@ -325,7 +325,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           className={cn(
             "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-10",
             "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600 shadow-2xl",
-            "hover:from-amber-500 hover:via-orange-600 hover:to-orange-700 hover:scale-105",
+            "hover:from-amber-300 hover:via-yellow-500 hover:to-amber-500 hover:scale-105",
             isSearching && "animate-pulse"
           )}
           style={{
