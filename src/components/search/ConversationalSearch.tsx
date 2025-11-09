@@ -294,7 +294,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     <div className={`max-w-2xl mx-auto space-y-6 ${className}`}>
       {/* Redesigned Stacked Search Box */}
       <div className="relative">
-        <Card className="backdrop-blur-md bg-white dark:bg-white border-0 rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+        <Card className="backdrop-blur-md bg-white dark:bg-white border-0 rounded-3xl" style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
           <CardContent className="p-0">
             {/* Activity Input - Taller */}
             <div className="relative border-b border-gray-300">
@@ -346,7 +346,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-20",
             "bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 shadow-2xl",
             "hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-400 hover:scale-110",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:cursor-not-allowed",
             isSearching && "animate-pulse"
           )}
           style={{
