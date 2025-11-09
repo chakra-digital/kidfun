@@ -78,14 +78,26 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     let activityIndex = 0;
     let locationIndex = 0;
     
-    const interval = setInterval(() => {
+    // Activity emoji changes every 2 seconds
+    const activityInterval = setInterval(() => {
       activityIndex = (activityIndex + 1) % activityEmojis.length;
-      locationIndex = (locationIndex + 1) % locationEmojis.length;
       setCurrentEmoji(activityEmojis[activityIndex]);
-      setLocationEmoji(locationEmojis[locationIndex]);
     }, 2000);
     
-    return () => clearInterval(interval);
+    // Location emoji changes every 2 seconds, but offset by 1 second
+    const locationTimeout = setTimeout(() => {
+      const locationInterval = setInterval(() => {
+        locationIndex = (locationIndex + 1) % locationEmojis.length;
+        setLocationEmoji(locationEmojis[locationIndex]);
+      }, 2000);
+      
+      return () => clearInterval(locationInterval);
+    }, 1000);
+    
+    return () => {
+      clearInterval(activityInterval);
+      clearTimeout(locationTimeout);
+    };
   }, []);
 
   // Computed display value
@@ -275,7 +287,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           <CardContent className="p-0">
             {/* Activity Input - Taller */}
             <div className="relative border-b border-gray-300">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl pointer-events-none">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[28px] pointer-events-none">
                 {currentEmoji}
               </span>
               <Input
@@ -291,7 +303,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             
             {/* Location Input - Shorter */}
             <div className="relative">
-              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl pointer-events-none">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[26px] pointer-events-none">
                 {locationEmoji}
               </span>
               <LocationInput
@@ -311,19 +323,13 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           disabled={(!query.trim() && selectedCategories.length === 0) || isSearching}
           size="icon"
           className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300",
-            // Strong, glossy gradient
-            "bg-gradient-to-br from-amber-300 via-amber-400 to-orange-500",
-            // Outer white ring for contrast against any background
-            "relative ring-[6px] ring-white/90 ring-offset-2 ring-offset-transparent",
-            // Soft glow halo
-            "before:content-[''] before:absolute before:inset-[-12px] before:rounded-full before:bg-amber-400/25 before:blur-2xl before:pointer-events-none",
-            // Hover interaction
-            "hover:from-amber-400 hover:via-amber-500 hover:to-orange-600 hover:scale-105",
+            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-10",
+            "bg-gradient-to-br from-amber-400 via-orange-500 to-orange-600",
+            "hover:from-amber-500 hover:via-orange-600 hover:to-orange-700 hover:scale-105",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 12px 40px rgba(251,146,60,0.55), 0 6px 14px rgba(0,0,0,0.12)'
+            boxShadow: '0 8px 32px rgba(251, 146, 60, 0.6), 0 0 0 6px rgba(255, 255, 255, 0.9)'
           }}
         >
           {isSearching ? (
