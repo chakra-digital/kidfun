@@ -327,12 +327,6 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 requireSelection={true}
                 onValidityChange={setIsLocationValid}
               />
-              {/* Absolutely positioned error to prevent layout shift */}
-              {locationInput && !isLocationValid && (
-                <div className="absolute left-16 -bottom-7 text-sm text-destructive font-medium whitespace-nowrap">
-                  Please choose a location from the suggestions.
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -360,6 +354,15 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           )}
         </Button>
       </div>
+
+      {/* Error message popout below the card */}
+      {locationInput && !isLocationValid && (
+        <div className="flex justify-center -mt-2 mb-4">
+          <div className="bg-destructive/10 border border-destructive/30 rounded-lg px-4 py-2 text-sm text-destructive font-medium shadow-md">
+            Please choose a location from the suggestions.
+          </div>
+        </div>
+      )}
 
       {/* Category Tiles - Uniform Size and Spacing */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mt-8">

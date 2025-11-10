@@ -231,7 +231,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       </div>
       
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-[100] mt-2 w-full bg-white dark:bg-gray-800 backdrop-blur-md border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto">
+        <div className="absolute z-[300] mt-2 w-full bg-white dark:bg-gray-800 backdrop-blur-md border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.place_id}
