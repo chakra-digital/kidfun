@@ -448,7 +448,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           disabled={((!query.trim() && selectedCategories.length === 0) || isSearching || (locationInput && !isLocationValid))}
           size="icon"
           className={cn(
-            "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[5px] md:translate-y-[8px] h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 z-20",
+            "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[21px] md:translate-y-[27px] h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 z-20",
             "bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 shadow-2xl",
             "hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-400 hover:scale-110",
             "disabled:cursor-not-allowed",
@@ -476,7 +476,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       )}
 
       {/* Category Tiles - Uniform Size and Spacing */}
-      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3 mt-44 md:mt-48">
+      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3 mt-56 md:mt-64">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
