@@ -4,12 +4,15 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { Send, Sparkles, MapPin, Palette, Crown, ChefHat, Music, Languages, Trees, Drama, Gamepad2, FlaskConical, GraduationCap, Users, Loader2, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { LocationInput } from '@/components/ui/location-input';
 import { searchCache } from '@/lib/searchCache';
+import { format } from 'date-fns';
+import type { DateRange } from 'react-day-picker';
 
 // Animated emoji placeholder hook
 const useAnimatedPlaceholder = (emojis: string[], baseText: string) => {
@@ -72,12 +75,19 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   // Animated emojis (separate from placeholder text now)
   const activityEmojis = ['⚽', '🎨', '🎭', '🏊', '⛺', '🎪'];
   const locationEmojis = ['📍', '🗺️', '🌍', '✈️', '🧭'];
+  const dateEmojis = ['🗓️', '📅', '⏰', '📆'];
   const [currentEmoji, setCurrentEmoji] = useState(activityEmojis[0]);
   const [locationEmoji, setLocationEmoji] = useState(locationEmojis[0]);
+  const [dateEmoji, setDateEmoji] = useState(dateEmojis[0]);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [dateMode, setDateMode] = useState<'single' | 'range'>('single');
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
   
   useEffect(() => {
     let activityIndex = 0;
     let locationIndex = 0;
+    let dateIndex = 0;
     
     // Activity emoji changes every 2 seconds
     const activityInterval = setInterval(() => {
@@ -95,9 +105,20 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       return () => clearInterval(locationInterval);
     }, 1000);
     
+    // Date emoji changes every 2 seconds, but offset by 0.5 seconds
+    const dateTimeout = setTimeout(() => {
+      const dateInterval = setInterval(() => {
+        dateIndex = (dateIndex + 1) % dateEmojis.length;
+        setDateEmoji(dateEmojis[dateIndex]);
+      }, 2000);
+      
+      return () => clearInterval(dateInterval);
+    }, 500);
+    
     return () => {
       clearInterval(activityInterval);
       clearTimeout(locationTimeout);
+      clearTimeout(dateTimeout);
     };
   }, []);
 
@@ -312,6 +333,96 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               />
             </div>
             
+            {/* Date Input - Middle */}
+            <div className="relative border-b border-gray-300">
+              <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[26px] pointer-events-none z-10 opacity-100">
+                {dateEmoji}
+              </span>
+              <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className="w-full h-14 pl-16 pr-6 text-left border-0 bg-transparent text-xl font-normal text-gray-600 hover:bg-gray-50/50 transition-colors focus:outline-none disabled:opacity-50"
+                    disabled={isSearching}
+                  >
+                    {dateMode === 'single' && selectedDate ? (
+                      <span>{format(selectedDate, 'PPP')}</span>
+                    ) : dateMode === 'range' && dateRange.from ? (
+                      <span>
+                        {format(dateRange.from, 'PP')}
+                        {dateRange.to && ` - ${format(dateRange.to, 'PP')}`}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">When</span>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start" sideOffset={8}>
+                  <div className="p-3 border-b border-border bg-background">
+                    <div className="flex gap-2">
+                      <Button
+                        variant={dateMode === 'single' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setDateMode('single');
+                          setDateRange(undefined);
+                        }}
+                        className="flex-1"
+                      >
+                        Single Date
+                      </Button>
+                      <Button
+                        variant={dateMode === 'range' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setDateMode('range');
+                          setSelectedDate(undefined);
+                        }}
+                        className="flex-1"
+                      >
+                        Date Range
+                      </Button>
+                    </div>
+                  </div>
+                  {dateMode === 'single' ? (
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        if (date) setIsDatePopoverOpen(false);
+                      }}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  ) : (
+                    <Calendar
+                      mode="range"
+                      selected={dateRange}
+                      onSelect={(range) => {
+                        setDateRange(range);
+                        if (range?.from && range?.to) setIsDatePopoverOpen(false);
+                      }}
+                      initialFocus
+                      className="pointer-events-auto"
+                      numberOfMonths={2}
+                    />
+                  )}
+                  <div className="p-3 border-t border-border bg-background flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedDate(undefined);
+                        setDateRange(undefined);
+                      }}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
             {/* Location Input - Shorter */}
             <div className="relative">
               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[26px] pointer-events-none z-10 opacity-100">
