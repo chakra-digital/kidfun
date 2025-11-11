@@ -476,7 +476,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       )}
 
       {/* Category Tiles - Uniform Size and Spacing */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 md:gap-3 mt-16 md:mt-24">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 md:gap-3 mt-32 md:mt-36">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
