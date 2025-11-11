@@ -242,7 +242,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/60 rounded-full"
+            className="absolute right-12 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted/60 rounded-full z-10"
           >
             <X className="h-4 w-4 text-foreground" />
           </Button>

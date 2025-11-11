@@ -170,38 +170,43 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       // Mark map as initialized only after successful creation
       initialized.current = true;
 
-      // Listen for map errors (detect Google error overlay reliably)
+      // Listen for map errors with delayed check to avoid false positives
       try {
         const container = mapContainer.current;
         if (container) {
-          // 1) Immediate check
-          const errNow = container.querySelector('.gm-err-message, .gm-err-container');
-          if (errNow) {
-            console.error('Google Maps error overlay detected immediately');
-            setError('Google Maps configuration issue - check API key restrictions');
-          }
+          // Wait a moment before checking for errors to let map initialize
+          setTimeout(() => {
+            const errEl = container.querySelector('.gm-err-message, .gm-err-container');
+            if (errEl) {
+              const errorText = errEl.textContent || 'Unknown error';
+              console.error('Google Maps error detected:', errorText);
+              setError(`Map error: ${errorText.substring(0, 100)}`);
+            }
+          }, 1500);
 
-          // 2) Observe DOM mutations to catch async error overlays
+          // Observe DOM mutations to catch async error overlays
           const observer = new MutationObserver(() => {
             const errEl = container.querySelector('.gm-err-message, .gm-err-container');
             if (errEl) {
-              console.error('Google Maps error overlay detected via observer');
-              setError('Google Maps configuration issue - check API key restrictions');
+              const errorText = errEl.textContent || 'Configuration issue';
+              console.error('Google Maps error overlay detected:', errorText);
+              setError(`Map error: ${errorText.substring(0, 100)}`);
             }
           });
           observer.observe(container, { childList: true, subtree: true });
 
-          // 3) Also try tilesloaded in case it fires
-          (window as any).google.maps.event.addListener(map.current, 'tilesloaded', () => {
+          // Check on tiles loaded
+          (window as any).google.maps.event.addListenerOnce(map.current, 'tilesloaded', () => {
+            console.log('Google Maps tiles loaded successfully');
             const errorDiv = container.querySelector('.gm-err-message, .gm-err-container');
             if (errorDiv) {
-              console.error('Google Maps failed to load properly (tilesloaded check)');
-              setError('Google Maps configuration issue - check API key restrictions');
+              const errorText = errorDiv.textContent || 'Failed to load tiles';
+              console.error('Google Maps error after tiles loaded:', errorText);
+              setError(`Map error: ${errorText.substring(0, 100)}`);
+            } else {
+              console.log('Map loaded without errors');
             }
           });
-
-          // Cleanup observer when component unmounts or error triggers
-          // We rely on the global cleanup effect to close info windows; observer will be GC'd when container is removed
         }
       } catch (e) {
         console.warn('Map error detection setup failed:', e);
