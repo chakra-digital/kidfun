@@ -167,7 +167,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
         // Invalid free-typed value
         onValidityChange?.(false);
       }
-    }, 150);
+    }, 200);
   };
 
   const handleClear = () => {
@@ -231,15 +231,15 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       </div>
       
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-[300] mt-2 w-full bg-white dark:bg-gray-800 backdrop-blur-md border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto">
+        <div className="absolute z-[9999] mt-2 w-full bg-white dark:bg-gray-800 backdrop-blur-md border-2 border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto">
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.place_id}
               type="button"
               className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
-              onMouseDown={(e) => {
-                // Prevent blur from firing before click
+              onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 handleSuggestionClick(suggestion);
               }}
             >

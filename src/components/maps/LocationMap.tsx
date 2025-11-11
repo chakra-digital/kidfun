@@ -393,8 +393,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
   return (
     <div className={`relative ${className}`}>
-      {/* Loading states - ALWAYS show when searching, prioritize over errors */}
-      {(isSearching || isLoading || !map.current || (providers.length === 0 && !error)) && (
+      {/* Loading states - show when searching, loading, or map not ready */}
+      {(isSearching || isLoading || (!map.current && apiKeySubmitted)) && (
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-lg flex items-center justify-center z-40">
           <div className="text-center">
             <div className="text-5xl mb-4 animate-bounce">
@@ -405,15 +405,25 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
                 ? 'Searching providers...' 
                 : isLoading 
                 ? 'Loading map...' 
-                : !map.current
-                ? 'Preparing map...'
-                : 'No providers to display'}
+                : 'Preparing map...'}
             </p>
-            {providers.length > 0 && (
+            {providers.length > 0 && !isSearching && (
               <p className="text-sm text-muted-foreground">
                 Found {providers.length} location{providers.length !== 1 ? 's' : ''}
               </p>
             )}
+          </div>
+        </div>
+      )}
+      
+      {/* Show "No providers" message when search is done but no results */}
+      {!isSearching && !isLoading && map.current && providers.length === 0 && !error && (
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg flex items-center justify-center z-40">
+          <div className="text-center">
+            <div className="text-5xl mb-4">🔍</div>
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+              No providers to display
+            </p>
           </div>
         </div>
       )}
@@ -452,13 +462,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         </div>
       )}
 
-      {/* Map container - completely hidden if error or loading to prevent Google error UI */}
+      {/* Map container - visible when initialized */}
       <div 
         ref={mapContainer} 
         className="w-full h-full rounded-lg bg-muted" 
         style={{ 
           display: error ? 'none' : 'block',
-          visibility: (isLoading || isSearching) ? 'hidden' : 'visible'
+          visibility: (apiKeySubmitted && !error) ? 'visible' : 'hidden'
         }}
       />
     </div>
