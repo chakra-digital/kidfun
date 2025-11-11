@@ -260,6 +260,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       if (savedApiKey) {
         setGoogleMapsApiKey(savedApiKey);
         setApiKeySubmitted(true);
+        if (!initialized.current) {
+          console.log('Using saved API key, initializing map...');
+          await initializeMap(savedApiKey);
+        }
         return;
       }
         try {
