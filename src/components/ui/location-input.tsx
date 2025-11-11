@@ -237,7 +237,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
               key={suggestion.place_id}
               type="button"
               className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
-              onClick={(e) => {
+              onMouseDown={(e) => {
+                // Prevent blur from firing before click
                 e.preventDefault();
                 e.stopPropagation();
                 handleSuggestionClick(suggestion);

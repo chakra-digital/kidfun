@@ -91,7 +91,7 @@ const Index = () => {
       <main className="flex-grow">
         {/* Hero Section with AI Search */}
         <section 
-          className="relative text-white py-16 md:py-24 overflow-hidden min-h-[70vh] flex items-center"
+          className="relative text-white py-16 md:py-24 min-h-[70vh] flex items-center"
           style={{
             backgroundImage: `url(${heroImage})`,
             backgroundSize: 'cover',

@@ -293,7 +293,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   return (
     <div className={`max-w-2xl mx-auto space-y-6 ${className}`}>
       {/* Redesigned Stacked Search Box */}
-      <div className="relative">
+      <div className="relative z-[1000]">
         <Card className="backdrop-blur-md bg-white dark:bg-white border-0 rounded-3xl" style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
           <CardContent className="p-0">
             {/* Activity Input - Taller */}

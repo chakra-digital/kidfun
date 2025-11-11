@@ -167,6 +167,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         }
       });
 
+      // Mark map as initialized only after successful creation
+      initialized.current = true;
+
       // Listen for map errors (detect Google error overlay reliably)
       try {
         const container = mapContainer.current;
@@ -283,7 +286,6 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       return;
     }
 
-    initialized.current = true;
     console.log('Initializing map from effect...');
     void initializeMap(key);
   }, [apiKeySubmitted, googleMapsApiKey]);
