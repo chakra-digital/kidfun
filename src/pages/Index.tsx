@@ -91,7 +91,7 @@ const Index = () => {
       <main className="flex-grow">
         {/* Hero Section with AI Search */}
         <section 
-          className="relative text-white py-16 md:py-24 min-h-[70vh] flex items-center"
+          className="relative text-white py-8 md:py-16 lg:py-24 min-h-[65vh] md:min-h-[70vh] flex items-center"
           style={{
             backgroundImage: `url(${heroImage})`,
             backgroundSize: 'cover',
@@ -101,10 +101,10 @@ const Index = () => {
         >
           <div className="absolute inset-0 bg-gradient-to-b from-blue-600/40 via-teal-500/40 to-green-500/40"></div>
           
-          <div className="container mx-auto px-4 relative z-10 w-full">
-            <div className="max-w-4xl mx-auto text-center mb-12">
+          <div className="container mx-auto px-3 md:px-4 relative z-10 w-full">
+            <div className="max-w-4xl mx-auto text-center mb-6 md:mb-12">
               <h1 
-                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight text-white"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 leading-tight text-white"
                 style={{
                   textShadow: '0 2px 4px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.4)'
                 }}
@@ -112,7 +112,7 @@ const Index = () => {
                 Where childhood memories are made
               </h1>
               <p 
-                className="text-lg sm:text-xl md:text-2xl text-white/95 mb-8"
+                className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/95 mb-4 md:mb-8"
                 style={{
                   textShadow: '0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)'
                 }}
