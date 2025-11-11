@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin, X, Loader2 } from "lucide-react";
@@ -42,6 +43,24 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const abortControllerRef = useRef<AbortController | null>(null);
   const suppressFetchRef = useRef<boolean>(false);
   const selectedRef = useRef<boolean>(false);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 0 });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX, width: rect.width });
+    };
+    update();
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [isOpen, inputValue]);
 
   useEffect(() => {
     setInputValue(value);

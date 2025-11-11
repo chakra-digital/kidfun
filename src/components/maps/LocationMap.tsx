@@ -240,21 +240,25 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         setApiKeySubmitted(true);
         return;
       }
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase.functions.invoke('get-maps-key');
-        if (error) throw error;
-        const key = (data as any)?.key;
-        if (!key) throw new Error('No API key returned');
-        localStorage.setItem('googleMapsApiKey', key);
-        setGoogleMapsApiKey(key);
-        setApiKeySubmitted(true);
-      } catch (e: any) {
-        console.error('Failed to fetch Maps API key', e);
-        setError(e.message || 'Unable to load Google Maps API key');
-      } finally {
-        setIsLoading(false);
-      }
+        try {
+          setIsLoading(true);
+          const { data, error } = await supabase.functions.invoke('get-maps-key');
+          if (error) throw error;
+          const key = (data as any)?.key;
+          if (!key) throw new Error('No API key returned');
+          localStorage.setItem('googleMapsApiKey', key);
+          setGoogleMapsApiKey(key);
+          setApiKeySubmitted(true);
+          if (!initialized.current) {
+            console.log('API key fetched, initializing map directly...');
+            void initializeMap(key);
+          }
+        } catch (e: any) {
+          console.error('Failed to fetch Maps API key', e);
+          setError(e.message || 'Unable to load Google Maps API key');
+        } finally {
+          setIsLoading(false);
+        }
     };
     void init();
   }, []);

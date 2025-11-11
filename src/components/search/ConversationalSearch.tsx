@@ -358,7 +358,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       {/* Error message popout below the card */}
       {locationInput && !isLocationValid && (
         <div className="flex justify-center -mt-2 mb-4">
-          <div className="bg-destructive/10 border border-destructive/30 rounded-lg px-4 py-2 text-sm text-destructive font-medium shadow-md">
+          <div className="rounded-full px-4 py-1.5 text-sm font-semibold text-gray-900 shadow-lg bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 border border-white/40 backdrop-blur">
             Please choose a location from the suggestions.
           </div>
         </div>
