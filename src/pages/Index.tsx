@@ -23,6 +23,7 @@ const Index = () => {
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [selectedAIResult, setSelectedAIResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const { profiles: providers, loading: providersLoading } = usePublicProviderProfiles();
   const navigate = useNavigate();
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -150,10 +151,30 @@ const Index = () => {
                   </Button>
                 )}
               </div>
+
+              {/* Sticky Tab Switcher for Mobile */}
+              <div className="lg:hidden sticky top-16 z-30 bg-background/95 backdrop-blur-sm -mx-4 px-4 py-3 mb-4 border-b shadow-sm">
+                <div className="flex gap-2">
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    onClick={() => setViewMode('list')}
+                    className="flex-1"
+                  >
+                    List View
+                  </Button>
+                  <Button
+                    variant={viewMode === 'map' ? 'default' : 'outline'}
+                    onClick={() => setViewMode('map')}
+                    className="flex-1"
+                  >
+                    Map View
+                  </Button>
+                </div>
+              </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Results Cards - Left Side */}
-                <div className="space-y-4 lg:max-h-[calc(100vh-16rem)] lg:overflow-y-auto lg:pr-2">
+                {/* Results Cards - Left Side (Hidden on mobile when map view) */}
+                <div className={`space-y-4 lg:max-h-[calc(100vh-16rem)] lg:overflow-y-auto lg:pr-2 ${viewMode === 'map' ? 'hidden lg:block' : ''}`}>
                   {isLoadingResults ? (
                     <SearchResultSkeletonList count={5} />
                   ) : (
@@ -167,8 +188,8 @@ const Index = () => {
                   )}
                 </div>
                 
-                {/* Map - Right Side */}
-                <div className="lg:sticky lg:top-24 h-[400px] lg:h-[calc(100vh-16rem)] rounded-lg overflow-hidden border">
+                {/* Map - Right Side (Full width on mobile when map view) */}
+                <div className={`lg:sticky lg:top-24 h-[600px] lg:h-[calc(100vh-16rem)] rounded-lg overflow-hidden border ${viewMode === 'list' ? 'hidden lg:block' : ''}`}>
                   <LocationMap 
                     providers={aiResults.filter(r => r.latitude && r.longitude).map(r => ({
                       id: r.id || r.google_place_id || '',

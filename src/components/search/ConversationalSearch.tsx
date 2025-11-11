@@ -204,13 +204,20 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     console.log('Starting AI search...');
     
     try {
-      const { data, error } = await supabase.functions.invoke('ai-provider-search', {
+      // Add timeout to prevent hanging requests when app goes to background
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Search request timed out')), 30000); // 30 second timeout
+      });
+
+      const searchPromise = supabase.functions.invoke('ai-provider-search', {
         body: { query: enhancedQuery, location: searchLocation }
       });
 
+      const { data, error } = await Promise.race([searchPromise, timeoutPromise]) as any;
+
       if (error) {
         console.error('Edge function error:', error);
-        throw new Error(error.message || 'Failed to invoke search function');
+        throw new Error(error.message || 'Failed to connect to search service');
       }
 
       if (!data) {
@@ -236,9 +243,18 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 
     } catch (error: any) {
       console.error('Search error details:', error);
+      
+      // More specific error messaging
+      let errorMessage = "Failed to search providers. Please try again.";
+      if (error.message?.includes('timeout')) {
+        errorMessage = "Search took too long. Please check your connection and try again.";
+      } else if (error.message?.includes('Failed to send')) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      }
+      
       toast({
         title: "Search Error",
-        description: error.message || "Failed to search providers. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -476,7 +492,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       )}
 
       {/* Category Tiles - Uniform Size and Spacing */}
-      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3 mt-28 md:mt-36">
+      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3 mt-48 md:mt-48">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
