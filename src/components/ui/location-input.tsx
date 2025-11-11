@@ -173,9 +173,8 @@ export const LocationInput: React.FC<LocationInputProps> = ({
     // Small delay to allow suggestion click to fire first
     setTimeout(() => {
       setIsOpen(false);
-      // Allow fetching suggestions again after blur
-      suppressFetchRef.current = false;
       const val = inputValue.trim();
+      // Do NOT re-enable fetching here; wait until user types again
       if (!requireSelection || val.length === 0 || selectedRef.current) {
         if (inputValue !== value) {
           onChange(inputValue);
@@ -186,7 +185,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
         // Invalid free-typed value
         onValidityChange?.(false);
       }
-    }, 200);
+    }, 150);
   };
 
   const handleClear = () => {
@@ -226,9 +225,10 @@ export const LocationInput: React.FC<LocationInputProps> = ({
             }
           }}
           onFocus={() => {
-            // Allow suggestions when user starts typing again
-            suppressFetchRef.current = false;
+            /* keep suggestions closed until user types again */
           }}
+          autoComplete="off"
+          spellCheck={false}
           placeholder={placeholder}
           className={cn("pr-10", className)}
         />
@@ -256,7 +256,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
               key={suggestion.place_id}
               type="button"
               className="w-full px-4 py-3 text-left text-sm hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 first:rounded-t-xl last:rounded-b-xl"
-              onMouseDown={(e) => {
+              onPointerDown={(e) => {
                 // Prevent blur from firing before click
                 e.preventDefault();
                 e.stopPropagation();

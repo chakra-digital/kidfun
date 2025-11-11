@@ -221,7 +221,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   };
 
 
-  const handleResetApiKey = () => {
+  const handleResetApiKey = async () => {
     localStorage.removeItem('googleMapsApiKey');
     setApiKeySubmitted(false);
     setGoogleMapsApiKey('');
@@ -229,6 +229,22 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
     initialized.current = false;
     if (map.current) {
       map.current = null;
+    }
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase.functions.invoke('get-maps-key');
+      if (error) throw error;
+      const key = (data as any)?.key;
+      if (!key) throw new Error('No API key returned');
+      localStorage.setItem('googleMapsApiKey', key);
+      setGoogleMapsApiKey(key);
+      setApiKeySubmitted(true);
+      await initializeMap(key);
+    } catch (e: any) {
+      console.error('Failed to fetch Maps API key on retry', e);
+      setError(e.message || 'Unable to load Google Maps API key');
+    } finally {
+      setIsLoading(false);
     }
   };
   // Fetch API key on mount (from localStorage or Edge Function) and auto-submit
@@ -400,7 +416,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   return (
     <div className={`relative ${className}`}>
       {/* Loading states - show when searching, loading, or map not ready */}
-      {(isSearching || isLoading || (!map.current && apiKeySubmitted)) && (
+      {(isSearching || isLoading || !map.current) && (
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 rounded-lg flex items-center justify-center z-40">
           <div className="text-center">
             <div className="text-5xl mb-4 animate-bounce">
@@ -473,8 +489,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         ref={mapContainer} 
         className="w-full h-full rounded-lg bg-muted" 
         style={{ 
-          display: error ? 'none' : 'block',
-          visibility: (apiKeySubmitted && !error) ? 'visible' : 'hidden'
+          display: error ? 'none' : 'block'
         }}
       />
     </div>
