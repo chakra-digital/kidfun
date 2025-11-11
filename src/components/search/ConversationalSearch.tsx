@@ -341,18 +341,18 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
                 <PopoverTrigger asChild>
                   <button
-                    className="w-full h-14 pl-16 pr-6 text-left border-0 bg-transparent text-xl font-normal text-gray-600 hover:bg-gray-50/50 transition-colors focus:outline-none disabled:opacity-50"
+                    className="w-full h-14 pl-16 pr-6 text-left border-0 bg-transparent font-normal text-gray-600 hover:bg-gray-50/50 transition-colors focus:outline-none disabled:opacity-50"
                     disabled={isSearching}
                   >
                     {dateMode === 'single' && selectedDate ? (
-                      <span>{format(selectedDate, 'PPP')}</span>
+                      <span className="text-base">{format(selectedDate, 'PPP')}</span>
                     ) : dateMode === 'range' && dateRange?.from ? (
-                      <span>
+                      <span className="text-base">
                         {format(dateRange?.from as Date, 'PP')}
                         {dateRange?.to && ` - ${format(dateRange?.to as Date, 'PP')}`}
                       </span>
                     ) : (
-                      <span className="text-gray-400">When</span>
+                      <span className="text-gray-400 text-base">When</span>
                     )}
                   </button>
                 </PopoverTrigger>

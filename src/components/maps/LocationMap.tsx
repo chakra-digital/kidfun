@@ -154,9 +154,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e0e0e0' }] },
           // Muted green for parks/natural areas
           { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#c8e6c9' }] },
-          // Keep POI labels visible but subtle
-          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] },
-          { featureType: 'poi', elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] }
+          // Hide all POI labels and icons for cleaner map (only show our result markers)
+          { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+          { featureType: 'poi.business', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', elementType: 'labels', stylers: [{ visibility: 'simplified' }] }
         ],
         mapTypeControl: false,
         streetViewControl: false,
@@ -400,12 +401,12 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
     // Fit map to new markers with proper padding
     if (validProviders.length === 1) {
-      // Single marker - just center on it with reasonable zoom
+      // Single marker - just center on it with reasonable zoom (closer for detail view)
       map.current.setCenter(validProviders[0].latitude && validProviders[0].longitude 
         ? { lat: validProviders[0].latitude, lng: validProviders[0].longitude }
         : bounds.getCenter()
       );
-      map.current.setZoom(12);
+      map.current.setZoom(15);
     } else {
       // Multiple markers - fit to bounds
       map.current.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
