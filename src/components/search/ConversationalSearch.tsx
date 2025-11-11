@@ -346,10 +346,10 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                   >
                     {dateMode === 'single' && selectedDate ? (
                       <span>{format(selectedDate, 'PPP')}</span>
-                    ) : dateMode === 'range' && dateRange.from ? (
+                    ) : dateMode === 'range' && dateRange?.from ? (
                       <span>
-                        {format(dateRange.from, 'PP')}
-                        {dateRange.to && ` - ${format(dateRange.to, 'PP')}`}
+                        {format(dateRange?.from as Date, 'PP')}
+                        {dateRange?.to && ` - ${format(dateRange?.to as Date, 'PP')}`}
                       </span>
                     ) : (
                       <span className="text-gray-400">When</span>
