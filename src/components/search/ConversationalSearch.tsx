@@ -328,7 +328,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What are you looking for?"
-                className="h-20 pl-16 pr-6 border-0 bg-transparent text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-gray-600 disabled:opacity-100 rounded-none"
+                className="h-20 pl-16 pr-6 border-0 bg-transparent text-base font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-gray-600 disabled:opacity-100 rounded-none"
                 disabled={isSearching}
               />
             </div>
@@ -433,7 +433,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-14 pl-16 pr-20 border-0 bg-transparent text-xl font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
+                className="h-14 pl-16 pr-20 border-0 bg-transparent text-base font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
                 disabled={isSearching}
                 requireSelection={true}
                 onValidityChange={setIsLocationValid}
@@ -442,13 +442,13 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           </CardContent>
         </Card>
         
-        {/* Ultra-Bright Search Button - Maximum Visibility */}
+        {/* Ultra-Bright Search Button - Centered at bottom */}
         <Button
           onClick={() => handleSearch()}
           disabled={((!query.trim() && selectedCategories.length === 0) || isSearching || (locationInput && !isLocationValid))}
           size="icon"
           className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 h-16 w-16 rounded-full transition-all duration-300 z-20",
+            "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 h-16 w-16 rounded-full transition-all duration-300 z-20",
             "bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 shadow-2xl",
             "hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-400 hover:scale-110",
             "disabled:cursor-not-allowed",
@@ -476,7 +476,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       )}
 
       {/* Category Tiles - Uniform Size and Spacing */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mt-8">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mt-16">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
