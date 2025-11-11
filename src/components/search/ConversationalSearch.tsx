@@ -442,13 +442,13 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           </CardContent>
         </Card>
         
-        {/* Ultra-Bright Search Button - Centered at bottom */}
+        {/* Ultra-Bright Search Button - Centered at bottom, overlapping 1/3 */}
         <Button
           onClick={() => handleSearch()}
           disabled={((!query.trim() && selectedCategories.length === 0) || isSearching || (locationInput && !isLocationValid))}
           size="icon"
           className={cn(
-            "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 h-12 w-12 md:h-16 md:w-16 rounded-full transition-all duration-300 z-20",
+            "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[5px] md:translate-y-[8px] h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 z-20",
             "bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 shadow-2xl",
             "hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-400 hover:scale-110",
             "disabled:cursor-not-allowed",
@@ -459,9 +459,9 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
           }}
         >
           {isSearching ? (
-            <Loader2 className="w-5 h-5 md:w-7 md:h-7 text-gray-900 animate-spin drop-shadow-md" />
+            <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-gray-900 animate-spin drop-shadow-md" />
           ) : (
-            <Search className="w-5 h-5 md:w-7 md:h-7 text-gray-900 drop-shadow-md" />
+            <Search className="w-6 h-6 md:w-8 md:h-8 text-gray-900 drop-shadow-md" />
           )}
         </Button>
       </div>
@@ -476,7 +476,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       )}
 
       {/* Category Tiles - Uniform Size and Spacing */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 md:gap-3 mt-32 md:mt-36">
+      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3 mt-44 md:mt-48">
         {categories.map((category) => {
           const IconComponent = category.icon;
           const isSelected = selectedCategories.includes(category.value);
@@ -488,7 +488,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               onClick={() => toggleCategory(category.value)}
               disabled={isSearching}
               className={cn(
-                "aspect-square flex flex-col items-center justify-center gap-1.5 md:gap-2 rounded-xl md:rounded-2xl relative group transition-all duration-200 border p-3 md:p-4",
+                "aspect-square flex flex-col items-center justify-center gap-1 md:gap-2 rounded-lg md:rounded-2xl relative group transition-all duration-200 border p-2 md:p-4",
                 isSelected 
                   ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary shadow-lg' 
                   : 'bg-white/60 dark:bg-background/60 backdrop-blur-sm border-gray-200/50 dark:border-border/50 text-gray-600 dark:text-foreground/80 hover:border-primary/30 hover:shadow-sm hover:bg-white/70 dark:hover:bg-background/70',
@@ -496,15 +496,15 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
               )}
             >
               {isCategorySearching && (
-                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm rounded-xl md:rounded-2xl">
-                  <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-primary" />
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm rounded-lg md:rounded-2xl">
+                  <Loader2 className="w-3 h-3 md:w-5 md:h-5 animate-spin text-primary" />
                 </div>
               )}
               <IconComponent className={cn(
-                "w-5 h-5 md:w-7 md:h-7 transition-transform duration-300",
+                "w-4 h-4 md:w-7 md:h-7 transition-transform duration-300",
                 !isSelected && "group-hover:scale-110"
               )} />
-              <span className="text-[10px] md:text-xs font-medium text-center leading-tight">
+              <span className="text-[9px] md:text-xs font-medium text-center leading-tight">
                 {category.label}
               </span>
             </button>
