@@ -105,14 +105,14 @@ serve(async (req) => {
 });
 
 async function analyzeSearchQuery(query: string) {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+      'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'google/gemini-2.5-flash',
       messages: [{
         role: 'system',
         content: `You are a search query analyzer for children's activity providers. Extract structured information from user queries.
@@ -130,8 +130,7 @@ async function analyzeSearchQuery(query: string) {
         content: query
       }],
       response_format: { type: "json_object" },
-      max_tokens: 300,
-      temperature: 0.3
+      max_tokens: 300
     }),
   });
 
@@ -305,15 +304,15 @@ async function rankAndCombineResults(existingProviders: any[], googlePlacesResul
     return [];
   }
 
-  // Use OpenAI to rank and explain relevance
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  // Use Gemini via Lovable AI Gateway to rank and explain relevance
+  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
+      'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'google/gemini-2.5-flash',
       messages: [{
         role: 'system',
         content: `You are helping parents find the best activity providers for their children. 
@@ -344,8 +343,7 @@ async function rankAndCombineResults(existingProviders: any[], googlePlacesResul
           source: p.source
         })))}`
       }],
-      max_tokens: 1500,
-      temperature: 0.3
+      max_tokens: 1500
     }),
   });
 
