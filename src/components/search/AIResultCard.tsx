@@ -3,6 +3,8 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Star, ExternalLink, Sparkles, Phone } from 'lucide-react';
+import { useProviderImage } from '@/hooks/useProviderImage';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface AIResultCardProps {
   id?: string;
@@ -22,9 +24,12 @@ interface AIResultCardProps {
   isNewDiscovery: boolean;
   source: string;
   onClick?: () => void;
+  image_url?: string | null;
 }
 
 const AIResultCard: React.FC<AIResultCardProps> = ({
+  id,
+  google_place_id,
   business_name,
   location,
   google_rating,
@@ -36,8 +41,19 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
   relevanceScore,
   explanation,
   isNewDiscovery,
-  onClick
+  onClick,
+  image_url,
 }) => {
+  const providerId = id || google_place_id || '';
+  
+  const { imageUrl: generatedImage, loading: imageLoading } = useProviderImage({
+    providerId,
+    businessName: business_name,
+    specialties,
+    description,
+    existingImageUrl: image_url,
+  });
+  
   const formatLocation = (location: string) => {
     // Truncate long addresses for display
     return location.length > 60 ? location.substring(0, 60) + '...' : location;
@@ -47,6 +63,19 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
     <Card className={`cursor-pointer transition-all duration-200 hover:shadow-lg animate-fade-in ${
       isNewDiscovery ? 'border-l-4 border-l-primary' : ''
     }`} onClick={onClick}>
+      {/* Provider Preview Image */}
+      {imageLoading ? (
+        <Skeleton className="w-full h-32" />
+      ) : generatedImage ? (
+        <div className="relative h-32 overflow-hidden">
+          <img
+            src={generatedImage}
+            alt={business_name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : null}
+      
       <CardContent className="p-3">
         <div className="space-y-2">
           {/* Header */}

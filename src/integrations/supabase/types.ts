@@ -143,6 +143,7 @@ export type Database = {
           google_rating: number | null
           google_reviews_count: number | null
           id: string
+          image_url: string | null
           insurance_verified: boolean | null
           latitude: number | null
           license_number: string | null
@@ -170,6 +171,7 @@ export type Database = {
           google_rating?: number | null
           google_reviews_count?: number | null
           id?: string
+          image_url?: string | null
           insurance_verified?: boolean | null
           latitude?: number | null
           license_number?: string | null
@@ -197,6 +199,7 @@ export type Database = {
           google_rating?: number | null
           google_reviews_count?: number | null
           id?: string
+          image_url?: string | null
           insurance_verified?: boolean | null
           latitude?: number | null
           license_number?: string | null
