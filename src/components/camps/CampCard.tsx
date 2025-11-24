@@ -3,6 +3,8 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Star, MapPin, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProviderImage } from "@/hooks/useProviderImage";
 
 export interface CampCardProps {
   id: string;
@@ -19,6 +21,9 @@ export interface CampCardProps {
   distance?: string;
   age?: string;
   external_website?: string;
+  specialties?: string[];
+  description?: string;
+  image_url?: string | null;
 }
 
 const CampCard = ({
@@ -36,7 +41,20 @@ const CampCard = ({
   distance,
   age,
   external_website,
+  specialties,
+  description,
+  image_url,
 }: CampCardProps) => {
+  
+  const { imageUrl: generatedImage, loading: imageLoading } = useProviderImage({
+    providerId: id,
+    businessName: title,
+    specialties,
+    description,
+    existingImageUrl: image_url,
+  });
+
+  const displayImage = generatedImage || image;
   
   // Handle click - navigate to provider's website if available, otherwise to provider page
   const handleClick = (e: React.MouseEvent) => {
@@ -54,11 +72,15 @@ const CampCard = ({
   return (
     <Link to={`/provider/${id}`} className="block" onClick={handleClick}>
       <div className="rounded-xl overflow-hidden shadow-sm border card-hover">
-        {/* Card Image - Only show if image exists */}
-        {image && (
+        {/* Card Image - Show loading skeleton or image */}
+        {imageLoading ? (
+          <div className="relative aspect-[4/3]">
+            <Skeleton className="w-full h-full" />
+          </div>
+        ) : displayImage ? (
           <div className="relative aspect-[4/3]">
             <img
-              src={image}
+              src={displayImage}
               alt={title}
               className="w-full h-full object-cover"
             />
@@ -77,10 +99,10 @@ const CampCard = ({
               </div>
             )}
           </div>
-        )}
+        ) : null}
 
         {/* Card Content */}
-        <div className={image ? "p-3" : "p-4"}>
+        <div className={displayImage ? "p-3" : "p-4"}>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center space-x-1 text-sm text-gray-600">
               <MapPin className="h-3.5 w-3.5" />
