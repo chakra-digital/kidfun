@@ -200,7 +200,8 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
 
   const allResults: any[] = [];
 
-  for (const searchQuery of searchQueries) {
+  // Execute all Google Places searches in parallel for faster results
+  const searchPromises = searchQueries.map(async (searchQuery) => {
     try {
       const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${googlePlacesApiKey}&type=establishment${locationBias}`;
       
@@ -274,15 +275,19 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
           })
         );
 
-        allResults.push(...detailedResults);
         console.log(`Added ${detailedResults.length} results from query: "${searchQuery}"`);
+        return detailedResults;
       } else if (data.status !== 'ZERO_RESULTS') {
         console.log(`Google Places API error for query "${searchQuery}":`, data.status, data.error_message);
       }
     } catch (error) {
       console.error(`Error searching Google Places for "${searchQuery}":`, error);
     }
-  }
+    return [];
+  });
+
+  const resultsArrays = await Promise.all(searchPromises);
+  const allResults = resultsArrays.flat();
 
   // Remove duplicates based on place_id
   const uniqueResults = allResults.filter((result, index, self) => 
