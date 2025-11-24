@@ -118,8 +118,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       }, 12000);
     });
   };
-  const initializeMap = async (apiKey: string) => {
-    if (!mapContainer.current || !apiKey) return;
+  const initializeMap = React.useCallback(async (apiKey: string) => {
+    if (!mapContainer.current || !apiKey || initialized.current) return;
 
     setIsLoading(true);
     setError('');
@@ -224,7 +224,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [center]);
 
 
   const handleResetApiKey = async () => {
@@ -294,7 +294,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
   // Initialize map after the container is mounted and key is available
   useEffect(() => {
-    if (!apiKeySubmitted) return;
+    if (!apiKeySubmitted || initialized.current) return;
 
     const key = (googleMapsApiKey || localStorage.getItem('googleMapsApiKey') || '').trim();
 
@@ -306,14 +306,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       console.warn('No API key available to initialize map');
       return;
     }
-    if (initialized.current) {
-      console.log('Map already initialized, skipping');
-      return;
-    }
 
     console.log('Initializing map from effect...');
     void initializeMap(key);
-  }, [apiKeySubmitted, googleMapsApiKey]);
+  }, [apiKeySubmitted, initializeMap, googleMapsApiKey]);
 
   // Add markers when providers change and map is ready
   useEffect(() => {
