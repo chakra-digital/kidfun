@@ -83,8 +83,11 @@ const Index = () => {
     external_website: provider.external_website
   }));
 
-  // Get featured providers (first 8 for better grid layout)
-  const featuredProviders = transformedProviders.slice(6, 14);
+  // Get featured providers (first 8) - omit external_website so they open provider modal
+  const featuredProviders = transformedProviders.slice(6, 14).map(provider => ({
+    ...provider,
+    external_website: undefined // Force navigation to provider detail page
+  }));
 
   return (
     <div className="min-h-screen flex flex-col">
