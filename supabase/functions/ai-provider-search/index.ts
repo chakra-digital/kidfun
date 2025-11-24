@@ -198,8 +198,6 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
 
   console.log('Google Places search queries:', searchQueries);
 
-  const allResults: any[] = [];
-
   // Execute all Google Places searches in parallel for faster results
   const searchPromises = searchQueries.map(async (searchQuery) => {
     try {

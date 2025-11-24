@@ -83,11 +83,8 @@ const Index = () => {
     external_website: provider.external_website
   }));
 
-  // Get featured providers (first 8) - omit external_website so they open provider modal
-  const featuredProviders = transformedProviders.slice(6, 14).map(provider => ({
-    ...provider,
-    external_website: undefined // Force navigation to provider detail page
-  }));
+  // Get featured providers (first 8)
+  const featuredProviders = transformedProviders.slice(0, 8);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -244,8 +241,10 @@ const Index = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {featuredProviders.map((camp) => (
-                    <CampCard key={camp.id} {...camp} />
+                  {featuredProviders.map((provider) => (
+                    <div key={provider.id} onClick={() => handleAIResultClick(provider)} className="cursor-pointer">
+                      <CampCard {...provider} />
+                    </div>
                   ))}
                 </div>
               )}
