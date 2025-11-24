@@ -60,7 +60,15 @@ export const useProviderImage = ({
         }
       } catch (err: any) {
         console.error('Error generating provider image:', err);
-        setError(err.message || 'Failed to generate image');
+        const errorMessage = err.message || 'Failed to generate image';
+        
+        // Check if it's a payment/credit issue
+        if (errorMessage.includes('Payment required') || errorMessage.includes('credits')) {
+          console.warn('Lovable AI credits exhausted - image generation unavailable');
+          setError('AI image generation unavailable');
+        } else {
+          setError(errorMessage);
+        }
       } finally {
         setLoading(false);
       }

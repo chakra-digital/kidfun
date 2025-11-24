@@ -46,7 +46,7 @@ const CampCard = ({
   image_url,
 }: CampCardProps) => {
   
-  const { imageUrl: generatedImage, loading: imageLoading } = useProviderImage({
+  const { imageUrl: generatedImage, loading: imageLoading, error: imageError } = useProviderImage({
     providerId: id,
     businessName: title,
     specialties,
@@ -54,6 +54,7 @@ const CampCard = ({
     existingImageUrl: image_url,
   });
 
+  // Fall back to placeholder if generation fails or is unavailable
   const displayImage = generatedImage || image;
   
   // Handle click - navigate to provider's website if available, otherwise to provider page
@@ -72,8 +73,8 @@ const CampCard = ({
   return (
     <Link to={`/provider/${id}`} className="block" onClick={handleClick}>
       <div className="rounded-xl overflow-hidden shadow-sm border card-hover">
-        {/* Card Image - Show loading skeleton or image */}
-        {imageLoading ? (
+        {/* Card Image - Show loading skeleton, image, or nothing if generation failed */}
+        {imageLoading && !imageError ? (
           <div className="relative aspect-[4/3]">
             <Skeleton className="w-full h-full" />
           </div>
