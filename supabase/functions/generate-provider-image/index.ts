@@ -27,9 +27,17 @@ serve(async (req) => {
 
     // Build a descriptive prompt based on provider info
     const specialtiesText = specialties?.join(', ') || 'activities';
-    const prompt = `A vibrant, welcoming preview image for "${businessName}", a children's activity provider specializing in ${specialtiesText}. The image should be colorful, family-friendly, and convey fun and learning. Include elements related to ${specialtiesText}. Modern, professional illustration style. 16:9 aspect ratio.`;
+    
+    // Create a prompt that emphasizes NO TEXT or minimal background text only
+    const prompt = `Create a clean, vibrant illustration showing children enjoying ${specialtiesText} activities. 
+Style: Modern, family-friendly, colorful illustration with soft lighting. 
+Scene: Show diverse children actively engaged in ${specialtiesText} in a welcoming environment.
+CRITICAL: No text overlays, no business names, no labels, no words. Pure illustration only.
+If any text must appear, it should be tiny and naturally integrated into the background (like on a sign or poster in the scene), barely visible.
+Composition: Dynamic action shot, warm and inviting atmosphere.
+Format: 16:9 aspect ratio, professional quality.`;
 
-    console.log('Generating image with prompt:', prompt);
+    console.log('Generating image with minimal-text prompt for:', businessName);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
