@@ -34,6 +34,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   const [apiKeySubmitted, setApiKeySubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const errorSetRef = useRef(false); // Prevent error re-renders
   const infoWindowsRef = useRef<any[]>([]);
   const markersRef = useRef<any[]>([]);
   const [currentBallEmoji, setCurrentBallEmoji] = useState('⚽');
@@ -178,20 +179,23 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           // Wait a moment before checking for errors to let map initialize
           setTimeout(() => {
             const errEl = container.querySelector('.gm-err-message, .gm-err-container');
-            if (errEl) {
+            if (errEl && !errorSetRef.current) {
               const errorText = errEl.textContent || 'Unknown error';
               console.error('Google Maps error detected:', errorText);
+              errorSetRef.current = true;
               setError(`Map error: ${errorText.substring(0, 100)}`);
             }
           }, 1500);
 
-          // Observe DOM mutations to catch async error overlays
+          // Observe DOM mutations to catch async error overlays (once only)
           const observer = new MutationObserver(() => {
             const errEl = container.querySelector('.gm-err-message, .gm-err-container');
-            if (errEl) {
+            if (errEl && !errorSetRef.current) {
               const errorText = errEl.textContent || 'Configuration issue';
               console.error('Google Maps error overlay detected:', errorText);
+              errorSetRef.current = true;
               setError(`Map error: ${errorText.substring(0, 100)}`);
+              observer.disconnect(); // Stop observing after first error
             }
           });
           observer.observe(container, { childList: true, subtree: true });
@@ -200,9 +204,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           (window as any).google.maps.event.addListenerOnce(map.current, 'tilesloaded', () => {
             console.log('Google Maps tiles loaded successfully');
             const errorDiv = container.querySelector('.gm-err-message, .gm-err-container');
-            if (errorDiv) {
+            if (errorDiv && !errorSetRef.current) {
               const errorText = errorDiv.textContent || 'Failed to load tiles';
               console.error('Google Maps error after tiles loaded:', errorText);
+              errorSetRef.current = true;
               setError(`Map error: ${errorText.substring(0, 100)}`);
             } else {
               console.log('Map loaded without errors');
@@ -232,6 +237,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
     setApiKeySubmitted(false);
     setGoogleMapsApiKey('');
     setError('');
+    errorSetRef.current = false; // Reset error flag
     initialized.current = false;
     if (map.current) {
       map.current = null;
