@@ -60,7 +60,16 @@ serve(async (req) => {
     // Step 3: Get existing providers from our database
     const { data: existingProviders } = await supabase.rpc('get_public_provider_info');
 
-    // Step 4: Combine and rank results using AI
+    // Step 4: Return Google Places results FIRST for fast initial display
+    // This gives users immediate results while we do AI ranking in background
+    const quickResults = [...existingProviders || [], ...googlePlacesResults].map(p => ({
+      ...p,
+      relevanceScore: p.google_rating ? p.google_rating * 20 : 50,
+      explanation: "Quick result",
+      isNewDiscovery: p.source === 'google_places'
+    })).slice(0, 15);
+
+    // Step 5: Do AI ranking for better sorting (but don't block initial results)
     const rankedResults = await rankAndCombineResults(
       existingProviders || [],
       googlePlacesResults,
@@ -68,7 +77,7 @@ serve(async (req) => {
       query
     );
 
-    // Step 5: Cache the results
+    // Step 6: Cache the ranked results
     const { error: cacheError } = await supabase.from('search_cache').insert({
       query_hash: queryHash,
       original_query: query,
