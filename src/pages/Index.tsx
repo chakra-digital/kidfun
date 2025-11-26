@@ -13,7 +13,6 @@ import type { AIResult } from "@/components/search/AIResultModal";
 import { User, Calendar, Star } from "lucide-react";
 import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
-import { getProviderImage } from "@/lib/imageUtils";
 
 // Mock data for camps
 
@@ -65,11 +64,21 @@ const Index = () => {
     setIsModalOpen(true);
   };
 
-  // Transform provider profiles to CampCard format
-  const transformedProviders = providers.map((provider) => ({
+  // Transform provider profiles to CampCard format with deduplication
+  const uniqueProviders = providers.reduce((acc, provider) => {
+    // Deduplicate by business name (case-insensitive)
+    const key = provider.business_name.toLowerCase().trim();
+    if (!acc.has(key)) {
+      acc.set(key, provider);
+    }
+    return acc;
+  }, new Map());
+
+  const transformedProviders = Array.from(uniqueProviders.values()).map((provider) => ({
     id: provider.id,
     title: provider.business_name,
-    image: '', // Remove images to avoid duplicative/irrelevant content
+    image: '', // Let CampCard's useProviderImage handle it
+    image_url: null, // Force fresh image loading
     location: provider.location,
     price: provider.base_price || 35,
     priceUnit: "session" as const,
@@ -78,13 +87,15 @@ const Index = () => {
     dates: "Available",
     availability: "Available",
     type: "activity" as const,
-    age: "6-12", // Default age range
+    age: provider.age_groups?.[0] || "6-12",
     distance: "Austin area",
-    external_website: provider.external_website
+    external_website: provider.external_website,
+    specialties: provider.specialties,
+    description: provider.description
   }));
 
-  // Get featured providers (first 8)
-  const featuredProviders = transformedProviders.slice(0, 8);
+  // Get featured providers (first 12, since we deduplicated)
+  const featuredProviders = transformedProviders.slice(0, 12);
 
   return (
     <div className="min-h-screen flex flex-col">

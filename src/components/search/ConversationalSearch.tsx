@@ -63,6 +63,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
 }) => {
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [searchStartTime, setSearchStartTime] = useState<number | null>(null);
+  const [searchDuration, setSearchDuration] = useState<number>(0);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [locationInput, setLocationInput] = useState('');
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
@@ -142,6 +144,19 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     }
   }, []);
 
+  // Timer to track search duration
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isSearching && searchStartTime) {
+      interval = setInterval(() => {
+        setSearchDuration(Math.floor((Date.now() - searchStartTime) / 1000));
+      }, 1000);
+    } else {
+      setSearchDuration(0);
+    }
+    return () => clearInterval(interval);
+  }, [isSearching, searchStartTime]);
+
   const handleSearch = async (categoryOverride?: string, locationOverride?: string) => {
     const searchQuery = query.trim();
     const searchCategory = categoryOverride || (selectedCategories.length > 0 ? selectedCategories.join(', ') : '');
@@ -201,6 +216,7 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     onSearchStart?.();
 
     setIsSearching(true);
+    setSearchStartTime(Date.now());
     console.log('Starting AI search...');
     
     try {
@@ -278,6 +294,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       });
     } finally {
       setIsSearching(false);
+      setSearchStartTime(null);
+      setSearchDuration(0);
     }
   };
 
@@ -499,6 +517,16 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
             <Search className="w-6 h-6 md:w-8 md:h-8 text-gray-900 drop-shadow-md" />
           )}
         </Button>
+        
+        {/* Search progress indicator */}
+        {isSearching && searchDuration > 2 && (
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[160px] sm:translate-y-[168px] md:translate-y-[144px] z-10">
+            <div className="text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border whitespace-nowrap">
+              Searching... {searchDuration}s
+              {searchDuration > 8 && <span className="ml-1">(Finding best matches)</span>}
+            </div>
+          </div>
+        )}
       </div>
       {/* Spacer to ensure the floating button does not overlap category tiles on mobile */}
       <div aria-hidden="true" className="h-36 sm:h-40 md:h-28" />

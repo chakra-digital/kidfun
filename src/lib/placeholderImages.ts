@@ -41,22 +41,39 @@ export const PLACEHOLDER_IMAGES: Record<string, string> = {
 };
 
 // Map common keywords to placeholder categories
+// IMPORTANT: Order matters! More specific matches should come first
 const KEYWORD_TO_CATEGORY: Record<string, string> = {
+  // Martial Arts - MUST come before 'arts' to avoid wrong matching
+  'martial arts': 'martial_arts',
+  'martial art': 'martial_arts',
+  'karate': 'martial_arts',
+  'taekwondo': 'martial_arts',
+  'judo': 'martial_arts',
+  'jiu-jitsu': 'martial_arts',
+  'jiujitsu': 'martial_arts',
+  'kung fu': 'martial_arts',
+  'kickboxing': 'martial_arts',
+  'boxing': 'martial_arts',
+  'mma': 'martial_arts',
+  'self defense': 'martial_arts',
+  'self-defense': 'martial_arts',
+  
   // Sports variations
   'football': 'soccer',
   'futbol': 'soccer',
   'hoops': 'basketball',
   'swim': 'swimming',
   'pool': 'swimming',
-  'karate': 'martial_arts',
-  'taekwondo': 'martial_arts',
-  'judo': 'martial_arts',
   'ballet': 'dance',
   'hip hop': 'dance',
+  'hip-hop': 'dance',
   'contemporary': 'dance',
   
-  // Arts variations
+  // Arts & Crafts variations (after martial arts)
+  'arts and crafts': 'crafts',
+  'arts & crafts': 'crafts',
   'drawing': 'art',
+  'painting': 'painting',
   'sculpture': 'art',
   'clay': 'pottery',
   'piano': 'music',
@@ -80,16 +97,20 @@ const KEYWORD_TO_CATEGORY: Record<string, string> = {
 export function getPlaceholderImage(businessName: string, specialties: string[] = [], description?: string): string {
   const searchText = `${businessName} ${specialties.join(' ')} ${description || ''}`.toLowerCase();
   
-  // Try to match keywords to categories
-  for (const [keyword, category] of Object.entries(KEYWORD_TO_CATEGORY)) {
+  // First, try to match multi-word phrases (more specific)
+  // Sort by length descending to match longer phrases first
+  const sortedKeywords = Object.entries(KEYWORD_TO_CATEGORY)
+    .sort(([a], [b]) => b.length - a.length);
+  
+  for (const [keyword, category] of sortedKeywords) {
     if (searchText.includes(keyword)) {
       return PLACEHOLDER_IMAGES[category];
     }
   }
   
-  // Try direct category match
+  // Try direct category match from the main PLACEHOLDER_IMAGES
   for (const category of Object.keys(PLACEHOLDER_IMAGES)) {
-    if (searchText.includes(category)) {
+    if (category !== 'default' && searchText.includes(category.replace('_', ' '))) {
       return PLACEHOLDER_IMAGES[category];
     }
   }

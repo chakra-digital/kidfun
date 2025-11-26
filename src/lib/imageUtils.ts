@@ -33,8 +33,9 @@ function simpleHash(str: string): number {
 
 /**
  * Get a consistent unique image for a provider based on their ID or business name
+ * Additional params are for potential future use but identifier is used for selection
  */
-export function getProviderImage(identifier: string): string {
+export function getProviderImage(identifier: string, specialties?: string[], websiteUrl?: string | null): string {
   const hash = simpleHash(identifier);
   const imageIndex = hash % activityImages.length;
   return activityImages[imageIndex];
