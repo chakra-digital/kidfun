@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -55,12 +55,12 @@ interface ConversationalSearchProps {
   compact?: boolean;
 }
 
-const ConversationalSearch: React.FC<ConversationalSearchProps> = ({ 
-  onResultsUpdate,
-  onSearchStart,
-  className = "",
-  compact = false 
-}) => {
+export interface ConversationalSearchRef {
+  triggerSearch: (query: string) => void;
+}
+
+const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalSearchProps>(
+  ({ onResultsUpdate, onSearchStart, className = "", compact = false }, ref) => {
   const [query, setQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [searchStartTime, setSearchStartTime] = useState<number | null>(null);
@@ -73,6 +73,14 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
   const [isWhereOpen, setIsWhereOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Expose triggerSearch method via ref
+  useImperativeHandle(ref, () => ({
+    triggerSearch: (newQuery: string) => {
+      setQuery(newQuery);
+      setTimeout(() => handleSearch(undefined, undefined, newQuery), 100);
+    }
+  }));
 
   // Animated emojis (separate from placeholder text now)
   const activityEmojis = ['⚽', '🎨', '🎭', '🏊', '⛺', '🎪'];
@@ -157,8 +165,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
     return () => clearInterval(interval);
   }, [isSearching, searchStartTime]);
 
-  const handleSearch = async (categoryOverride?: string, locationOverride?: string) => {
-    const searchQuery = query.trim();
+  const handleSearch = async (categoryOverride?: string, locationOverride?: string, queryOverride?: string) => {
+    const searchQuery = (queryOverride || query).trim();
     const searchCategory = categoryOverride || (selectedCategories.length > 0 ? selectedCategories.join(', ') : '');
     
     if (!searchQuery && !searchCategory) return;
@@ -601,6 +609,8 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       )}
     </div>
   );
-};
+});
+
+ConversationalSearch.displayName = "ConversationalSearch";
 
 export default ConversationalSearch;

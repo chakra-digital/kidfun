@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import CampCard from "@/components/camps/CampCard";
 import ConversationalSearch from "@/components/search/ConversationalSearch";
 import AIResultCard from "@/components/search/AIResultCard";
 import AIResultModal from "@/components/search/AIResultModal";
@@ -11,7 +10,7 @@ import { SearchResultSkeletonList } from "@/components/search/SearchResultSkelet
 import { Button } from "@/components/ui/button";
 import type { AIResult } from "@/components/search/AIResultModal";
 import { User, Calendar, Star } from "lucide-react";
-import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
+import CategoryTiles from "@/components/home/CategoryTiles";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 
 // Mock data for camps
@@ -23,9 +22,9 @@ const Index = () => {
   const [selectedAIResult, setSelectedAIResult] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const { profiles: providers, loading: providersLoading } = usePublicProviderProfiles();
   const navigate = useNavigate();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<{ triggerSearch: (query: string) => void }>(null);
 
   const handleSearchStart = () => {
     setIsLoadingResults(true);
@@ -64,38 +63,9 @@ const Index = () => {
     setIsModalOpen(true);
   };
 
-  // Transform provider profiles to CampCard format with deduplication
-  const uniqueProviders = providers.reduce((acc, provider) => {
-    // Deduplicate by business name (case-insensitive)
-    const key = provider.business_name.toLowerCase().trim();
-    if (!acc.has(key)) {
-      acc.set(key, provider);
-    }
-    return acc;
-  }, new Map());
-
-  const transformedProviders = Array.from(uniqueProviders.values()).map((provider) => ({
-    id: provider.id,
-    title: provider.business_name,
-    image: '', // Let CampCard's useProviderImage handle it
-    image_url: null, // Force fresh image loading
-    location: provider.location,
-    price: provider.base_price || 35,
-    priceUnit: "session" as const,
-    rating: provider.google_rating || 4.5,
-    reviewCount: provider.google_reviews_count || 0,
-    dates: "Available",
-    availability: "Available",
-    type: "activity" as const,
-    age: provider.age_groups?.[0] || "6-12",
-    distance: "Austin area",
-    external_website: provider.external_website,
-    specialties: provider.specialties,
-    description: provider.description
-  }));
-
-  // Get featured providers (first 12, since we deduplicated)
-  const featuredProviders = transformedProviders.slice(0, 12);
+  const handleCategoryClick = (query: string) => {
+    searchRef.current?.triggerSearch(query);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -135,6 +105,7 @@ const Index = () => {
             
             {/* AI Conversational Search */}
             <ConversationalSearch 
+              ref={searchRef}
               onResultsUpdate={handleAIResultsUpdate}
               onSearchStart={handleSearchStart}
               className=""
@@ -230,35 +201,17 @@ const Index = () => {
         )}
 
 
-        {/* Featured Providers Section - Only show when no AI results */}
+        {/* Categories Section - Only show when no AI results */}
         {!showAIResults && (
-          <section className="py-12 bg-muted/30">
+          <section className="py-16 bg-gradient-to-b from-background to-muted/30">
             <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold">Featured Providers</h2>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/camps')}
-                  className="rounded-full"
-                >
-                  View All
-                </Button>
+              <div className="text-center mb-10">
+                <h2 className="text-3xl md:text-4xl font-bold mb-3">Discover Activities</h2>
+                <p className="text-lg text-muted-foreground">
+                  Browse by category or search above for personalized recommendations
+                </p>
               </div>
-              {providersLoading ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {[...Array(10)].map((_, i) => (
-                    <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {featuredProviders.map((provider) => (
-                    <div key={provider.id} onClick={() => handleAIResultClick(provider)} className="cursor-pointer">
-                      <CampCard {...provider} />
-                    </div>
-                  ))}
-                </div>
-              )}
+              <CategoryTiles onCategoryClick={handleCategoryClick} />
             </div>
           </section>
         )}
