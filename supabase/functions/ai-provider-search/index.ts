@@ -204,14 +204,12 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
   const baseQueries = [
     `${searchAnalysis.googlePlacesQuery} ${resolvedLocation}`,
     // Add specific program-type keywords to filter out irrelevant results
-    ...searchAnalysis.activities.map((activity: string) => `${activity} camp for kids ${resolvedLocation}`),
-    ...searchAnalysis.activities.map((activity: string) => `${activity} classes children ${resolvedLocation}`),
-    ...searchAnalysis.activities.map((activity: string) => `${activity} program youth ${resolvedLocation}`),
+    ...searchAnalysis.activities.slice(0, 2).map((activity: string) => `${activity} camp for kids ${resolvedLocation}`),
   ];
 
   const searchQueries = baseQueries
     .filter(q => q && q.trim())
-    .slice(0, 6); // Limit to 6 queries
+    .slice(0, 3); // Reduced to 3 queries for faster results
 
   console.log('Google Places search queries:', searchQueries);
 
@@ -230,65 +228,29 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
         const relevantPlaces = data.results
           .filter((place: any) => {
             const isOperational = !place.business_status || place.business_status === 'OPERATIONAL';
-            const hasMinRating = !place.rating || place.rating >= 3.0;
+            const hasMinRating = !place.rating || place.rating >= 3.5;
             return isOperational && hasMinRating;
           })
-          .slice(0, 8);
+          .slice(0, 5); // Reduced to 5 for faster results
 
-        // Fetch detailed info including phone and website for each place
-        const detailedResults = await Promise.all(
-          relevantPlaces.map(async (place: any) => {
-            try {
-              const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_address,geometry,rating,user_ratings_total,formatted_phone_number,international_phone_number,website,business_status&key=${googlePlacesApiKey}`;
-              const detailsResponse = await fetch(detailsUrl);
-              const detailsData = await detailsResponse.json();
-              
-              if (detailsData.status === 'OK' && detailsData.result) {
-                const details = detailsData.result;
-                return {
-                  google_place_id: place.place_id,
-                  business_name: place.name,
-                  location: place.formatted_address,
-                  latitude: place.geometry?.location?.lat,
-                  longitude: place.geometry?.location?.lng,
-                  google_rating: place.rating,
-                  google_reviews_count: place.user_ratings_total,
-                  description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
-                  specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
-                  amenities: ['Outdoor Space', 'Safety Equipment'],
-                  pricing_model: 'per_session',
-                  base_price: 25.00,
-                  capacity: 20,
-                  age_groups: ['3-5', '6-12', '13-17'],
-                  phone: details.formatted_phone_number || details.international_phone_number,
-                  external_website: details.website,
-                  source: 'google_places'
-                };
-              }
-            } catch (error) {
-              console.error(`Error fetching details for ${place.name}:`, error);
-            }
-            
-            // Fallback if details fetch fails
-            return {
-              google_place_id: place.place_id,
-              business_name: place.name,
-              location: place.formatted_address,
-              latitude: place.geometry?.location?.lat,
-              longitude: place.geometry?.location?.lng,
-              google_rating: place.rating,
-              google_reviews_count: place.user_ratings_total,
-              description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
-              specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
-              amenities: ['Outdoor Space', 'Safety Equipment'],
-              pricing_model: 'per_session',
-              base_price: 25.00,
-              capacity: 20,
-              age_groups: ['3-5', '6-12', '13-17'],
-              source: 'google_places'
-            };
-          })
-        );
+        // Skip detailed fetching for now to speed up results
+        const detailedResults = relevantPlaces.map((place: any) => ({
+          google_place_id: place.place_id,
+          business_name: place.name,
+          location: place.formatted_address,
+          latitude: place.geometry?.location?.lat,
+          longitude: place.geometry?.location?.lng,
+          google_rating: place.rating,
+          google_reviews_count: place.user_ratings_total,
+          description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
+          specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
+          amenities: ['Outdoor Space', 'Safety Equipment'],
+          pricing_model: 'per_session',
+          base_price: 25.00,
+          capacity: 20,
+          age_groups: ['3-5', '6-12', '13-17'],
+          source: 'google_places'
+        }));
 
         console.log(`Added ${detailedResults.length} results from query: "${searchQuery}"`);
         return detailedResults;
@@ -310,7 +272,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
   );
 
   console.log(`Total unique Google Places results: ${uniqueResults.length}`);
-  return uniqueResults.slice(0, 15); // More total results
+  return uniqueResults.slice(0, 12); // Limit for faster results
 }
 
 async function rankAndCombineResults(existingProviders: any[], googlePlacesResults: any[], searchAnalysis: any, originalQuery: string) {
@@ -415,7 +377,7 @@ Providers to rank: ${JSON.stringify(allProviders.map(p => ({
       .filter(Boolean)
       .sort((a: any, b: any) => b.relevanceScore - a.relevanceScore);
 
-    return rankedProviders.slice(0, 20); // Limit to top 20 results
+    return rankedProviders.slice(0, 15); // Limit to top 15 results for faster load
     
   } catch (error) {
     console.error('Error parsing AI rankings:', error);
