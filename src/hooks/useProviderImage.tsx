@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPlaceholderImage } from "@/lib/placeholderImages";
 
 interface UseProviderImageProps {
   providerId: string;
@@ -7,6 +8,7 @@ interface UseProviderImageProps {
   specialties?: string[];
   description?: string;
   existingImageUrl?: string | null;
+  websiteUrl?: string | null;
 }
 
 export const useProviderImage = ({
@@ -15,6 +17,7 @@ export const useProviderImage = ({
   specialties,
   description,
   existingImageUrl,
+  websiteUrl,
 }: UseProviderImageProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(existingImageUrl || null);
   const [loading, setLoading] = useState(false);
@@ -27,31 +30,46 @@ export const useProviderImage = ({
       return;
     }
 
-    const generateImage = async () => {
+    const fetchImage = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const { data, error: functionError } = await supabase.functions.invoke(
-          'generate-provider-image',
-          {
-            body: {
-              businessName,
-              specialties,
-              description,
-            },
+        let finalImageUrl: string | null = null;
+
+        // Strategy 1: Try to fetch from provider's website (if URL available)
+        if (websiteUrl) {
+          console.log('Attempting to fetch image from website:', websiteUrl);
+          try {
+            const { data, error: fetchError } = await supabase.functions.invoke(
+              'fetch-provider-image',
+              {
+                body: { websiteUrl },
+              }
+            );
+
+            if (!fetchError && data?.imageUrl) {
+              console.log('Successfully fetched image from website');
+              finalImageUrl = data.imageUrl;
+            }
+          } catch (err) {
+            console.warn('Failed to fetch website image, falling back to placeholder:', err);
           }
-        );
+        }
 
-        if (functionError) throw functionError;
+        // Strategy 2: Use static placeholder based on activity type
+        if (!finalImageUrl) {
+          console.log('Using placeholder image based on activity category');
+          finalImageUrl = getPlaceholderImage(businessName, specialties, description);
+        }
 
-        if (data?.imageUrl) {
-          setImageUrl(data.imageUrl);
+        setImageUrl(finalImageUrl);
 
-          // Store the generated image URL in the database
+        // Store the fetched image URL in the database for future use
+        if (finalImageUrl && providerId) {
           const { error: updateError } = await supabase
             .from('provider_profiles')
-            .update({ image_url: data.imageUrl })
+            .update({ image_url: finalImageUrl })
             .eq('id', providerId);
 
           if (updateError) {
@@ -59,23 +77,17 @@ export const useProviderImage = ({
           }
         }
       } catch (err: any) {
-        console.error('Error generating provider image:', err);
-        const errorMessage = err.message || 'Failed to generate image';
-        
-        // Check if it's a payment/credit issue
-        if (errorMessage.includes('Payment required') || errorMessage.includes('credits')) {
-          console.warn('Lovable AI credits exhausted - image generation unavailable');
-          setError('AI image generation unavailable');
-        } else {
-          setError(errorMessage);
-        }
+        console.error('Error fetching provider image:', err);
+        // Even on error, fall back to placeholder
+        const placeholderUrl = getPlaceholderImage(businessName, specialties, description);
+        setImageUrl(placeholderUrl);
       } finally {
         setLoading(false);
       }
     };
 
-    generateImage();
-  }, [providerId, businessName, specialties, description, existingImageUrl]);
+    fetchImage();
+  }, [providerId, businessName, specialties, description, existingImageUrl, websiteUrl]);
 
   return { imageUrl, loading, error };
 };
