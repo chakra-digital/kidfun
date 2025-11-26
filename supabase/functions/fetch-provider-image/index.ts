@@ -22,18 +22,33 @@ serve(async (req) => {
 
     console.log('Fetching image from website:', websiteUrl);
 
-    // Fetch the website HTML
-    const response = await fetch(websiteUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; KidFunBot/1.0)'
+    // Fetch the website HTML with timeout and SSL error handling
+    let html: string;
+    try {
+      const response = await fetch(websiteUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; KidFunBot/1.0)'
+        },
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      });
+
+      if (!response.ok) {
+        console.log(`HTTP error ${response.status}, falling back to no image`);
+        return new Response(
+          JSON.stringify({ imageUrl: null, source: 'none' }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch website: ${response.status}`);
+      html = await response.text();
+    } catch (fetchError: any) {
+      // Handle SSL cert errors, timeouts, and other fetch failures gracefully
+      console.log(`Fetch failed (${fetchError.message}), falling back to no image`);
+      return new Response(
+        JSON.stringify({ imageUrl: null, source: 'none' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-
-    const html = await response.text();
 
     // Extract Open Graph image
     const ogImageMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);

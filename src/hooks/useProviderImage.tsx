@@ -66,7 +66,8 @@ export const useProviderImage = ({
         setImageUrl(finalImageUrl);
 
         // Store the fetched image URL in the database for future use
-        if (finalImageUrl && providerId) {
+        // Only update if this is a UUID (existing provider), not a google_place_id
+        if (finalImageUrl && providerId && providerId.length === 36 && providerId.includes('-')) {
           const { error: updateError } = await supabase
             .from('provider_profiles')
             .update({ image_url: finalImageUrl })
