@@ -46,13 +46,10 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
 }) => {
   const providerId = id || google_place_id || '';
   
-  const { imageUrl: generatedImage, loading: imageLoading } = useProviderImage({
-    providerId,
-    businessName: business_name,
-    specialties,
-    description,
-    existingImageUrl: image_url,
-  });
+  // DISABLED: Auto image generation is too expensive ($$ per search)
+  // Only use existing images or fallback to no image
+  const generatedImage = image_url;
+  const imageLoading = false;
   
   const formatLocation = (location: string) => {
     // Truncate long addresses for display

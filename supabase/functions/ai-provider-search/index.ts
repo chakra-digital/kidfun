@@ -352,7 +352,7 @@ Providers to rank: ${JSON.stringify(allProviders.map(p => ({
       }],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 1500,
+        maxOutputTokens: 4096,
         responseMimeType: "application/json"
       }
     }),
