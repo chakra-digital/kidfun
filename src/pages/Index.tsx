@@ -64,7 +64,22 @@ const Index = () => {
   };
 
   const handleCategoryClick = (query: string) => {
-    searchRef.current?.triggerSearch(query);
+    // Scroll to search section first
+    const searchSection = document.querySelector('section');
+    searchSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Focus on location input to prompt user
+    setTimeout(() => {
+      const locationInput = document.querySelector('input[placeholder="Where"]') as HTMLInputElement;
+      if (locationInput) {
+        locationInput.focus();
+        // Add a visual highlight effect
+        locationInput.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+        setTimeout(() => {
+          locationInput.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+        }, 2000);
+      }
+    }, 500);
   };
 
   return (
