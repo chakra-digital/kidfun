@@ -22,6 +22,7 @@ const CategoryTile = ({ icon, label, gradient, onClick }: CategoryTileProps) => 
     onClick={onClick}
     className="group relative overflow-hidden rounded-2xl p-6 text-white transition-all hover:scale-105 hover:shadow-xl"
     style={{ background: gradient }}
+    aria-label={`Search for ${label}`}
   >
     <div className="relative z-10 flex flex-col items-center gap-3">
       <div className="rounded-full bg-white/20 p-4 backdrop-blur-sm transition-all group-hover:bg-white/30">
@@ -30,6 +31,11 @@ const CategoryTile = ({ icon, label, gradient, onClick }: CategoryTileProps) => 
       <span className="text-lg font-semibold text-white drop-shadow-md">{label}</span>
     </div>
     <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <span className="text-xs text-white/90 bg-black/20 px-3 py-1 rounded-full backdrop-blur-sm">
+        Click to explore
+      </span>
+    </div>
   </button>
 );
 

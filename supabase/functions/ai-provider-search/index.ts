@@ -218,7 +218,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
 
   const searchQueries = baseQueries
     .filter(q => q && q.trim())
-    .slice(0, 3); // Reduced to 3 queries for faster results
+    .slice(0, 2); // Reduced to 2 queries for even faster results
 
   console.log('Google Places search queries:', searchQueries);
 
@@ -240,7 +240,7 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
             const hasMinRating = !place.rating || place.rating >= 3.5;
             return isOperational && hasMinRating;
           })
-          .slice(0, 5); // Reduced to 5 for faster results
+          .slice(0, 3); // Reduced to 3 for even faster results
 
         // Skip detailed fetching for now to speed up results
         const detailedResults = relevantPlaces.map((place: any) => ({

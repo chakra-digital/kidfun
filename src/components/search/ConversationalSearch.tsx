@@ -77,7 +77,11 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
   useImperativeHandle(ref, () => ({
     triggerSearch: (newQuery: string) => {
       setQuery(newQuery);
-      setTimeout(() => handleSearch(undefined, undefined, newQuery), 100);
+      // Don't auto-search, just populate the query
+      toast({
+        title: "Ready to search",
+        description: "Enter your location to find " + newQuery,
+      });
     }
   }));
 
