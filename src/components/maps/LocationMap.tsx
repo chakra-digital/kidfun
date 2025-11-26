@@ -104,8 +104,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       script.async = true;
       script.defer = true;
       script.onerror = (error) => {
-        console.error('Google Maps script onerror event:', error);
-        reject(new Error('Failed to load Google Maps API - check your API key and referrer restrictions'));
+        console.error('Google Maps script load failed:', error);
+        console.error('Current hostname:', window.location.hostname);
+        console.error('Verify that your Google Maps API key allows requests from this domain');
+        reject(new Error(`Failed to load Google Maps - verify API key allows ${window.location.hostname}`));
       };
       
       console.log('Adding Google Maps script to document head');
@@ -183,7 +185,8 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
               const errorText = errEl.textContent || 'Unknown error';
               console.error('Google Maps error detected:', errorText);
               errorSetRef.current = true;
-              setError(`Map error: ${errorText.substring(0, 100)}`);
+              // Provide helpful error message
+              setError(`Map configuration issue. Check that your Google Maps API key has JavaScript API enabled and allows requests from ${window.location.hostname}`);
             }
           }, 1500);
 
