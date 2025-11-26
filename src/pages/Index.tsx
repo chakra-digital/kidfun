@@ -64,7 +64,10 @@ const Index = () => {
   };
 
   const handleCategoryClick = (query: string) => {
-    // Scroll to search section first
+    // Set the query in the search component
+    searchRef.current?.triggerSearch(query);
+    
+    // Scroll to search section
     const searchSection = document.querySelector('section');
     searchSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     
