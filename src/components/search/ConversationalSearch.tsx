@@ -216,8 +216,14 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
       return;
     }
     
-    // Clear previous results and trigger loading state
-    onResultsUpdate([]);
+    // Show skeleton results immediately for progressive loading feel
+    const skeletonResults = Array(6).fill(null).map((_, i) => ({
+      id: `skeleton-${i}`,
+      business_name: 'Loading...',
+      location: 'Searching nearby...',
+      isLoading: true
+    }));
+    onResultsUpdate(skeletonResults as any);
     setLastSearchAnalysis(null);
     onSearchStart?.();
 

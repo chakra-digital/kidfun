@@ -37,9 +37,13 @@ export const useProviderImage = ({
       try {
         let finalImageUrl: string | null = null;
 
-        // Strategy 1: Try to fetch from provider's website (if URL available)
-        if (websiteUrl) {
-          console.log('Attempting to fetch image from website:', websiteUrl);
+        // Strategy 1: Prefer placeholder images for uniqueness (avoid duplicate OG images)
+        const placeholderUrl = getPlaceholderImage(businessName, specialties, description);
+        
+        // Strategy 2: Only try website fetch if it's likely unique (has specific path/params)
+        let websiteFetchUrl: string | null = null;
+        if (websiteUrl && (websiteUrl.includes('?') || websiteUrl.split('/').length > 4)) {
+          console.log('Attempting to fetch unique image from website:', websiteUrl);
           try {
             const { data, error: fetchError } = await supabase.functions.invoke(
               'fetch-provider-image',
@@ -50,18 +54,15 @@ export const useProviderImage = ({
 
             if (!fetchError && data?.imageUrl) {
               console.log('Successfully fetched image from website');
-              finalImageUrl = data.imageUrl;
+              websiteFetchUrl = data.imageUrl;
             }
           } catch (err) {
-            console.warn('Failed to fetch website image, falling back to placeholder:', err);
+            console.warn('Failed to fetch website image, using placeholder:', err);
           }
         }
 
-        // Strategy 2: Use static placeholder based on activity type
-        if (!finalImageUrl) {
-          console.log('Using placeholder image based on activity category');
-          finalImageUrl = getPlaceholderImage(businessName, specialties, description);
-        }
+        // Use website image only if it differs from placeholder, otherwise use placeholder for uniqueness
+        finalImageUrl = websiteFetchUrl || placeholderUrl;
 
         setImageUrl(finalImageUrl);
 

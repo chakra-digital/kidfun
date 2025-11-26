@@ -25,6 +25,7 @@ interface AIResultCardProps {
   source: string;
   onClick?: () => void;
   image_url?: string | null;
+  isLoading?: boolean;
 }
 
 const AIResultCard: React.FC<AIResultCardProps> = ({
@@ -43,8 +44,28 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
   isNewDiscovery,
   onClick,
   image_url,
+  isLoading = false,
 }) => {
   const providerId = id || google_place_id || '';
+  
+  // Show skeleton while search is loading
+  if (isLoading) {
+    return (
+      <Card className="overflow-hidden animate-pulse">
+        <Skeleton className="h-48 w-full" />
+        <CardContent className="p-4 space-y-3">
+          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <div className="flex gap-2 pt-2">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-6 w-20" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   // Smart image strategy: website scraping -> placeholder -> cached
   const { imageUrl: generatedImage, loading: imageLoading } = useProviderImage({
