@@ -224,6 +224,17 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
         throw new Error('No data returned from search function');
       }
 
+      // Check for API errors in the response
+      if (data.error) {
+        if (data.error.includes('RATE_LIMIT') || data.error.includes('rate limit')) {
+          throw new Error('RATE_LIMIT: Too many searches. Please wait a moment.');
+        } else if (data.error.includes('API_QUOTA') || data.error.includes('quota')) {
+          throw new Error('API_QUOTA: Google API quota exceeded.');
+        } else {
+          throw new Error(data.error);
+        }
+      }
+
       const { results, searchAnalysis, newProvidersFound } = data;
       
       // Cache the results
@@ -245,15 +256,23 @@ const ConversationalSearch: React.FC<ConversationalSearchProps> = ({
       console.error('Search error details:', error);
       
       // More specific error messaging
+      let errorTitle = "Search Error";
       let errorMessage = "Failed to search providers. Please try again.";
+      
       if (error.message?.includes('timeout')) {
         errorMessage = "Search took too long. Please check your connection and try again.";
       } else if (error.message?.includes('Failed to send')) {
         errorMessage = "Network error. Please check your connection and try again.";
+      } else if (error.message?.includes('RATE_LIMIT')) {
+        errorTitle = "Rate Limit Exceeded";
+        errorMessage = "Too many searches. Please wait a moment and try again.";
+      } else if (error.message?.includes('API_QUOTA')) {
+        errorTitle = "API Quota Exceeded";
+        errorMessage = "Google API quota has been exceeded. Please contact support or check your Google Cloud billing.";
       }
       
       toast({
-        title: "Search Error",
+        title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
