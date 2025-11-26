@@ -137,6 +137,19 @@ User query: "${query}"`
     }),
   });
 
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Google API error ${response.status}:`, errorText);
+    
+    if (response.status === 429) {
+      throw new Error('RATE_LIMIT: Google API rate limit exceeded. Please try again in a moment.');
+    }
+    if (response.status === 403) {
+      throw new Error('API_QUOTA: Google API quota exceeded. Please check your Google Cloud billing.');
+    }
+    throw new Error(`API_ERROR: Google API returned ${response.status}`);
+  }
+
   const data = await response.json();
   console.log('Query analysis raw response:', data.candidates?.[0]?.content?.parts?.[0]?.text);
   
@@ -357,6 +370,19 @@ Providers to rank: ${JSON.stringify(allProviders.map(p => ({
       }
     }),
   });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Google API ranking error ${response.status}:`, errorText);
+    
+    if (response.status === 429) {
+      throw new Error('RATE_LIMIT: Google API rate limit exceeded. Please try again in a moment.');
+    }
+    if (response.status === 403) {
+      throw new Error('API_QUOTA: Google API quota exceeded. Please check your Google Cloud billing.');
+    }
+    throw new Error(`API_ERROR: Google API returned ${response.status}`);
+  }
 
   const data = await response.json();
   console.log('Ranking raw response:', data.candidates?.[0]?.content?.parts?.[0]?.text);
