@@ -49,7 +49,7 @@ serve(async (req) => {
       });
     }
 
-    // Step 1: Use OpenAI to analyze the search query and extract structured information
+    // Step 1: Use Gemini to analyze the search query and extract structured information
     const searchAnalysis = await analyzeSearchQuery(query);
     console.log("Search analysis:", searchAnalysis);
 
@@ -105,40 +105,44 @@ serve(async (req) => {
 });
 
 async function analyzeSearchQuery(query: string) {
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const apiKey = Deno.env.get('GOOGLE_API_KEY');
+  
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{
-        role: 'system',
-        content: `You are a search query analyzer for children's activity providers. Extract structured information from user queries.
+      contents: [{
+        parts: [{
+          text: `You are a search query analyzer for children's activity providers. Extract structured information from user queries.
         
-        Respond ONLY with valid JSON (no markdown, no code blocks) containing:
-        - activities: array of activity types (e.g., ["soccer", "swimming", "art"])
-        - ageGroups: array of age ranges (e.g., ["5-8", "9-12"])
-        - keywords: array of relevant search terms
-        - location: specific location if mentioned
-        - googlePlacesQuery: a Google Places search query to find relevant businesses
-        
-        Example activities: soccer, swimming, art, music, dance, coding, science, martial arts, gymnastics, tennis, basketball, camps, daycare, tutoring`
-      }, {
-        role: 'user',
-        content: query
+Respond ONLY with valid JSON (no markdown, no code blocks) containing:
+- activities: array of activity types (e.g., ["soccer", "swimming", "art"])
+- ageGroups: array of age ranges (e.g., ["5-8", "9-12"])
+- keywords: array of relevant search terms
+- location: specific location if mentioned
+- googlePlacesQuery: a Google Places search query to find relevant businesses
+
+Example activities: soccer, swimming, art, music, dance, coding, science, martial arts, gymnastics, tennis, basketball, camps, daycare, tutoring
+
+User query: "${query}"`
+        }]
       }],
-      response_format: { type: "json_object" },
-      max_tokens: 300
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 300,
+        responseMimeType: "application/json"
+      }
     }),
   });
 
   const data = await response.json();
-  console.log('Query analysis raw response:', data.choices[0].message.content);
+  console.log('Query analysis raw response:', data.candidates?.[0]?.content?.parts?.[0]?.text);
   
   try {
-    const parsed = JSON.parse(data.choices[0].message.content);
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const parsed = JSON.parse(content);
     console.log('Parsed query analysis:', parsed);
     return parsed;
   } catch (error) {
@@ -307,54 +311,58 @@ async function rankAndCombineResults(existingProviders: any[], googlePlacesResul
     return [];
   }
 
-  // Use OpenAI directly to rank and explain relevance
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  // Use Gemini 2.5 Flash to rank and explain relevance
+  const apiKey = Deno.env.get('GOOGLE_API_KEY');
+  
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [{
-        role: 'system',
-        content: `You are helping parents find the best activity providers for their children. 
+      contents: [{
+        parts: [{
+          text: `You are helping parents find the best activity providers for their children. 
         
-        Rank the providers based on relevance to the search query. Consider:
-        - Activity match (specialties, business name, description)
-        - Age appropriateness 
-        - Location convenience
-        - Rating and reviews
-        - Source reliability (database providers are pre-verified)
-        
-        Respond ONLY with a JSON array (no markdown, no code blocks). Each item should have:
-        - id: provider ID or google_place_id
-        - relevanceScore: number 0-100
-        - explanation: brief reason for match`
-      }, {
-        role: 'user',
-        content: `Search query: "${originalQuery}"
-        Search analysis: ${JSON.stringify(searchAnalysis)}
-        
-        Providers to rank: ${JSON.stringify(allProviders.map(p => ({
-          id: p.id || p.google_place_id,
-          business_name: p.business_name,
-          specialties: p.specialties,
-          description: p.description,
-          location: p.location,
-          rating: p.google_rating,
-          source: p.source
-        })))}`
+Rank the providers based on relevance to the search query. Consider:
+- Activity match (specialties, business name, description)
+- Age appropriateness 
+- Location convenience
+- Rating and reviews
+- Source reliability (database providers are pre-verified)
+
+Respond ONLY with a JSON array (no markdown, no code blocks). Each item should have:
+- id: provider ID or google_place_id
+- relevanceScore: number 0-100
+- explanation: brief reason for match
+
+Search query: "${originalQuery}"
+Search analysis: ${JSON.stringify(searchAnalysis)}
+
+Providers to rank: ${JSON.stringify(allProviders.map(p => ({
+  id: p.id || p.google_place_id,
+  business_name: p.business_name,
+  specialties: p.specialties,
+  description: p.description,
+  location: p.location,
+  rating: p.google_rating,
+  source: p.source
+})))}`
+        }]
       }],
-      max_tokens: 1500
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1500,
+        responseMimeType: "application/json"
+      }
     }),
   });
 
   const data = await response.json();
-  console.log('Ranking raw response:', data.choices[0].message.content);
+  console.log('Ranking raw response:', data.candidates?.[0]?.content?.parts?.[0]?.text);
   
   try {
-    let content = data.choices[0].message.content;
+    let content = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
     // Remove markdown formatting if present
     content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     const rankings = JSON.parse(content);
