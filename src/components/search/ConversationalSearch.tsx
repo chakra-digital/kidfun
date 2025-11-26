@@ -65,7 +65,6 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
   const [isSearching, setIsSearching] = useState(false);
   const [searchStartTime, setSearchStartTime] = useState<number | null>(null);
   const [searchDuration, setSearchDuration] = useState<number>(0);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [locationInput, setLocationInput] = useState('');
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [lastSearchAnalysis, setLastSearchAnalysis] = useState<any>(null);
@@ -167,17 +166,12 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
 
   const handleSearch = async (categoryOverride?: string, locationOverride?: string, queryOverride?: string) => {
     const searchQuery = (queryOverride || query).trim();
-    const searchCategory = categoryOverride || (selectedCategories.length > 0 ? selectedCategories.join(', ') : '');
     
-    if (!searchQuery && !searchCategory) return;
+    if (!searchQuery) return;
     if (isSearching) return;
     
-    // Build enhanced query with category
-    let enhancedQuery = searchQuery || `Find ${searchCategory} activities`;
-    
-    if (searchCategory && searchQuery) {
-      enhancedQuery += ` focusing on ${searchCategory}`;
-    }
+    // Use query directly without category appending
+    const enhancedQuery = searchQuery;
 
     // Capture current location input to avoid stale state
     const currentLocationInput = locationInput || locationOverride || '';
@@ -313,31 +307,6 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
       e.preventDefault();
       handleSearch();
     }
-  };
-
-  const categories = [
-    { icon: Palette, label: 'Art', value: 'art' },
-    { icon: Crown, label: 'Chess', value: 'chess' },
-    { icon: ChefHat, label: 'Cooking', value: 'cooking' },
-    { icon: Music, label: 'Dance', value: 'dance' },
-    { icon: Users, label: 'Gymnastics', value: 'gymnastics' },
-    { icon: Languages, label: 'Language', value: 'language' },
-    { icon: Trees, label: 'Nature', value: 'nature' },
-    { icon: Drama, label: 'Performing arts', value: 'performing-arts' },
-    { icon: Gamepad2, label: 'Sports', value: 'sports' },
-    { icon: FlaskConical, label: 'STEM', value: 'stem' },
-    { icon: GraduationCap, label: 'Study', value: 'study' },
-    { icon: Users, label: 'Mixed', value: 'mixed' },
-  ];
-
-  const toggleCategory = (categoryValue: string) => {
-    // Toggle selection
-    const newCategories = selectedCategories.includes(categoryValue) 
-      ? selectedCategories.filter(c => c !== categoryValue)
-      : [categoryValue]; // Only allow one category at a time for clearer searches
-    
-    setSelectedCategories(newCategories);
-    // Don't auto-trigger search - let user click the search button
   };
 
   if (compact) {
@@ -506,7 +475,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
         {/* Ultra-Bright Search Button - Centered at bottom, overlapping 1/3 */}
         <Button
           onClick={() => handleSearch()}
-          disabled={((!query.trim() && selectedCategories.length === 0) || isSearching || (locationInput && !isLocationValid))}
+          disabled={(!query.trim() || isSearching || (locationInput && !isLocationValid))}
           size="icon"
           className={cn(
             "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[84px] sm:translate-y-[88px] md:translate-y-[64px] h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 z-20",
@@ -547,43 +516,6 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
           </div>
         </div>
       )}
-
-      {/* Category Tiles - Uniform Size and Spacing */}
-      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-1.5 md:gap-3 mt-16 md:mt-20">
-        {categories.map((category) => {
-          const IconComponent = category.icon;
-          const isSelected = selectedCategories.includes(category.value);
-          const isCategorySearching = isSearching && isSelected;
-          
-          return (
-            <button
-              key={category.value}
-              onClick={() => toggleCategory(category.value)}
-              disabled={isSearching}
-              className={cn(
-                "aspect-square flex flex-col items-center justify-center gap-1 md:gap-2 rounded-lg md:rounded-2xl relative group transition-all duration-200 border p-2 md:p-4",
-                isSelected 
-                  ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-primary shadow-lg' 
-                  : 'bg-white/60 dark:bg-background/60 backdrop-blur-sm border-gray-200/50 dark:border-border/50 text-gray-600 dark:text-foreground/80 hover:border-primary/30 hover:shadow-sm hover:bg-white/70 dark:hover:bg-background/70',
-                isCategorySearching && 'animate-pulse'
-              )}
-            >
-              {isCategorySearching && (
-                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 backdrop-blur-sm rounded-lg md:rounded-2xl">
-                  <Loader2 className="w-3 h-3 md:w-5 md:h-5 animate-spin text-primary" />
-                </div>
-              )}
-              <IconComponent className={cn(
-                "w-4 h-4 md:w-7 md:h-7 transition-transform duration-300",
-                !isSelected && "group-hover:scale-110"
-              )} />
-              <span className="text-[9px] md:text-xs font-medium text-center leading-tight">
-                {category.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* Search Analysis Display - Only show if there's actual data */}
       {lastSearchAnalysis && (lastSearchAnalysis.activities?.length > 0 || lastSearchAnalysis.ageGroups?.length > 0) && (
