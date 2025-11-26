@@ -183,10 +183,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
             const errEl = container.querySelector('.gm-err-message, .gm-err-container');
             if (errEl && !errorSetRef.current) {
               const errorText = errEl.textContent || 'Unknown error';
-              console.error('Google Maps error detected:', errorText);
+              console.error('=== GOOGLE MAPS ERROR DETECTED ===');
+              console.error('Error text:', errorText);
+              console.error('Current hostname:', window.location.hostname);
+              console.error('Error element HTML:', errEl.innerHTML);
+              console.error('================================');
               errorSetRef.current = true;
-              // Provide helpful error message
-              setError(`Map configuration issue. Check that your Google Maps API key has JavaScript API enabled and allows requests from ${window.location.hostname}`);
+              setError(`Map Error: ${errorText}. Verify API key allows ${window.location.hostname}`);
             }
           }, 1500);
 
