@@ -75,6 +75,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
     description,
     existingImageUrl: image_url,
     websiteUrl: external_website,
+    location,
   });
   
   const formatLocation = (location: string) => {

@@ -52,6 +52,7 @@ const CampCard = ({
     specialties,
     description,
     existingImageUrl: image_url,
+    location,
   });
 
   // Fall back to placeholder if generation fails or is unavailable
