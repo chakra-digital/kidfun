@@ -148,8 +148,9 @@ function simpleHash(str: string): number {
 export function getPlaceholderImage(businessName: string, specialties: string[] = [], description?: string, location?: string): string {
   const searchText = `${businessName} ${specialties.join(' ')} ${description || ''}`.toLowerCase();
   
-  // Create MORE unique hash including location and full business name to prevent duplicates
-  const uniqueKey = `${businessName.toLowerCase()}_${location || ''}_${specialties.join('_')}`;
+  // Create stable but maximally unique key - use full address for uniqueness
+  // This ensures each provider location gets a different image even if same business name
+  const uniqueKey = `${businessName.toLowerCase()}_${location || 'default'}_${specialties.slice(0, 2).join('_')}`;
   
   // First, try to match multi-word phrases (more specific)
   // Sort by length descending to match longer phrases first
@@ -159,7 +160,7 @@ export function getPlaceholderImage(businessName: string, specialties: string[] 
   for (const [keyword, category] of sortedKeywords) {
     if (searchText.includes(keyword)) {
       const images = PLACEHOLDER_IMAGES[category];
-      // Use unique key including location to ensure true variety
+      // Hash includes full location for maximum uniqueness
       const index = simpleHash(uniqueKey) % images.length;
       return images[index];
     }

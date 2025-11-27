@@ -50,10 +50,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
     return () => clearInterval(interval);
   }, []);
   
-  // Reset error when providers change (new search results) - but only if map isn't initialized
+  // Reset error state completely when providers change (new search)
   useEffect(() => {
-    if (providers.length > 0 && errorSetRef.current && !initialized.current) {
-      console.log('Resetting error state for new provider results');
+    if (providers.length > 0) {
+      console.log('New providers detected, clearing any previous errors');
       errorSetRef.current = false;
       setError('');
     }
