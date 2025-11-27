@@ -50,6 +50,15 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
     return () => clearInterval(interval);
   }, []);
   
+  // Reset error when providers change (new search results)
+  useEffect(() => {
+    if (providers.length > 0 && errorSetRef.current) {
+      console.log('Resetting error state for new provider results');
+      errorSetRef.current = false;
+      setError('');
+    }
+  }, [providers]);
+  
   console.log('LocationMap render:', { 
     providersCount: providers.length, 
     apiKeySubmitted, 
