@@ -148,6 +148,10 @@ function simpleHash(str: string): number {
 export function getPlaceholderImage(businessName: string, specialties: string[] = [], description?: string): string {
   const searchText = `${businessName} ${specialties.join(' ')} ${description || ''}`.toLowerCase();
   
+  // Create unique hash from business name + location (if in business name) + first specialty
+  // This ensures same businesses with different locations get different images
+  const uniqueKey = `${businessName.toLowerCase()}_${specialties[0] || 'default'}`;
+  
   // First, try to match multi-word phrases (more specific)
   // Sort by length descending to match longer phrases first
   const sortedKeywords = Object.entries(KEYWORD_TO_CATEGORY)
@@ -156,8 +160,8 @@ export function getPlaceholderImage(businessName: string, specialties: string[] 
   for (const [keyword, category] of sortedKeywords) {
     if (searchText.includes(keyword)) {
       const images = PLACEHOLDER_IMAGES[category];
-      // Use business name to deterministically select from available images
-      const index = simpleHash(businessName) % images.length;
+      // Use unique key (name + specialty) to ensure variety
+      const index = simpleHash(uniqueKey) % images.length;
       return images[index];
     }
   }
@@ -166,13 +170,13 @@ export function getPlaceholderImage(businessName: string, specialties: string[] 
   for (const category of Object.keys(PLACEHOLDER_IMAGES)) {
     if (category !== 'default' && searchText.includes(category.replace('_', ' '))) {
       const images = PLACEHOLDER_IMAGES[category];
-      const index = simpleHash(businessName) % images.length;
+      const index = simpleHash(uniqueKey) % images.length;
       return images[index];
     }
   }
   
   // Default fallback with variety
   const defaultImages = PLACEHOLDER_IMAGES.default;
-  const index = simpleHash(businessName) % defaultImages.length;
+  const index = simpleHash(uniqueKey) % defaultImages.length;
   return defaultImages[index];
 }

@@ -349,12 +349,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
         position,
         map: map.current,
         title: provider.business_name,
-        icon: {
+        // Use default red pin for better visibility
+        icon: validProviders.length === 1 ? null : {
           path: (window as any).google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: '#3b82f6',
+          scale: 10,
+          fillColor: '#ef4444',
           fillOpacity: 1,
-          strokeColor: '#1e40af',
+          strokeColor: '#ffffff',
           strokeWeight: 2,
         }
       });
