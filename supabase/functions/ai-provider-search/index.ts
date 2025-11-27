@@ -84,7 +84,7 @@ serve(async (req) => {
       }
       
       // Name/description match boost (0-20 points)
-      const searchTerms = enhancedQuery.toLowerCase().split(' ');
+      const searchTerms = query.toLowerCase().split(' ');
       const providerText = `${p.business_name} ${p.description || ''} ${(p.specialties || []).join(' ')}`.toLowerCase();
       const termMatches = searchTerms.filter(term => term.length > 2 && providerText.includes(term)).length;
       score += Math.min(termMatches * 5, 20);
