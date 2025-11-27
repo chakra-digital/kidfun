@@ -60,8 +60,27 @@ serve(async (req) => {
     // Step 3: Get existing providers from our database
     const { data: existingProviders } = await supabase.rpc('get_public_provider_info');
 
-    // Step 4: Quick relevance scoring (no AI needed - much faster!)
-    const allProviders = [...existingProviders || [], ...googlePlacesResults];
+    // Step 4: Filter database providers by location proximity (only include nearby ones)
+    const searchCoordinates = googlePlacesResults.length > 0 
+      ? { lat: googlePlacesResults[0].latitude, lng: googlePlacesResults[0].longitude }
+      : null;
+    
+    const filteredDbProviders = searchCoordinates && existingProviders 
+      ? existingProviders.filter(p => {
+          if (!p.latitude || !p.longitude) return false;
+          // Calculate rough distance (in degrees, ~69 miles per degree at equator)
+          const latDiff = Math.abs(p.latitude - searchCoordinates.lat);
+          const lngDiff = Math.abs(p.longitude - searchCoordinates.lng);
+          const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+          // Only include if within ~100 miles (roughly 1.5 degrees)
+          return distance < 1.5;
+        })
+      : [];
+    
+    console.log(`Filtered ${existingProviders?.length || 0} database providers to ${filteredDbProviders.length} within search area`);
+
+    // Step 5: Quick relevance scoring (no AI needed - much faster!)
+    const allProviders = [...filteredDbProviders, ...googlePlacesResults];
     
     // Simple but effective scoring based on ratings and specialties match
     const scoredResults = allProviders.map(p => {
