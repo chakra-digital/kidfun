@@ -9,6 +9,7 @@ interface UseProviderImageProps {
   description?: string;
   existingImageUrl?: string | null;
   websiteUrl?: string | null;
+  location?: string;
 }
 
 export const useProviderImage = ({
@@ -18,6 +19,7 @@ export const useProviderImage = ({
   description,
   existingImageUrl,
   websiteUrl,
+  location,
 }: UseProviderImageProps) => {
   const [imageUrl, setImageUrl] = useState<string | null>(existingImageUrl || null);
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ export const useProviderImage = ({
         let finalImageUrl: string | null = null;
 
         // Strategy 1: Prefer placeholder images for uniqueness (avoid duplicate OG images)
-        const placeholderUrl = getPlaceholderImage(businessName, specialties, description);
+        const placeholderUrl = getPlaceholderImage(businessName, specialties, description, location);
         
         // Strategy 2: Only try website fetch if it's likely unique (has specific path/params)
         let websiteFetchUrl: string | null = null;
@@ -81,7 +83,7 @@ export const useProviderImage = ({
       } catch (err: any) {
         console.error('Error fetching provider image:', err);
         // Even on error, fall back to placeholder
-        const placeholderUrl = getPlaceholderImage(businessName, specialties, description);
+        const placeholderUrl = getPlaceholderImage(businessName, specialties, description, location);
         setImageUrl(placeholderUrl);
       } finally {
         setLoading(false);
