@@ -60,24 +60,47 @@ serve(async (req) => {
     // Step 3: Get existing providers from our database
     const { data: existingProviders } = await supabase.rpc('get_public_provider_info');
 
-    // Step 4: Return Google Places results FIRST for fast initial display
-    // This gives users immediate results while we do AI ranking in background
-    const quickResults = [...existingProviders || [], ...googlePlacesResults].map(p => ({
-      ...p,
-      relevanceScore: p.google_rating ? p.google_rating * 20 : 50,
-      explanation: "Quick result",
-      isNewDiscovery: p.source === 'google_places'
-    })).slice(0, 15);
-
-    // Step 5: Do AI ranking for better sorting (but don't block initial results)
-    const rankedResults = await rankAndCombineResults(
-      existingProviders || [],
-      googlePlacesResults,
-      searchAnalysis,
-      query
-    );
-
-    // Step 6: Cache the ranked results
+    // Step 4: Quick relevance scoring (no AI needed - much faster!)
+    const allProviders = [...existingProviders || [], ...googlePlacesResults];
+    
+    // Simple but effective scoring based on ratings and specialties match
+    const scoredResults = allProviders.map(p => {
+      let score = 50; // base score
+      
+      // Google rating boost (0-50 points)
+      if (p.google_rating) {
+        score += (p.google_rating / 5) * 50;
+      }
+      
+      // Specialty match boost (0-30 points)
+      if (p.specialties && searchAnalysis.activities) {
+        const matchCount = p.specialties.filter(s => 
+          searchAnalysis.activities.some((a: string) => 
+            s.toLowerCase().includes(a.toLowerCase()) || 
+            a.toLowerCase().includes(s.toLowerCase())
+          )
+        ).length;
+        score += Math.min(matchCount * 15, 30);
+      }
+      
+      // Name/description match boost (0-20 points)
+      const searchTerms = enhancedQuery.toLowerCase().split(' ');
+      const providerText = `${p.business_name} ${p.description || ''} ${(p.specialties || []).join(' ')}`.toLowerCase();
+      const termMatches = searchTerms.filter(term => term.length > 2 && providerText.includes(term)).length;
+      score += Math.min(termMatches * 5, 20);
+      
+      return {
+        ...p,
+        relevanceScore: Math.min(Math.round(score), 100),
+        explanation: `${p.business_name} specializes in ${(p.specialties || []).slice(0, 2).join(', ')}`,
+        isNewDiscovery: p.source === 'google_places'
+      };
+    });
+    
+    // Sort by score and limit to top 15
+    const rankedResults = scoredResults
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, 15);
     const { error: cacheError } = await supabase.from('search_cache').insert({
       query_hash: queryHash,
       original_query: query,
