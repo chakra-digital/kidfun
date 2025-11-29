@@ -120,11 +120,11 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
 
       {/* Action Buttons */}
       <div className="space-y-3 pt-4 border-t">
-        {result.external_website && (
-          <Button 
-            className="w-full"
-            size="lg"
-            onClick={() => {
+        <Button 
+          className="w-full"
+          size="lg"
+          onClick={() => {
+            if (result.external_website) {
               try {
                 const url = new URL(result.external_website);
                 url.searchParams.append('utm_source', 'kidfun');
@@ -134,12 +134,16 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
               } catch {
                 window.open(result.external_website, '_blank', 'noopener,noreferrer');
               }
-            }}
-          >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Book Now
-          </Button>
-        )}
+            } else {
+              // Fallback: Google search for the business
+              const searchQuery = encodeURIComponent(`${result.business_name} ${result.location}`);
+              window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank', 'noopener,noreferrer');
+            }
+          }}
+        >
+          <ExternalLink className="w-4 h-4 mr-2" />
+          Book Now
+        </Button>
         
         <div className="flex flex-col sm:flex-row gap-3">
           <Button 
