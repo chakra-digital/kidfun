@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, X, MapPin, DollarSign, Clock, User } from "lucide-react";
+import { Plus, X, MapPin, DollarSign, Clock, User, Users } from "lucide-react";
 import { LocationInput } from "@/components/ui/location-input";
 
 interface ParentOnboardingProps {
@@ -49,11 +49,15 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
   const [budgetRange, setBudgetRange] = useState([0, 200]);
   const [preferredRadius, setPreferredRadius] = useState([10]);
 
-  // Step 2: Emergency Contact
+  // Step 2: Social Connections
+  const [schoolName, setSchoolName] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+
+  // Step 3: Emergency Contact
   const [emergencyContactName, setEmergencyContactName] = useState("");
   const [emergencyContactPhone, setEmergencyContactPhone] = useState("");
 
-  // Step 3: Children Profiles
+  // Step 4: Children Profiles
   const [children, setChildren] = useState<ChildProfile[]>([{
     firstName: "",
     age: 5,
@@ -63,7 +67,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
     medicalNotes: ""
   }]);
 
-  // Step 4: Review & Complete
+  // Step 5: Review & Complete
   
   const addChild = () => {
     setChildren([...children, {
@@ -95,7 +99,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       onStepChange(currentStep + 1);
     } else {
       handleComplete();
@@ -122,6 +126,8 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
           budget_min: budgetRange[0],
           budget_max: budgetRange[1],
           preferred_radius: preferredRadius[0],
+          school_name: schoolName || null,
+          neighborhood: neighborhood || null,
           emergency_contact_name: emergencyContactName,
           emergency_contact_phone: emergencyContactPhone,
         });
@@ -164,10 +170,12 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
       case 1:
         return location.trim() !== "";
       case 2:
-        return emergencyContactName.trim() !== "" && emergencyContactPhone.trim() !== "";
+        return true; // Social connections are optional
       case 3:
-        return children.some(child => child.firstName.trim() !== "");
+        return emergencyContactName.trim() !== "" && emergencyContactPhone.trim() !== "";
       case 4:
+        return children.some(child => child.firstName.trim() !== "");
+      case 5:
         return true;
       default:
         return false;
@@ -237,6 +245,51 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
         );
 
       case 2:
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Users className="h-5 w-5 mr-2 text-primary" />
+                Connect with Other Parents
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Help us connect you with parents in your area who share similar interests and schedules
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="school-name">School Name (Optional)</Label>
+                  <Input
+                    id="school-name"
+                    placeholder="e.g., Lincoln Elementary School"
+                    value={schoolName}
+                    onChange={(e) => setSchoolName(e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Connect with parents whose kids attend the same school
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="neighborhood">Neighborhood (Optional)</Label>
+                  <Input
+                    id="neighborhood"
+                    placeholder="e.g., Downtown, Westlake, East Side"
+                    value={neighborhood}
+                    onChange={(e) => setNeighborhood(e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Find parents and activities in your neighborhood
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4:
         return (
           <div className="space-y-6">
             <div>
@@ -375,7 +428,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <div>
@@ -388,6 +441,14 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
                   <p className="text-sm text-muted-foreground">Budget: ${budgetRange[0]} - ${budgetRange[1]} per week</p>
                   <p className="text-sm text-muted-foreground">Travel Distance: {preferredRadius[0]} miles</p>
                 </Card>
+
+                {(schoolName || neighborhood) && (
+                  <Card className="p-4">
+                    <h4 className="font-medium mb-2">Social Connections</h4>
+                    {schoolName && <p className="text-sm text-muted-foreground">School: {schoolName}</p>}
+                    {neighborhood && <p className="text-sm text-muted-foreground">Neighborhood: {neighborhood}</p>}
+                  </Card>
+                )}
 
                 <Card className="p-4">
                   <h4 className="font-medium mb-2">Emergency Contact</h4>
@@ -433,7 +494,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
           onClick={handleNext}
           disabled={!canProceed() || loading}
         >
-          {loading ? "Saving..." : currentStep === 4 ? "Complete Setup" : "Next"}
+          {loading ? "Saving..." : currentStep === 5 ? "Complete Setup" : "Next"}
         </Button>
       </div>
     </div>
