@@ -14,6 +14,7 @@ import AddChildForm from "@/components/children/AddChildForm";
 import { EditChildDialog } from "@/components/children/EditChildDialog";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 import { GameifiedProgress } from "@/components/progress/GameifiedProgress";
+import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -154,8 +155,15 @@ const Dashboard = () => {
         </div>
 
         {userType === "parent" && (
-          <div id="children-section" className="mt-8">
-            <Card>
+          <>
+            {/* Social Connections Card */}
+            <div className="mt-8">
+              <SocialConnectionsCard />
+            </div>
+
+            {/* Children Section */}
+            <div id="children-section" className="mt-8">
+              <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
@@ -223,6 +231,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
+          </>
         )}
 
         {userType === "provider" && (

@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_participants: {
+        Row: {
+          activity_id: string
+          child_id: string | null
+          id: string
+          joined_at: string
+          notes: string | null
+          parent_id: string
+          status: string
+        }
+        Insert: {
+          activity_id: string
+          child_id?: string | null
+          id?: string
+          joined_at?: string
+          notes?: string | null
+          parent_id: string
+          status?: string
+        }
+        Update: {
+          activity_id?: string
+          child_id?: string | null
+          id?: string
+          joined_at?: string
+          notes?: string | null
+          parent_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_participants_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "group_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_participants_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_shares: {
+        Row: {
+          activity_name: string
+          created_at: string
+          group_id: string | null
+          id: string
+          provider_id: string | null
+          provider_name: string | null
+          rating: number | null
+          recommendation_note: string | null
+          shared_by: string
+          shared_with: string | null
+        }
+        Insert: {
+          activity_name: string
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          provider_id?: string | null
+          provider_name?: string | null
+          rating?: number | null
+          recommendation_note?: string | null
+          shared_by: string
+          shared_with?: string | null
+        }
+        Update: {
+          activity_name?: string
+          created_at?: string
+          group_id?: string | null
+          id?: string
+          provider_id?: string | null
+          provider_name?: string | null
+          rating?: number | null
+          recommendation_note?: string | null
+          shared_by?: string
+          shared_with?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_shares_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "social_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
           age: number
@@ -53,6 +145,130 @@ export type Database = {
         }
         Relationships: []
       }
+      group_activities: {
+        Row: {
+          activity_name: string
+          activity_type: string | null
+          cost_per_child: number | null
+          created_at: string
+          created_by: string
+          current_participants: number | null
+          description: string | null
+          group_id: string
+          id: string
+          location: string | null
+          max_participants: number | null
+          provider_id: string | null
+          scheduled_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activity_name: string
+          activity_type?: string | null
+          cost_per_child?: number | null
+          created_at?: string
+          created_by: string
+          current_participants?: number | null
+          description?: string | null
+          group_id: string
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          provider_id?: string | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activity_name?: string
+          activity_type?: string | null
+          cost_per_child?: number | null
+          created_at?: string
+          created_by?: string
+          current_participants?: number | null
+          description?: string | null
+          group_id?: string
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          provider_id?: string | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_activities_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "social_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_memberships: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          parent_id: string
+          role: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          parent_id: string
+          role?: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          parent_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_memberships_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "social_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      parent_connections: {
+        Row: {
+          connected_parent_id: string
+          connection_type: string | null
+          created_at: string
+          id: string
+          parent_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          connected_parent_id: string
+          connection_type?: string | null
+          created_at?: string
+          id?: string
+          parent_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          connected_parent_id?: string
+          connection_type?: string | null
+          created_at?: string
+          id?: string
+          parent_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       parent_profiles: {
         Row: {
           budget_max: number | null
@@ -62,7 +278,10 @@ export type Database = {
           emergency_contact_phone: string | null
           id: string
           location: string | null
+          neighborhood: string | null
           preferred_radius: number | null
+          referral_code: string | null
+          school_name: string | null
           updated_at: string
           user_id: string
         }
@@ -74,7 +293,10 @@ export type Database = {
           emergency_contact_phone?: string | null
           id?: string
           location?: string | null
+          neighborhood?: string | null
           preferred_radius?: number | null
+          referral_code?: string | null
+          school_name?: string | null
           updated_at?: string
           user_id: string
         }
@@ -86,7 +308,10 @@ export type Database = {
           emergency_contact_phone?: string | null
           id?: string
           location?: string | null
+          neighborhood?: string | null
           preferred_radius?: number | null
+          referral_code?: string | null
+          school_name?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -245,6 +470,48 @@ export type Database = {
           query_hash?: string
           results?: Json
           search_analysis?: Json | null
+        }
+        Relationships: []
+      }
+      social_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          group_type: string
+          id: string
+          location: string | null
+          name: string
+          neighborhood: string | null
+          privacy_level: string
+          school_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          group_type: string
+          id?: string
+          location?: string | null
+          name: string
+          neighborhood?: string | null
+          privacy_level?: string
+          school_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          group_type?: string
+          id?: string
+          location?: string | null
+          name?: string
+          neighborhood?: string | null
+          privacy_level?: string
+          school_name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

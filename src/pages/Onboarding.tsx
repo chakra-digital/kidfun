@@ -138,7 +138,7 @@ const Onboarding = () => {
     );
   }
 
-  const totalSteps = userType === "parent" ? 4 : 5;
+  const totalSteps = userType === "parent" ? 5 : 5;
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   return (
