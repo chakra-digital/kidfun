@@ -23,6 +23,9 @@ interface ParentProfile {
   preferred_radius: number | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
+  school_name: string | null;
+  neighborhood: string | null;
+  referral_code: string | null;
   created_at: string;
   updated_at: string;
 }

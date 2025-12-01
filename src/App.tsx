@@ -15,6 +15,7 @@ import Activities from "./pages/Activities";
 import Camps from "./pages/Camps";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import FindParents from "./pages/FindParents";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/camps" element={<Camps />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/find-parents" element={<FindParents />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

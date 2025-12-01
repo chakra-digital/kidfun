@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Users, UserPlus, School, Home } from 'lucide-react';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
+import { useNavigate } from 'react-router-dom';
 
 export const SocialConnectionsCard = () => {
+  const navigate = useNavigate();
   const { connections, groups, loading } = useSocialConnections();
 
   if (loading) {
@@ -37,7 +39,7 @@ export const SocialConnectionsCard = () => {
           <Users className="h-5 w-5" />
           Your Network
         </CardTitle>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={() => navigate('/find-parents')}>
           <UserPlus className="h-4 w-4 mr-2" />
           Find Parents
         </Button>

@@ -162,6 +162,101 @@ export const useSocialConnections = () => {
     }
   };
 
+  const fetchPendingRequests = async () => {
+    if (!user) return { received: [], sent: [] };
+
+    try {
+      // Fetch received requests
+      const { data: receivedData, error: receivedError } = await supabase
+        .from('parent_connections')
+        .select('*')
+        .eq('connected_parent_id', user.id)
+        .eq('status', 'pending');
+
+      if (receivedError) throw receivedError;
+
+      // Fetch sender profiles
+      const receivedWithProfiles = await Promise.all(
+        (receivedData || []).map(async (req) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email')
+            .eq('user_id', req.parent_id)
+            .single();
+          
+          return { ...req, sender_profile: profile };
+        })
+      );
+
+      // Fetch sent requests
+      const { data: sentData, error: sentError } = await supabase
+        .from('parent_connections')
+        .select('*')
+        .eq('parent_id', user.id)
+        .eq('status', 'pending');
+
+      if (sentError) throw sentError;
+
+      // Fetch receiver profiles
+      const sentWithProfiles = await Promise.all(
+        (sentData || []).map(async (req) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email')
+            .eq('user_id', req.connected_parent_id)
+            .single();
+          
+          return { ...req, receiver_profile: profile };
+        })
+      );
+
+      return {
+        received: receivedWithProfiles,
+        sent: sentWithProfiles
+      };
+    } catch (err: any) {
+      console.error('Error fetching pending requests:', err);
+      return { received: [], sent: [] };
+    }
+  };
+
+  const acceptConnectionRequest = async (requestId: string) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    try {
+      const { error } = await supabase
+        .from('parent_connections')
+        .update({ status: 'accepted' })
+        .eq('id', requestId)
+        .eq('connected_parent_id', user.id);
+
+      if (error) throw error;
+      
+      await fetchConnections();
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message };
+    }
+  };
+
+  const declineConnectionRequest = async (requestId: string) => {
+    if (!user) return { error: 'Not authenticated' };
+
+    try {
+      const { error } = await supabase
+        .from('parent_connections')
+        .update({ status: 'declined' })
+        .eq('id', requestId)
+        .eq('connected_parent_id', user.id);
+
+      if (error) throw error;
+      
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message };
+    }
+  };
+
   return {
     connections,
     groups,
@@ -169,6 +264,9 @@ export const useSocialConnections = () => {
     error,
     findPotentialConnections,
     sendConnectionRequest,
+    fetchPendingRequests,
+    acceptConnectionRequest,
+    declineConnectionRequest,
     refetch: () => {
       fetchConnections();
       fetchGroups();
