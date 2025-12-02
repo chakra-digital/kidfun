@@ -282,26 +282,63 @@ async function searchGooglePlaces(searchAnalysis: any, location: string) {
             const hasMinRating = !place.rating || place.rating >= 3.5;
             return isOperational && hasMinRating;
           })
-          .slice(0, 3); // Reduced to 3 for even faster results
+          .slice(0, 3);
 
-        // Skip detailed fetching for now to speed up results
-        const detailedResults = relevantPlaces.map((place: any) => ({
-          google_place_id: place.place_id,
-          business_name: place.name,
-          location: place.formatted_address,
-          latitude: place.geometry?.location?.lat,
-          longitude: place.geometry?.location?.lng,
-          google_rating: place.rating,
-          google_reviews_count: place.user_ratings_total,
-          description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
-          specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
-          amenities: ['Outdoor Space', 'Safety Equipment'],
-          pricing_model: 'per_session',
-          base_price: 25.00,
-          capacity: 20,
-          age_groups: ['3-5', '6-12', '13-17'],
-          source: 'google_places'
-        }));
+        // Fetch detailed info to get website URLs
+        const detailPromises = relevantPlaces.map(async (place: any) => {
+          try {
+            const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,website,formatted_phone_number,business_status&key=${googlePlacesApiKey}`;
+            const detailResponse = await fetch(detailUrl);
+            const detailData = await detailResponse.json();
+            
+            if (detailData.status === 'OK' && detailData.result) {
+              return {
+                google_place_id: place.place_id,
+                business_name: place.name,
+                location: place.formatted_address,
+                latitude: place.geometry?.location?.lat,
+                longitude: place.geometry?.location?.lng,
+                google_rating: place.rating,
+                google_reviews_count: place.user_ratings_total,
+                external_website: detailData.result.website || null,
+                phone: detailData.result.formatted_phone_number || null,
+                description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
+                specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
+                amenities: ['Outdoor Space', 'Safety Equipment'],
+                pricing_model: 'per_session',
+                base_price: 25.00,
+                capacity: 20,
+                age_groups: ['3-5', '6-12', '13-17'],
+                source: 'google_places'
+              };
+            }
+          } catch (error) {
+            console.error(`Error fetching details for ${place.place_id}:`, error);
+          }
+          
+          // Fallback if details fetch fails
+          return {
+            google_place_id: place.place_id,
+            business_name: place.name,
+            location: place.formatted_address,
+            latitude: place.geometry?.location?.lat,
+            longitude: place.geometry?.location?.lng,
+            google_rating: place.rating,
+            google_reviews_count: place.user_ratings_total,
+            external_website: null,
+            phone: null,
+            description: `${place.name} offers activities and services for children and families in the ${resolvedLocation} area.`,
+            specialties: searchAnalysis.activities.length > 0 ? searchAnalysis.activities : [place.types?.[0] || 'Activities'],
+            amenities: ['Outdoor Space', 'Safety Equipment'],
+            pricing_model: 'per_session',
+            base_price: 25.00,
+            capacity: 20,
+            age_groups: ['3-5', '6-12', '13-17'],
+            source: 'google_places'
+          };
+        });
+
+        const detailedResults = await Promise.all(detailPromises);
 
         console.log(`Added ${detailedResults.length} results from query: "${searchQuery}"`);
         return detailedResults;
