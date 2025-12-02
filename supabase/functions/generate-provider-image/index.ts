@@ -20,9 +20,9 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    if (!GOOGLE_GEMINI_API_KEY) {
+      throw new Error('GOOGLE_GEMINI_API_KEY not configured');
     }
 
     // Create a unique, whimsical prompt based on provider info
@@ -38,33 +38,42 @@ Background should be a solid vibrant color or simple gradient.`;
 
     console.log('Generating AI image with prompt:', prompt);
 
-    // Call Lovable AI with nano banana model (gemini-2.5-flash-image-preview)
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
-        messages: [
-          {
-            role: "user",
-            content: prompt
+    // Call Google AI Studio with nano banana model (gemini-2.5-flash-image-preview)
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            response_modalities: ["image"]
           }
-        ],
-        modalities: ["image", "text"]
-      })
-    });
+        })
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Lovable AI error:', errorText);
+      console.error('Google AI error:', errorText);
       throw new Error(`AI image generation failed: ${response.status}`);
     }
 
     const data = await response.json();
-    const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    const imageData = data.candidates?.[0]?.content?.parts?.[0]?.inline_data;
+    
+    if (!imageData?.data) {
+      throw new Error('No image data returned from AI');
+    }
+
+    // Convert base64 to data URL
+    const generatedImageUrl = `data:${imageData.mime_type};base64,${imageData.data}`;
 
     if (!generatedImageUrl) {
       throw new Error('No image URL returned from AI');
