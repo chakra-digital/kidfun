@@ -125,6 +125,7 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
           size="lg"
           onClick={() => {
             if (result.external_website) {
+              // Provider has a website - use it with UTM tracking
               try {
                 const url = new URL(result.external_website);
                 url.searchParams.append('utm_source', 'kidfun');
@@ -134,6 +135,10 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
               } catch {
                 window.open(result.external_website, '_blank', 'noopener,noreferrer');
               }
+            } else if (result.google_place_id) {
+              // No website but has Google Place ID - link to Google Maps business page
+              const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(result.business_name)}&query_place_id=${result.google_place_id}`;
+              window.open(url, '_blank', 'noopener,noreferrer');
             } else {
               // Fallback: Google search for the business
               const searchQuery = encodeURIComponent(`${result.business_name} ${result.location}`);
@@ -142,7 +147,7 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
           }}
         >
           <ExternalLink className="w-4 h-4 mr-2" />
-          Book Now
+          {result.external_website ? 'Visit Website' : 'View on Google Maps'}
         </Button>
         
         <div className="flex flex-col sm:flex-row gap-3">
