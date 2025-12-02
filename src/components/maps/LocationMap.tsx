@@ -278,41 +278,36 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   // Fetch API key on mount (from localStorage or Edge Function) and auto-submit
   useEffect(() => {
     const init = async () => {
-      const savedApiKey = localStorage.getItem('googleMapsApiKey');
-      if (savedApiKey) {
-        console.log('Found saved API key, setting state...');
-        setGoogleMapsApiKey(savedApiKey);
-        setApiKeySubmitted(true);
-        return;
-      }
-        try {
-          setIsLoading(true);
-          console.log('Fetching Maps API key from edge function...');
-          const { data, error } = await supabase.functions.invoke('get-maps-key');
-          console.log('Edge function response:', { data, error });
-          
-          if (error) {
-            console.error('Edge function error:', error);
-            throw error;
-          }
-          
-          const key = (data as any)?.key;
-          if (!key) {
-            console.error('No API key in response. Full data:', data);
-            throw new Error('No API key returned from server');
-          }
-          
-          console.log('API key fetched successfully, length:', key.length);
-          localStorage.setItem('googleMapsApiKey', key);
-          setGoogleMapsApiKey(key);
-          setApiKeySubmitted(true);
-        } catch (e: any) {
-          console.error('Failed to fetch Maps API key:', e);
-          console.error('Error details:', { message: e.message, stack: e.stack });
-          setError(`Maps unavailable: ${e.message || 'Unable to load Google Maps API key'}`);
-        } finally {
-          setIsLoading(false);
+      // Always fetch fresh from server to avoid stale keys
+      // (localStorage can have invalid keys from previous sessions)
+      try {
+        setIsLoading(true);
+        console.log('Fetching fresh Maps API key from server...');
+        const { data, error } = await supabase.functions.invoke('get-maps-key');
+        console.log('Edge function response:', { data, error });
+        
+        if (error) {
+          console.error('Edge function error:', error);
+          throw error;
         }
+        
+        const key = (data as any)?.key;
+        if (!key) {
+          console.error('No API key in response. Full data:', data);
+          throw new Error('No API key returned from server');
+        }
+        
+        console.log('API key fetched successfully');
+        localStorage.setItem('googleMapsApiKey', key);
+        setGoogleMapsApiKey(key);
+        setApiKeySubmitted(true);
+      } catch (e: any) {
+        console.error('Failed to fetch Maps API key:', e);
+        console.error('Error details:', { message: e.message, stack: e.stack });
+        setError(`Maps unavailable: ${e.message || 'Unable to load Google Maps API key'}`);
+      } finally {
+        setIsLoading(false);
+      }
     };
     void init();
   }, []);
