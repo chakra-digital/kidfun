@@ -31,13 +31,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   const map = useRef<any>(null);
   const initialized = useRef(false);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState('');
-  const [apiKeySubmitted, setApiKeySubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const errorSetRef = useRef(false); // Prevent error re-renders
+  const errorSetRef = useRef(false);
   const infoWindowsRef = useRef<any[]>([]);
   const markersRef = useRef<any[]>([]);
   const [currentBallEmoji, setCurrentBallEmoji] = useState('⚽');
+  const initAttempted = useRef(false);
   
   // Animated sports balls for loading state
   useEffect(() => {
@@ -62,7 +62,6 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   
   console.log('LocationMap render:', { 
     providersCount: providers.length, 
-    apiKeySubmitted, 
     hasError: !!error,
     className 
   });
@@ -265,12 +264,10 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
 
 
   const handleResetApiKey = async () => {
-    localStorage.removeItem('googleMapsApiKey');
-    setApiKeySubmitted(false);
-    setGoogleMapsApiKey('');
     setError('');
-    errorSetRef.current = false; // Reset error flag
+    errorSetRef.current = false;
     initialized.current = false;
+    initAttempted.current = false;
     if (map.current) {
       map.current = null;
     }
@@ -280,9 +277,7 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       if (error) throw error;
       const key = (data as any)?.key;
       if (!key) throw new Error('No API key returned');
-      localStorage.setItem('googleMapsApiKey', key);
       setGoogleMapsApiKey(key);
-      setApiKeySubmitted(true);
       await initializeMap(key);
     } catch (e: any) {
       console.error('Failed to fetch Maps API key on retry', e);
@@ -291,40 +286,46 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       setIsLoading(false);
     }
   };
-  // Fetch API key on mount (from localStorage or Edge Function) and auto-submit
+  // Fetch API key and initialize map
   useEffect(() => {
+    if (initAttempted.current) return;
+    initAttempted.current = true;
+
     const init = async () => {
-      // Always fetch fresh from server to avoid stale keys
-      // (localStorage can have invalid keys from previous sessions)
       try {
+        console.log('🗺️ Starting map initialization...');
         setIsLoading(true);
-        console.log('Fetching fresh Maps API key from server...');
+        
+        // Fetch API key
+        console.log('📡 Fetching Maps API key from server...');
         const { data, error } = await supabase.functions.invoke('get-maps-key');
-        console.log('Edge function response:', { data, error });
         
         if (error) {
-          console.error('Edge function error:', error);
+          console.error('❌ Edge function error:', error);
           throw error;
         }
         
         const key = (data as any)?.key;
         if (!key) {
-          console.error('No API key in response. Full data:', data);
+          console.error('❌ No API key in response:', data);
           throw new Error('No API key returned from server');
         }
         
-        console.log('API key fetched successfully');
-        localStorage.setItem('googleMapsApiKey', key);
+        console.log('✅ API key fetched successfully');
         setGoogleMapsApiKey(key);
-        setApiKeySubmitted(true);
+        
+        // Initialize map with the key
+        await initializeMap(key);
+        
       } catch (e: any) {
-        console.error('Failed to fetch Maps API key:', e);
-        console.error('Error details:', { message: e.message, stack: e.stack });
-        setError(`Maps unavailable: ${e.message || 'Unable to load Google Maps API key'}`);
+        console.error('❌ Map initialization failed:', e);
+        setError(`Maps unavailable: ${e.message || 'Unable to load Google Maps'}`);
+        errorSetRef.current = true;
       } finally {
         setIsLoading(false);
       }
     };
+    
     void init();
   }, []);
 
@@ -335,25 +336,6 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       infoWindowsRef.current = [];
     };
   }, []);
-
-  // Initialize map after the container is mounted and key is available
-  useEffect(() => {
-    if (!apiKeySubmitted || initialized.current) return;
-
-    const key = (googleMapsApiKey || localStorage.getItem('googleMapsApiKey') || '').trim();
-
-    if (!mapContainer.current) {
-      console.log('Map container not ready yet');
-      return;
-    }
-    if (!key) {
-      console.warn('No API key available to initialize map');
-      return;
-    }
-
-    console.log('Initializing map from effect...');
-    void initializeMap(key);
-  }, [apiKeySubmitted, initializeMap, googleMapsApiKey]);
 
   // Add markers when providers change and map is ready
   useEffect(() => {
