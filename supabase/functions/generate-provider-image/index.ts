@@ -61,19 +61,34 @@ Background should be a solid vibrant color or simple gradient.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Google AI error:', errorText);
-      throw new Error(`AI image generation failed: ${response.status}`);
+      console.error('Google AI error:', response.status, errorText);
+      throw new Error(`AI image generation failed: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    const imageData = data.candidates?.[0]?.content?.parts?.[0]?.inline_data;
+    console.log('Google AI response structure:', JSON.stringify(data, null, 2));
+    
+    // Try multiple possible response formats
+    let imageData = data.candidates?.[0]?.content?.parts?.[0]?.inline_data;
+    
+    // Alternative format: sometimes it's directly in parts
+    if (!imageData) {
+      const parts = data.candidates?.[0]?.content?.parts || [];
+      for (const part of parts) {
+        if (part.inline_data || part.inlineData) {
+          imageData = part.inline_data || part.inlineData;
+          break;
+        }
+      }
+    }
     
     if (!imageData?.data) {
-      throw new Error('No image data returned from AI');
+      console.error('Failed to find image in response. Full response:', JSON.stringify(data, null, 2));
+      throw new Error('No image data returned from AI. Check logs for response structure.');
     }
 
     // Convert base64 to data URL
-    const generatedImageUrl = `data:${imageData.mime_type};base64,${imageData.data}`;
+    const generatedImageUrl = `data:${imageData.mime_type || imageData.mimeType || 'image/png'};base64,${imageData.data}`;
 
     if (!generatedImageUrl) {
       throw new Error('No image URL returned from AI');
