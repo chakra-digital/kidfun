@@ -184,50 +184,66 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       // Mark map as initialized only after successful creation
       initialized.current = true;
 
-      // Listen for map errors with delayed check to avoid false positives
+      // Aggressive error detection - check immediately and continuously
       try {
         const container = mapContainer.current;
         if (container) {
-          // Wait a moment before checking for errors to let map initialize
-          setTimeout(() => {
+          // Check for errors multiple times during initialization
+          const checkForErrors = () => {
             const errEl = container.querySelector('.gm-err-message, .gm-err-container');
             if (errEl && !errorSetRef.current) {
               const errorText = errEl.textContent || 'Unknown error';
+              const errorHtml = errEl.innerHTML || '';
+              
               console.error('=== GOOGLE MAPS ERROR DETECTED ===');
               console.error('Error text:', errorText);
+              console.error('Error HTML:', errorHtml);
+              console.error('Current URL:', window.location.href);
               console.error('Current hostname:', window.location.hostname);
-              console.error('Error element HTML:', errEl.innerHTML);
+              console.error('API Key being used:', googleMapsApiKey ? 'Present (length: ' + googleMapsApiKey.length + ')' : 'Missing');
               console.error('================================');
+              console.error('COMMON CAUSES:');
+              console.error('1. API key HTTP referrer restrictions - must allow:', window.location.hostname);
+              console.error('2. Maps JavaScript API not enabled in Google Cloud Console');
+              console.error('3. Billing not set up or quota exceeded');
+              console.error('================================');
+              
               errorSetRef.current = true;
-              setError(`Map Error: ${errorText}. Verify API key allows ${window.location.hostname}`);
+              
+              // Provide more helpful error message
+              let helpfulMessage = 'Google Maps failed to load. ';
+              if (errorText.includes('API key')) {
+                helpfulMessage += 'Check API key configuration in Google Cloud Console.';
+              } else if (errorText.includes('billing')) {
+                helpfulMessage += 'Enable billing in Google Cloud Console.';
+              } else if (errorText.includes('referer') || errorText.includes('referrer')) {
+                helpfulMessage += `Add ${window.location.hostname} to HTTP referrer restrictions.`;
+              } else {
+                helpfulMessage += 'See console for details.';
+              }
+              
+              setError(helpfulMessage);
             }
-          }, 1500);
+          };
 
-          // Observe DOM mutations to catch async error overlays (once only)
-          const observer = new MutationObserver(() => {
-            const errEl = container.querySelector('.gm-err-message, .gm-err-container');
-            if (errEl && !errorSetRef.current) {
-              const errorText = errEl.textContent || 'Configuration issue';
-              console.error('Google Maps error overlay detected:', errorText);
-              errorSetRef.current = true;
-              setError(`Map error: ${errorText.substring(0, 100)}`);
-              observer.disconnect(); // Stop observing after first error
-            }
-          });
+          // Check immediately
+          setTimeout(checkForErrors, 100);
+          // Check again after initialization
+          setTimeout(checkForErrors, 1000);
+          // Check once more for delayed errors
+          setTimeout(checkForErrors, 2500);
+
+          // Observe DOM mutations to catch async error overlays
+          const observer = new MutationObserver(checkForErrors);
           observer.observe(container, { childList: true, subtree: true });
 
+          // Disconnect observer after map loads or fails
+          setTimeout(() => observer.disconnect(), 5000);
+          
           // Check on tiles loaded
           (window as any).google.maps.event.addListenerOnce(map.current, 'tilesloaded', () => {
-            console.log('Google Maps tiles loaded successfully');
-            const errorDiv = container.querySelector('.gm-err-message, .gm-err-container');
-            if (errorDiv && !errorSetRef.current) {
-              const errorText = errorDiv.textContent || 'Failed to load tiles';
-              console.error('Google Maps error after tiles loaded:', errorText);
-              errorSetRef.current = true;
-              setError(`Map error: ${errorText.substring(0, 100)}`);
-            } else {
-              console.log('Map loaded without errors');
-            }
+            console.log('✅ Google Maps tiles loaded successfully!');
+            observer.disconnect();
           });
         }
       } catch (e) {
