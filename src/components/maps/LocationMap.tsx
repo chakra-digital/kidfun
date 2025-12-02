@@ -51,12 +51,19 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   }, []);
   
   // Only reset error for provider changes if map successfully initialized
-  // If map never initialized, keep the error visible
+  // If map never initialized, reset error and try again
   useEffect(() => {
-    if (providers.length > 0 && initialized.current && errorSetRef.current) {
-      console.log('New providers detected, map is initialized, clearing transient errors');
-      errorSetRef.current = false;
-      setError('');
+    if (providers.length > 0) {
+      if (initialized.current && errorSetRef.current) {
+        console.log('New providers detected, map is initialized, clearing transient errors');
+        errorSetRef.current = false;
+        setError('');
+      } else if (!initialized.current && errorSetRef.current) {
+        console.log('New providers detected but map not initialized, resetting for retry');
+        errorSetRef.current = false;
+        setError('');
+        initAttempted.current = false; // Allow retry
+      }
     }
   }, [providers]);
   
@@ -288,13 +295,27 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
   };
   // Fetch API key and initialize map
   useEffect(() => {
-    if (initAttempted.current) return;
-    initAttempted.current = true;
+    if (initAttempted.current) {
+      console.log('⏭️ Init already attempted, skipping');
+      return;
+    }
 
     const init = async () => {
       try {
         console.log('🗺️ Starting map initialization...');
         setIsLoading(true);
+        initAttempted.current = true;
+        
+        // Wait for container to be ready
+        if (!mapContainer.current) {
+          console.log('⏳ Waiting for map container...');
+          await new Promise(resolve => setTimeout(resolve, 100));
+          if (!mapContainer.current) {
+            throw new Error('Map container not available');
+          }
+        }
+        
+        console.log('✅ Map container ready');
         
         // Fetch API key
         console.log('📡 Fetching Maps API key from server...');
@@ -311,11 +332,13 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
           throw new Error('No API key returned from server');
         }
         
-        console.log('✅ API key fetched successfully');
+        console.log('✅ API key fetched, length:', key.length);
         setGoogleMapsApiKey(key);
         
         // Initialize map with the key
+        console.log('🗺️ Calling initializeMap...');
         await initializeMap(key);
+        console.log('✅ Map initialization complete');
         
       } catch (e: any) {
         console.error('❌ Map initialization failed:', e);
@@ -326,8 +349,9 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
       }
     };
     
+    console.log('🚀 Scheduling init...');
     void init();
-  }, []);
+  }, [initializeMap]);
 
   useEffect(() => {
     return () => {
