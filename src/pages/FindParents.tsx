@@ -26,9 +26,12 @@ const FindParents = () => {
     if (!searchTerm.trim()) return;
     
     setIsSearching(true);
+    // Pass school_place_id for more accurate matching when searching by school
+    const schoolPlaceId = searchType === 'school' ? parentProfile?.school_place_id : undefined;
     const results = await findPotentialConnections(
       searchType === 'school' ? searchTerm : undefined,
-      searchType === 'neighborhood' ? searchTerm : undefined
+      searchType === 'neighborhood' ? searchTerm : undefined,
+      schoolPlaceId || undefined
     );
     setPotentialConnections(results);
     setIsSearching(false);
