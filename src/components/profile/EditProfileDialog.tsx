@@ -8,10 +8,11 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Edit } from "lucide-react";
+import { SchoolInput } from "@/components/ui/school-input";
 
 export const EditProfileDialog = () => {
   const { user } = useAuth();
-  const { userProfile, refreshProfile } = useUserProfile();
+  const { userProfile, parentProfile, refreshProfile } = useUserProfile();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,6 +23,14 @@ export const EditProfileDialog = () => {
     phone: ""
   });
 
+  const [parentFormData, setParentFormData] = useState({
+    school_name: "",
+    school_place_id: "",
+    neighborhood: ""
+  });
+
+  const isParent = userProfile?.user_type === 'parent';
+
   useEffect(() => {
     if (userProfile) {
       setFormData({
@@ -30,14 +39,22 @@ export const EditProfileDialog = () => {
         phone: userProfile.phone || ""
       });
     }
-  }, [userProfile]);
+    if (parentProfile) {
+      setParentFormData({
+        school_name: parentProfile.school_name || "",
+        school_place_id: parentProfile.school_place_id || "",
+        neighborhood: parentProfile.neighborhood || ""
+      });
+    }
+  }, [userProfile, parentProfile]);
 
   const handleSave = async () => {
     if (!user) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      // Update main profile
+      const { error: profileError } = await supabase
         .from("profiles")
         .update({
           first_name: formData.first_name,
@@ -46,7 +63,21 @@ export const EditProfileDialog = () => {
         })
         .eq("user_id", user.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Update parent profile if user is a parent
+      if (isParent) {
+        const { error: parentError } = await supabase
+          .from("parent_profiles")
+          .update({
+            school_name: parentFormData.school_name || null,
+            school_place_id: parentFormData.school_place_id || null,
+            neighborhood: parentFormData.neighborhood || null
+          })
+          .eq("user_id", user.id);
+
+        if (parentError) throw parentError;
+      }
 
       toast({
         title: "Profile updated",
@@ -64,6 +95,14 @@ export const EditProfileDialog = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSchoolChange = (name: string, placeId: string | null) => {
+    setParentFormData(prev => ({
+      ...prev,
+      school_name: name,
+      school_place_id: placeId || ""
+    }));
   };
 
   return (
@@ -107,6 +146,29 @@ export const EditProfileDialog = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
             />
           </div>
+
+          {isParent && (
+            <>
+              <div>
+                <Label htmlFor="school">School</Label>
+                <SchoolInput
+                  value={parentFormData.school_name}
+                  onChange={handleSchoolChange}
+                  placeholder="Search for your child's school..."
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="neighborhood">Neighborhood</Label>
+                <Input
+                  id="neighborhood"
+                  value={parentFormData.neighborhood}
+                  onChange={(e) => setParentFormData(prev => ({ ...prev, neighborhood: e.target.value }))}
+                  placeholder="e.g., Tarrytown, Hyde Park"
+                />
+              </div>
+            </>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setOpen(false)}>
