@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { input } = await req.json();
+    const { input, type } = await req.json();
     
     if (!input || input.length < 2) {
       return new Response(
@@ -30,7 +30,14 @@ serve(async (req) => {
     // Call Google Places Autocomplete API
     const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json');
     url.searchParams.append('input', input);
-    url.searchParams.append('types', '(cities)'); // Only cities
+    
+    // Support different place types
+    if (type === 'school') {
+      url.searchParams.append('types', 'school');
+    } else {
+      url.searchParams.append('types', '(cities)');
+    }
+    
     url.searchParams.append('components', 'country:us');
     url.searchParams.append('key', GOOGLE_PLACES_API_KEY);
 
