@@ -282,6 +282,7 @@ export type Database = {
           preferred_radius: number | null
           referral_code: string | null
           school_name: string | null
+          school_place_id: string | null
           updated_at: string
           user_id: string
         }
@@ -297,6 +298,7 @@ export type Database = {
           preferred_radius?: number | null
           referral_code?: string | null
           school_name?: string | null
+          school_place_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -312,6 +314,7 @@ export type Database = {
           preferred_radius?: number | null
           referral_code?: string | null
           school_name?: string | null
+          school_place_id?: string | null
           updated_at?: string
           user_id?: string
         }

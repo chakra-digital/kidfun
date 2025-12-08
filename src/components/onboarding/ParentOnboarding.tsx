@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X, MapPin, DollarSign, Clock, User, Users } from "lucide-react";
 import { LocationInput } from "@/components/ui/location-input";
+import { SchoolInput } from "@/components/ui/school-input";
 
 interface ParentOnboardingProps {
   currentStep: number;
@@ -51,6 +52,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
 
   // Step 2: Social Connections
   const [schoolName, setSchoolName] = useState("");
+  const [schoolPlaceId, setSchoolPlaceId] = useState<string | undefined>(undefined);
   const [neighborhood, setNeighborhood] = useState("");
 
   // Step 3: Emergency Contact
@@ -127,6 +129,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
           budget_max: budgetRange[1],
           preferred_radius: preferredRadius[0],
           school_name: schoolName || null,
+          school_place_id: schoolPlaceId || null,
           neighborhood: neighborhood || null,
           emergency_contact_name: emergencyContactName,
           emergency_contact_phone: emergencyContactPhone,
@@ -259,11 +262,13 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="school-name">School Name (Optional)</Label>
-                  <Input
-                    id="school-name"
-                    placeholder="e.g., Lincoln Elementary School"
+                  <SchoolInput
                     value={schoolName}
-                    onChange={(e) => setSchoolName(e.target.value)}
+                    onChange={(name, placeId) => {
+                      setSchoolName(name);
+                      setSchoolPlaceId(placeId);
+                    }}
+                    placeholder="Search for your school..."
                     className="mt-1"
                   />
                   <p className="text-xs text-muted-foreground mt-1">

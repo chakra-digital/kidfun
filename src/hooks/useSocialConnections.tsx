@@ -103,22 +103,25 @@ export const useSocialConnections = () => {
     }
   };
 
-  const findPotentialConnections = async (schoolName?: string, neighborhood?: string) => {
+  const findPotentialConnections = async (schoolName?: string, neighborhood?: string, schoolPlaceId?: string) => {
     if (!user) return [];
 
     try {
       let query = supabase
         .from('parent_profiles')
-        .select('user_id, school_name, neighborhood')
+        .select('user_id, school_name, school_place_id, neighborhood')
         .neq('user_id', user.id);
 
-      if (schoolName) {
-        query = query.eq('school_name', schoolName);
+      // Prefer matching on school_place_id for accuracy, fall back to name
+      if (schoolPlaceId) {
+        query = query.eq('school_place_id', schoolPlaceId);
+      } else if (schoolName) {
+        query = query.ilike('school_name', `%${schoolName}%`);
       } else if (neighborhood) {
-        query = query.eq('neighborhood', neighborhood);
+        query = query.ilike('neighborhood', `%${neighborhood}%`);
       }
 
-      const { data: profiles, error } = await query.limit(10);
+      const { data: profiles, error } = await query.limit(20);
 
       if (error) throw error;
       
