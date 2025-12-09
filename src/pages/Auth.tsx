@@ -36,37 +36,52 @@ const Auth = () => {
         setUser(session?.user ?? null);
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Check if this is from email verification 
-          const isFromEmailVerification = window.location.hash.includes('access_token') || 
-                                          window.location.hash.includes('type=recovery');
-          
           // Defer navigation to prevent deadlocks
-          setTimeout(() => {
+          setTimeout(async () => {
             const userType = session.user.user_metadata?.user_type;
             
-            if (isFromEmailVerification && userType) {
-              // Email verification - redirect to onboarding
-              console.log("Email verification - redirecting to onboarding with type:", userType);
-              navigate(`/onboarding?type=${userType}`, { replace: true });
-              toast({
-                title: "Email verified!",
-                description: "Let's complete your profile setup",
-              });
-            } else if (!isFromEmailVerification) {
+            // Check if user has completed onboarding
+            try {
+              const { data: profile } = await supabase
+                .from("profiles")
+                .select("first_name, last_name")
+                .eq("user_id", session.user.id)
+                .single();
+              
+              const { data: parentProfile } = await supabase
+                .from("parent_profiles")
+                .select("location")
+                .eq("user_id", session.user.id)
+                .single();
+              
+              const hasCompletedOnboarding = profile?.first_name && 
+                                             profile?.last_name && 
+                                             (userType !== 'parent' || parentProfile?.location);
+              
+              if (!hasCompletedOnboarding && userType) {
+                // User hasn't completed onboarding - redirect there
+                console.log("User needs onboarding - redirecting with type:", userType);
+                navigate(`/onboarding?type=${userType}`, { replace: true });
+                toast({
+                  title: "Welcome!",
+                  description: "Let's complete your profile setup",
+                });
+              } else {
+                // User has completed onboarding - go to dashboard
+                console.log("User onboarding complete - redirecting to dashboard");
+                navigate('/dashboard', { replace: true });
+                toast({
+                  title: "Welcome back!",
+                  description: "Successfully signed in",
+                });
+              }
+            } catch (error) {
+              // If we can't check, redirect to onboarding to be safe
               if (userType) {
-                // New user sign-in - redirect to onboarding
-                console.log("New user - redirecting to onboarding with type:", userType);
                 navigate(`/onboarding?type=${userType}`, { replace: true });
               } else {
-                // Existing user - redirect to home
-                console.log("Existing user - redirecting to home");
-                navigate('/', { replace: true });
+                navigate('/dashboard', { replace: true });
               }
-              
-              toast({
-                title: "Welcome!",
-                description: "Successfully signed in",
-              });
             }
           }, 100);
         }

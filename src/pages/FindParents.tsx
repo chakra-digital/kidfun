@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft, Users, Edit } from 'lucide-react';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import ParentCard from '@/components/social/ParentCard';
@@ -71,6 +71,31 @@ const FindParents = () => {
             </TabsList>
 
             <TabsContent value="discover" className="space-y-6">
+              {/* Prompt to set school/neighborhood if not set */}
+              {!parentProfile?.school_name && !parentProfile?.neighborhood && (
+                <Card className="p-6 border-primary/20 bg-primary/5">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-primary/10 rounded-full">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Complete Your Profile</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Add your child's school or neighborhood to find and connect with nearby parents more easily.
+                        </p>
+                      </div>
+                    </div>
+                    <Button asChild>
+                      <Link to="/dashboard">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Update Profile Settings
+                      </Link>
+                    </Button>
+                  </div>
+                </Card>
+              )}
+
               <Card className="p-6">
                 <div className="space-y-4">
                   <div>
@@ -107,7 +132,7 @@ const FindParents = () => {
                   {parentProfile?.school_name && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Quick search:</p>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button
                           variant="outline"
                           size="sm"

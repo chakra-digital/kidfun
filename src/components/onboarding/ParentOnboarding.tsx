@@ -294,7 +294,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
           </div>
         );
 
-      case 4:
+      case 3:
         return (
           <div className="space-y-6">
             <div>
@@ -331,7 +331,7 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-6">
             <div>
