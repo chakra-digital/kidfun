@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Circle, Trophy, Star, User, UserCheck, Heart, Bookmark, Calendar, Users, MessageCircle, MapPin, Settings, Building, DollarSign, Shield, Search, Phone, Camera, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckCircle, Circle, Trophy, Star, User, UserCheck, Heart, Bookmark, Calendar, Users, MessageCircle, MapPin, Settings, Building, DollarSign, Shield, Search, Phone, Camera, ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
 import { GameifiedProgress as GameifiedProgressType } from "@/hooks/useGameifiedProgress";
 
 interface GameifiedProgressProps {
@@ -39,6 +40,13 @@ export const GameifiedProgress: React.FC<GameifiedProgressProps> = ({
 }) => {
   const { milestones, totalPoints, completedCount, progressPercentage } = progress;
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const navigate = useNavigate();
+
+  const handleMilestoneClick = (milestone: typeof milestones[0]) => {
+    if (!milestone.completed && milestone.actionLink) {
+      navigate(milestone.actionLink);
+    }
+  };
 
   if (compact) {
     return (
@@ -120,14 +128,18 @@ export const GameifiedProgress: React.FC<GameifiedProgressProps> = ({
         <CardContent className="space-y-3">
           {milestones.map((milestone) => {
             const IconComponent = iconMap[milestone.icon as keyof typeof iconMap] || Circle;
+            const isClickable = !milestone.completed && milestone.actionLink;
             
             return (
               <div 
                 key={milestone.id}
+                onClick={() => handleMilestoneClick(milestone)}
                 className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                   milestone.completed 
                     ? 'bg-primary/10 border border-primary/20' 
-                    : 'bg-muted/50 hover:bg-muted'
+                    : isClickable
+                    ? 'bg-muted/50 hover:bg-muted cursor-pointer'
+                    : 'bg-muted/50'
                 }`}
               >
                 <div className={`flex-shrink-0 ${milestone.completed ? 'text-primary' : 'text-muted-foreground'}`}>
@@ -152,6 +164,10 @@ export const GameifiedProgress: React.FC<GameifiedProgressProps> = ({
                   </div>
                   <p className="text-xs text-muted-foreground">{milestone.description}</p>
                 </div>
+
+                {isClickable && (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                )}
               </div>
             );
           })}

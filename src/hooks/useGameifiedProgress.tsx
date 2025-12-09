@@ -11,6 +11,7 @@ export interface ProgressMilestone {
   completed: boolean;
   icon: string;
   points: number;
+  actionLink?: string; // Optional route to complete this milestone
 }
 
 export interface GameifiedProgress {
@@ -73,6 +74,7 @@ export const useGameifiedProgress = () => {
       completed: hasStartedOnboarding && !!(userProfile?.first_name && userProfile?.last_name),
       icon: "UserCheck",
       points: 10,
+      actionLink: "/onboarding",
     },
     {
       id: "location_preferences",
@@ -81,6 +83,7 @@ export const useGameifiedProgress = () => {
       completed: hasStartedOnboarding && !!(parentProfile?.location),
       icon: "MapPin",
       points: 10,
+      actionLink: "/onboarding",
     },
     {
       id: "emergency_contact",
@@ -89,6 +92,7 @@ export const useGameifiedProgress = () => {
       completed: hasStartedOnboarding && !!(parentProfile?.emergency_contact_name && parentProfile?.emergency_contact_phone),
       icon: "Phone",
       points: 10,
+      actionLink: "/onboarding",
     },
     {
       id: "add_child",
@@ -97,6 +101,7 @@ export const useGameifiedProgress = () => {
       completed: hasStartedOnboarding && children.length > 0,
       icon: "Heart",
       points: 15,
+      actionLink: "/onboarding",
     },
     {
       id: "explore_activities",
@@ -105,6 +110,7 @@ export const useGameifiedProgress = () => {
       completed: false, // Will be implemented when activity browsing is tracked
       icon: "Search",
       points: 10,
+      actionLink: "/activities",
     },
     {
       id: "save_provider",
@@ -113,6 +119,7 @@ export const useGameifiedProgress = () => {
       completed: savedProviders > 0,
       icon: "Bookmark",
       points: 15,
+      actionLink: "/camps",
     },
     {
       id: "book_activity",
@@ -121,6 +128,7 @@ export const useGameifiedProgress = () => {
       completed: false, // Will be implemented when booking system is added
       icon: "Calendar",
       points: 20,
+      actionLink: "/activities",
     },
     {
       id: "leave_review",

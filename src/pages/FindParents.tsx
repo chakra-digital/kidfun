@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { useSocialConnections } from '@/hooks/useSocialConnections';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import ParentCard from '@/components/social/ParentCard';
 import ConnectionRequests from '@/components/social/ConnectionRequests';
+import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
 
 const FindParents = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const FindParents = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [potentialConnections, setPotentialConnections] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
@@ -86,12 +88,16 @@ const FindParents = () => {
                         </p>
                       </div>
                     </div>
-                    <Button asChild>
-                      <Link to="/dashboard">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Update Profile Settings
-                      </Link>
-                    </Button>
+                    <EditProfileDialog 
+                      open={editProfileOpen} 
+                      onOpenChange={setEditProfileOpen}
+                      trigger={
+                        <Button>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Update Profile Settings
+                        </Button>
+                      }
+                    />
                   </div>
                 </Card>
               )}
