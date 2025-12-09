@@ -10,12 +10,22 @@ import { useToast } from "@/hooks/use-toast";
 import { Edit } from "lucide-react";
 import { SchoolInput } from "@/components/ui/school-input";
 
-export const EditProfileDialog = () => {
+interface EditProfileDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}
+
+export const EditProfileDialog = ({ open: controlledOpen, onOpenChange, trigger }: EditProfileDialogProps = {}) => {
   const { user } = useAuth();
   const { userProfile, parentProfile, refreshProfile } = useUserProfile();
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (onOpenChange || (() => {})) : setInternalOpen;
   
   const [formData, setFormData] = useState({
     first_name: "",
@@ -107,12 +117,16 @@ export const EditProfileDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Edit className="h-4 w-4 mr-2" />
-          Edit Profile
-        </Button>
-      </DialogTrigger>
+      {trigger !== undefined ? (
+        trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm">
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Profile
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
