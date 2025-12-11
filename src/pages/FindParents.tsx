@@ -15,7 +15,7 @@ import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
 
 const FindParents = () => {
   const navigate = useNavigate();
-  const { parentProfile } = useUserProfile();
+  const { parentProfile, refreshProfile } = useUserProfile();
   const { findPotentialConnections, sendConnectionRequest, loading } = useSocialConnections();
   
   const [searchType, setSearchType] = useState<'school' | 'neighborhood'>('school');
@@ -90,7 +90,13 @@ const FindParents = () => {
                     </div>
                     <EditProfileDialog 
                       open={editProfileOpen} 
-                      onOpenChange={setEditProfileOpen}
+                      onOpenChange={(open) => {
+                        setEditProfileOpen(open);
+                        if (!open) {
+                          // Refresh profile when dialog closes
+                          refreshProfile();
+                        }
+                      }}
                       trigger={
                         <Button>
                           <Edit className="h-4 w-4 mr-2" />

@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar } from "lucide-react";
+import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar, GraduationCap, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import AddChildForm from "@/components/children/AddChildForm";
 import { EditChildDialog } from "@/components/children/EditChildDialog";
@@ -18,7 +18,7 @@ import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { userProfile, loading } = useUserProfile();
+  const { userProfile, parentProfile, loading } = useUserProfile();
   const { children, loading: childrenLoading, refetch: refetchChildren } = useChildren();
   const { progress } = useGameifiedProgress();
 
@@ -108,6 +108,28 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
+              
+              {/* School & Neighborhood for Parents */}
+              {userType === "parent" && (
+                <div className="pt-4 border-t border-border">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">School</label>
+                      <p className="text-foreground flex items-center gap-2">
+                        <GraduationCap className="h-4 w-4 text-primary" />
+                        {parentProfile?.school_name || <span className="text-muted-foreground italic">Not set</span>}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Neighborhood</label>
+                      <p className="text-foreground flex items-center gap-2">
+                        <Home className="h-4 w-4 text-primary" />
+                        {parentProfile?.neighborhood || <span className="text-muted-foreground italic">Not set</span>}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
