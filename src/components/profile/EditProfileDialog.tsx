@@ -75,16 +75,18 @@ export const EditProfileDialog = ({ open: controlledOpen, onOpenChange, trigger 
 
       if (profileError) throw profileError;
 
-      // Update parent profile if user is a parent
+      // Upsert parent profile if user is a parent (insert if not exists)
       if (isParent) {
         const { error: parentError } = await supabase
           .from("parent_profiles")
-          .update({
+          .upsert({
+            user_id: user.id,
             school_name: parentFormData.school_name || null,
             school_place_id: parentFormData.school_place_id || null,
             neighborhood: parentFormData.neighborhood || null
-          })
-          .eq("user_id", user.id);
+          }, {
+            onConflict: 'user_id'
+          });
 
         if (parentError) throw parentError;
       }
