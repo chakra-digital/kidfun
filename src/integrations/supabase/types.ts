@@ -529,6 +529,14 @@ export type Database = {
       }
       clean_expired_search_cache: { Args: never; Returns: undefined }
       get_current_user_type: { Args: never; Returns: string }
+      get_parent_discovery_info: {
+        Args: { search_neighborhood?: string; search_school?: string }
+        Returns: {
+          neighborhood: string
+          school_name: string
+          user_id: string
+        }[]
+      }
       get_public_provider_info: {
         Args: never
         Returns: {
