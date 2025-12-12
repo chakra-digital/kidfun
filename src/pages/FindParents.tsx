@@ -24,19 +24,28 @@ const FindParents = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
+  const handleSearch = async (overrideSearchTerm?: string, overrideType?: 'school' | 'neighborhood', overridePlaceId?: string) => {
+    const term = overrideSearchTerm ?? searchTerm;
+    const type = overrideType ?? searchType;
+    
+    if (!term.trim()) return;
     
     setIsSearching(true);
     // Pass school_place_id for more accurate matching when searching by school
-    const schoolPlaceId = searchType === 'school' ? parentProfile?.school_place_id : undefined;
+    const schoolPlaceId = type === 'school' ? (overridePlaceId ?? parentProfile?.school_place_id) : undefined;
     const results = await findPotentialConnections(
-      searchType === 'school' ? searchTerm : undefined,
-      searchType === 'neighborhood' ? searchTerm : undefined,
+      type === 'school' ? term : undefined,
+      type === 'neighborhood' ? term : undefined,
       schoolPlaceId || undefined
     );
     setPotentialConnections(results);
     setIsSearching(false);
+  };
+
+  const handleQuickSearch = (type: 'school' | 'neighborhood', term: string, placeId?: string) => {
+    setSearchType(type);
+    setSearchTerm(term);
+    handleSearch(term, type, placeId);
   };
 
   const handleSendRequest = async (targetUserId: string) => {
@@ -134,7 +143,7 @@ const FindParents = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                       />
-                      <Button onClick={handleSearch} disabled={isSearching || !searchTerm.trim()}>
+                      <Button onClick={() => handleSearch()} disabled={isSearching || !searchTerm.trim()}>
                         <Search className="h-4 w-4 mr-2" />
                         Search
                       </Button>
@@ -148,10 +157,7 @@ const FindParents = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            setSearchType('school');
-                            setSearchTerm(parentProfile.school_name || '');
-                          }}
+                          onClick={() => handleQuickSearch('school', parentProfile.school_name || '', parentProfile.school_place_id || undefined)}
                         >
                           My School: {parentProfile.school_name}
                         </Button>
@@ -159,10 +165,7 @@ const FindParents = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => {
-                              setSearchType('neighborhood');
-                              setSearchTerm(parentProfile.neighborhood || '');
-                            }}
+                            onClick={() => handleQuickSearch('neighborhood', parentProfile.neighborhood || '')}
                           >
                             My Neighborhood: {parentProfile.neighborhood}
                           </Button>
