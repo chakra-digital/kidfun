@@ -443,6 +443,53 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_activities: {
+        Row: {
+          activity_name: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          provider_id: string | null
+          provider_name: string
+          scheduled_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_name?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          provider_id?: string | null
+          provider_name: string
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_name?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          provider_id?: string | null
+          provider_name?: string
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_activities_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "provider_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       search_cache: {
         Row: {
           created_at: string

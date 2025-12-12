@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, School, Home, Bell, Check, X, Sparkles, ArrowRight } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Users, UserPlus, School, Home, Bell, Check, X, Sparkles, ArrowRight, ChevronDown, Bookmark } from 'lucide-react';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useSavedActivities, SavedActivity } from '@/hooks/useSavedActivities';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
@@ -39,6 +41,10 @@ export const SocialConnectionsCard = () => {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [connectingUserIds, setConnectingUserIds] = useState<Set<string>>(new Set());
   const [sentRequestUserIds, setSentRequestUserIds] = useState<Set<string>>(new Set());
+  const [connectionsExpanded, setConnectionsExpanded] = useState(false);
+  const [connectionActivities, setConnectionActivities] = useState<Record<string, SavedActivity[]>>({});
+  
+  const { fetchConnectionActivities } = useSavedActivities();
 
   useEffect(() => {
     loadPendingRequests();
@@ -50,6 +56,28 @@ export const SocialConnectionsCard = () => {
       loadSuggestions();
     }
   }, [parentProfile, connections, loading]);
+
+  // Load connection activities when expanded
+  useEffect(() => {
+    const loadConnectionActivities = async () => {
+      if (!connectionsExpanded || connections.length === 0) return;
+      
+      const connectionIds = connections.map(c => c.connected_parent_id);
+      const activities = await fetchConnectionActivities(connectionIds);
+      
+      // Group by user_id
+      const grouped: Record<string, SavedActivity[]> = {};
+      activities.forEach(activity => {
+        if (!grouped[activity.user_id]) {
+          grouped[activity.user_id] = [];
+        }
+        grouped[activity.user_id].push(activity);
+      });
+      setConnectionActivities(grouped);
+    };
+    
+    loadConnectionActivities();
+  }, [connectionsExpanded, connections]);
 
   const loadPendingRequests = async () => {
     setLoadingRequests(true);
@@ -347,8 +375,79 @@ export const SocialConnectionsCard = () => {
           </div>
         )}
 
+        {/* Connections List - Expandable */}
+        {hasConnections && (
+          <Collapsible open={connectionsExpanded} onOpenChange={setConnectionsExpanded}>
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between py-2 cursor-pointer hover:bg-muted/50 rounded-lg px-2 -mx-2 transition-colors">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Your Connections</span>
+                  <Badge variant="secondary" className="text-xs">{connections.length}</Badge>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${connectionsExpanded ? 'rotate-180' : ''}`} />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2 pt-2">
+              {connections.map((connection) => {
+                const activities = connectionActivities[connection.connected_parent_id] || [];
+                return (
+                  <div 
+                    key={connection.id}
+                    className="p-3 rounded-lg bg-background border border-border hover:border-primary/30 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Users className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">
+                            {connection.profile?.first_name} {connection.profile?.last_name}
+                          </p>
+                          {connection.connection_type && (
+                            <p className="text-xs text-muted-foreground capitalize">
+                              {connection.connection_type === 'school' ? (
+                                <span className="flex items-center gap-1"><School className="h-3 w-3" /> Same school</span>
+                              ) : (
+                                <span className="flex items-center gap-1"><Home className="h-3 w-3" /> Neighbor</span>
+                              )}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Shared activities preview */}
+                    {activities.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-border/50">
+                        <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                          <Bookmark className="h-3 w-3" />
+                          Saved activities:
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {activities.slice(0, 2).map(activity => (
+                            <Badge key={activity.id} variant="outline" className="text-xs">
+                              {activity.provider_name}
+                            </Badge>
+                          ))}
+                          {activities.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{activities.length - 2} more
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
         {/* Quick Stats Row */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between pt-3 border-t border-border mt-2">
           <div className="flex items-center gap-4">
             <div className="text-center">
               <p className="text-lg font-bold text-primary">{connections.length}</p>
