@@ -62,6 +62,13 @@ const Dashboard = () => {
           <GameifiedProgress progress={progress} defaultExpanded={true} />
         </div>
 
+        {/* Your Network - Primary Feature for Parents */}
+        {userType === "parent" && (
+          <div className="mb-6">
+            <SocialConnectionsCard />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Profile Information Card */}
           <Card className="lg:col-span-2">
@@ -140,30 +147,32 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent className="space-y-3">
               <Button asChild className="w-full justify-start">
-                <Link to="/activities">
+                <Link to="/">
                   <Plus className="h-4 w-4 mr-2" />
                   Browse Activities
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-start">
-                <Link to="/camps">
-                  <Users className="h-4 w-4 mr-2" />
-                  Find Camps
-                </Link>
-              </Button>
               {userType === "parent" ? (
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    document.getElementById('children-section')?.scrollIntoView({ 
-                      behavior: 'smooth' 
-                    });
-                  }}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Manage Children
-                </Button>
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => {
+                      document.getElementById('children-section')?.scrollIntoView({ 
+                        behavior: 'smooth' 
+                      });
+                    }}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Manage Children
+                  </Button>
+                  <Button asChild variant="outline" className="w-full justify-start">
+                    <Link to="/find-parents">
+                      <Users className="h-4 w-4 mr-2" />
+                      Find Parents
+                    </Link>
+                  </Button>
+                </>
               ) : (
                 <Button asChild variant="outline" className="w-full justify-start">
                   <Link to="/onboarding">
@@ -178,10 +187,6 @@ const Dashboard = () => {
 
         {userType === "parent" && (
           <>
-            {/* Social Connections Card */}
-            <div className="mt-8">
-              <SocialConnectionsCard />
-            </div>
 
             {/* Children Section */}
             <div id="children-section" className="mt-8">
