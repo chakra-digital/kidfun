@@ -107,33 +107,25 @@ export const useSocialConnections = () => {
     if (!user) return [];
 
     try {
-      let query = supabase
-        .from('parent_profiles')
-        .select('user_id, school_name, school_place_id, neighborhood')
-        .neq('user_id', user.id);
-
-      // Prefer matching on school_place_id for accuracy, fall back to name
-      if (schoolPlaceId) {
-        query = query.eq('school_place_id', schoolPlaceId);
-      } else if (schoolName) {
-        query = query.ilike('school_name', `%${schoolName}%`);
-      } else if (neighborhood) {
-        query = query.ilike('neighborhood', `%${neighborhood}%`);
-      }
-
-      const { data: profiles, error } = await query.limit(20);
+      // Use the secure RPC function that only exposes non-sensitive discovery fields
+      // This protects emergency contacts, precise locations, and budget information
+      const { data: profiles, error } = await supabase
+        .rpc('get_parent_discovery_info', {
+          search_school: schoolName || null,
+          search_neighborhood: neighborhood || null
+        });
 
       if (error) throw error;
       
       if (!profiles || profiles.length === 0) return [];
 
-      // Fetch profile details
+      // Fetch basic profile details (name only for display)
       const { data: userProfiles } = await supabase
         .from('profiles')
-        .select('user_id, first_name, last_name, email')
-        .in('user_id', profiles.map(p => p.user_id));
+        .select('user_id, first_name, last_name')
+        .in('user_id', profiles.map((p: any) => p.user_id));
 
-      return profiles.map(profile => ({
+      return profiles.slice(0, 20).map((profile: any) => ({
         ...profile,
         profile: userProfiles?.find(up => up.user_id === profile.user_id)
       }));
