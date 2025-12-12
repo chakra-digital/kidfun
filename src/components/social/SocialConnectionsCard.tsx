@@ -1,14 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, School, Home } from 'lucide-react';
+import { Users, UserPlus, School, Home, Bell, Check, X } from 'lucide-react';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 export const SocialConnectionsCard = () => {
   const navigate = useNavigate();
-  const { connections, groups, loading } = useSocialConnections();
+  const { connections, groups, loading, fetchPendingRequests, acceptConnectionRequest, declineConnectionRequest, refetch } = useSocialConnections();
+  const [pendingReceived, setPendingReceived] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+
+  useEffect(() => {
+    loadPendingRequests();
+  }, []);
+
+  const loadPendingRequests = async () => {
+    setLoadingRequests(true);
+    const { received } = await fetchPendingRequests();
+    setPendingReceived(received);
+    setLoadingRequests(false);
+  };
+
+  const handleAccept = async (requestId: string) => {
+    const { error } = await acceptConnectionRequest(requestId);
+    if (error) {
+      toast({ title: 'Error', description: error, variant: 'destructive' });
+    } else {
+      toast({ title: 'Connection accepted!', description: 'You are now connected.' });
+      loadPendingRequests();
+      refetch();
+    }
+  };
+
+  const handleDecline = async (requestId: string) => {
+    const { error } = await declineConnectionRequest(requestId);
+    if (error) {
+      toast({ title: 'Error', description: error, variant: 'destructive' });
+    } else {
+      toast({ title: 'Request declined' });
+      loadPendingRequests();
+    }
+  };
 
   if (loading) {
     return (
@@ -31,6 +66,7 @@ export const SocialConnectionsCard = () => {
 
   const hasConnections = connections.length > 0;
   const hasGroups = groups.length > 0;
+  const hasPendingRequests = pendingReceived.length > 0;
 
   return (
     <Card>
@@ -38,6 +74,11 @@ export const SocialConnectionsCard = () => {
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
           Your Network
+          {hasPendingRequests && (
+            <Badge variant="destructive" className="ml-2">
+              {pendingReceived.length} new
+            </Badge>
+          )}
         </CardTitle>
         <Button variant="outline" size="sm" onClick={() => navigate('/find-parents')}>
           <UserPlus className="h-4 w-4 mr-2" />
@@ -45,6 +86,41 @@ export const SocialConnectionsCard = () => {
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Pending Requests Section */}
+        {hasPendingRequests && (
+          <div className="pb-4 border-b">
+            <div className="flex items-center gap-2 mb-3">
+              <Bell className="h-4 w-4 text-destructive" />
+              <h4 className="text-sm font-medium">Connection Requests</h4>
+            </div>
+            <div className="space-y-2">
+              {pendingReceived.map((request) => (
+                <div 
+                  key={request.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {request.sender_profile?.first_name} {request.sender_profile?.last_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      wants to connect via {request.connection_type}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 ml-2">
+                    <Button size="sm" variant="default" onClick={() => handleAccept(request.id)}>
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleDecline(request.id)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Connections Section */}
         <div>
           <div className="flex items-center justify-between mb-2">
