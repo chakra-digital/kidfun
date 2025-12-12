@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -12,17 +12,36 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import ParentCard from '@/components/social/ParentCard';
 import ConnectionRequests from '@/components/social/ConnectionRequests';
 import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
+import { toast } from '@/hooks/use-toast';
 
 const FindParents = () => {
   const navigate = useNavigate();
   const { parentProfile, refreshProfile } = useUserProfile();
-  const { findPotentialConnections, sendConnectionRequest, loading } = useSocialConnections();
+  const { findPotentialConnections, sendConnectionRequest, connections, fetchPendingRequests, loading } = useSocialConnections();
   
   const [searchType, setSearchType] = useState<'school' | 'neighborhood'>('school');
   const [searchTerm, setSearchTerm] = useState('');
   const [potentialConnections, setPotentialConnections] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [pendingUserIds, setPendingUserIds] = useState<Set<string>>(new Set());
+  const [connectedUserIds, setConnectedUserIds] = useState<Set<string>>(new Set());
+  const [sentRequestUserIds, setSentRequestUserIds] = useState<Set<string>>(new Set());
+
+  // Load existing connections and pending requests to filter results
+  useEffect(() => {
+    const loadConnectionStatus = async () => {
+      // Get connected user IDs from accepted connections
+      const connectedIds = new Set(connections.map(c => c.profile?.email ? c.connected_parent_id : c.parent_id));
+      setConnectedUserIds(connectedIds);
+
+      // Get pending request user IDs
+      const { sent } = await fetchPendingRequests();
+      const sentIds = new Set(sent.map((r: any) => r.connected_parent_id));
+      setSentRequestUserIds(sentIds);
+    };
+    loadConnectionStatus();
+  }, [connections]);
 
   const handleSearch = async (overrideSearchTerm?: string, overrideType?: 'school' | 'neighborhood', overridePlaceId?: string) => {
     const term = overrideSearchTerm ?? searchTerm;
@@ -50,9 +69,26 @@ const FindParents = () => {
 
   const handleSendRequest = async (targetUserId: string) => {
     const { error } = await sendConnectionRequest(targetUserId, searchType);
-    if (!error) {
-      setPotentialConnections(prev => prev.filter(p => p.user_id !== targetUserId));
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error,
+        variant: 'destructive',
+      });
+    } else {
+      // Mark as pending instead of removing
+      setSentRequestUserIds(prev => new Set([...prev, targetUserId]));
+      toast({
+        title: 'Connection request sent!',
+        description: 'The parent will be notified of your request.',
+      });
     }
+  };
+
+  const getConnectionStatus = (userId: string): 'none' | 'pending' | 'connected' => {
+    if (connectedUserIds.has(userId)) return 'connected';
+    if (sentRequestUserIds.has(userId) || pendingUserIds.has(userId)) return 'pending';
+    return 'none';
   };
 
   return (
@@ -187,6 +223,7 @@ const FindParents = () => {
                         key={parent.user_id}
                         parent={parent}
                         onConnect={handleSendRequest}
+                        connectionStatus={getConnectionStatus(parent.user_id)}
                       />
                     ))}
                   </div>

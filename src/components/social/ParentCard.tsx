@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, MapPin, School } from 'lucide-react';
+import { UserPlus, MapPin, School, Check, Clock } from 'lucide-react';
 import { useState } from 'react';
 
 interface ParentCardProps {
@@ -17,15 +17,49 @@ interface ParentCardProps {
   };
   onConnect: (userId: string) => Promise<void>;
   showConnectButton?: boolean;
+  connectionStatus?: 'none' | 'pending' | 'connected';
 }
 
-const ParentCard = ({ parent, onConnect, showConnectButton = true }: ParentCardProps) => {
+const ParentCard = ({ parent, onConnect, showConnectButton = true, connectionStatus = 'none' }: ParentCardProps) => {
   const [isConnecting, setIsConnecting] = useState(false);
 
   const handleConnect = async () => {
     setIsConnecting(true);
     await onConnect(parent.user_id);
     setIsConnecting(false);
+  };
+
+  const renderActionButton = () => {
+    if (!showConnectButton) return null;
+
+    if (connectionStatus === 'connected') {
+      return (
+        <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+          <Check className="h-3 w-3 mr-1" />
+          Connected
+        </Badge>
+      );
+    }
+
+    if (connectionStatus === 'pending') {
+      return (
+        <Badge variant="outline" className="text-muted-foreground">
+          <Clock className="h-3 w-3 mr-1" />
+          Request Sent
+        </Badge>
+      );
+    }
+
+    return (
+      <Button
+        size="sm"
+        onClick={handleConnect}
+        disabled={isConnecting}
+      >
+        <UserPlus className="h-4 w-4 mr-1" />
+        {isConnecting ? 'Sending...' : 'Connect'}
+      </Button>
+    );
   };
 
   return (
@@ -37,16 +71,7 @@ const ParentCard = ({ parent, onConnect, showConnectButton = true }: ParentCardP
           </h4>
           <p className="text-sm text-muted-foreground">{parent.profile?.email}</p>
         </div>
-        {showConnectButton && (
-          <Button
-            size="sm"
-            onClick={handleConnect}
-            disabled={isConnecting}
-          >
-            <UserPlus className="h-4 w-4 mr-1" />
-            {isConnecting ? 'Sending...' : 'Connect'}
-          </Button>
-        )}
+        {renderActionButton()}
       </div>
 
       <div className="space-y-2">
