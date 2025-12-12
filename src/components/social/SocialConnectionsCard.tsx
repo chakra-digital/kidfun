@@ -42,8 +42,14 @@ export const SocialConnectionsCard = () => {
 
   useEffect(() => {
     loadPendingRequests();
-    loadSuggestions();
-  }, [parentProfile]);
+  }, []);
+
+  // Load suggestions after connections are ready
+  useEffect(() => {
+    if (!loading && parentProfile) {
+      loadSuggestions();
+    }
+  }, [parentProfile, connections, loading]);
 
   const loadPendingRequests = async () => {
     setLoadingRequests(true);
@@ -74,9 +80,21 @@ export const SocialConnectionsCard = () => {
         suggestions = [...suggestions, ...newSuggestions];
       }
       
-      // Filter out already connected or pending
-      const connectedIds = new Set(connections.map(c => c.connected_parent_id === c.parent_id ? c.connected_parent_id : c.parent_id));
-      suggestions = suggestions.filter(s => !connectedIds.has(s.user_id) && !sentRequestUserIds.has(s.user_id));
+      // Filter out already connected users (get both sides of connections)
+      const connectedIds = new Set<string>();
+      connections.forEach(c => {
+        connectedIds.add(c.connected_parent_id);
+        connectedIds.add(c.parent_id);
+      });
+      
+      // Also filter out pending requests (both sent and received)
+      const pendingReceivedIds = new Set(pendingReceived.map((r: any) => r.parent_id));
+      
+      suggestions = suggestions.filter(s => 
+        !connectedIds.has(s.user_id) && 
+        !sentRequestUserIds.has(s.user_id) &&
+        !pendingReceivedIds.has(s.user_id)
+      );
       
       setSuggestedParents(suggestions.slice(0, 3));
     } catch (error) {
