@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useChildren } from "@/hooks/useChildren";
@@ -8,19 +8,43 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar, GraduationCap, Home } from "lucide-react";
-import { Link } from "react-router-dom";
+import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar, GraduationCap, Home, ChevronDown, ChevronUp } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import AddChildForm from "@/components/children/AddChildForm";
 import { EditChildDialog } from "@/components/children/EditChildDialog";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 import { GameifiedProgress } from "@/components/progress/GameifiedProgress";
 import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { userProfile, parentProfile, loading } = useUserProfile();
   const { children, loading: childrenLoading, refetch: refetchChildren } = useChildren();
   const { progress } = useGameifiedProgress();
+  const navigate = useNavigate();
+  
+  // Profile section collapsed state with localStorage persistence
+  const [profileExpanded, setProfileExpanded] = useState(() => {
+    const saved = localStorage.getItem('dashboard_profile_expanded');
+    return saved !== null ? JSON.parse(saved) : false; // Default collapsed on mobile
+  });
+
+  useEffect(() => {
+    localStorage.setItem('dashboard_profile_expanded', JSON.stringify(profileExpanded));
+  }, [profileExpanded]);
+
+  const handleSchoolClick = () => {
+    if (parentProfile?.school_name) {
+      navigate('/find-parents', { state: { filterSchool: parentProfile.school_name } });
+    }
+  };
+
+  const handleNeighborhoodClick = () => {
+    if (parentProfile?.neighborhood) {
+      navigate('/find-parents', { state: { filterNeighborhood: parentProfile.neighborhood } });
+    }
+  };
 
   if (loading) {
     return (
@@ -70,74 +94,136 @@ const Dashboard = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Information Card */}
+          {/* Profile Information Card - Collapsible */}
           <Card className="lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Profile Information
-              </CardTitle>
-              <EditProfileDialog />
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Name</label>
-                  <p className="text-foreground">
-                    {userProfile?.first_name} {userProfile?.last_name}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">User Type</label>
-                  <div className="mt-1">
-                    <Badge 
-                      variant={userType === "provider" ? "default" : "secondary"}
-                      className={userType === "provider" ? "bg-primary text-primary-foreground" : ""}
-                    >
-                      {userType === "provider" ? "🏢 Provider" : "👨‍👩‍👧‍👦 Parent"}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Email</label>
-                  <p className="text-foreground flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    {userProfile?.email}
-                  </p>
-                </div>
-                {userProfile?.phone && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                    <p className="text-foreground flex items-center gap-2">
-                      <Phone className="h-4 w-4" />
-                      {userProfile.phone}
-                    </p>
-                  </div>
-                )}
-              </div>
+            <Collapsible open={profileExpanded} onOpenChange={setProfileExpanded}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CollapsibleTrigger className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer flex-1 text-left">
+                  <User className="h-5 w-5" />
+                  <CardTitle className="text-lg">Profile Information</CardTitle>
+                  {profileExpanded ? (
+                    <ChevronUp className="h-4 w-4 ml-auto text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 ml-auto text-muted-foreground" />
+                  )}
+                </CollapsibleTrigger>
+                <EditProfileDialog />
+              </CardHeader>
               
-              {/* School & Neighborhood for Parents */}
-              {userType === "parent" && (
-                <div className="pt-4 border-t border-border">
+              {/* Collapsed summary - show key info */}
+              {!profileExpanded && userType === "parent" && (
+                <CardContent className="pt-0 pb-4">
+                  <div className="flex flex-wrap gap-2">
+                    {parentProfile?.school_name && (
+                      <Badge 
+                        variant="secondary" 
+                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={handleSchoolClick}
+                      >
+                        <GraduationCap className="h-3 w-3 mr-1" />
+                        {parentProfile.school_name}
+                      </Badge>
+                    )}
+                    {parentProfile?.neighborhood && (
+                      <Badge 
+                        variant="secondary"
+                        className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={handleNeighborhoodClick}
+                      >
+                        <Home className="h-3 w-3 mr-1" />
+                        {parentProfile.neighborhood}
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              )}
+
+              <CollapsibleContent>
+                <CardContent className="space-y-4 pt-0">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">School</label>
-                      <p className="text-foreground flex items-center gap-2">
-                        <GraduationCap className="h-4 w-4 text-primary" />
-                        {parentProfile?.school_name || <span className="text-muted-foreground italic">Not set</span>}
+                      <label className="text-sm font-medium text-muted-foreground">Name</label>
+                      <p className="text-foreground">
+                        {userProfile?.first_name} {userProfile?.last_name}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Neighborhood</label>
+                      <label className="text-sm font-medium text-muted-foreground">User Type</label>
+                      <div className="mt-1">
+                        <Badge 
+                          variant={userType === "provider" ? "default" : "secondary"}
+                          className={userType === "provider" ? "bg-primary text-primary-foreground" : ""}
+                        >
+                          {userType === "provider" ? "🏢 Provider" : "👨‍👩‍👧‍👦 Parent"}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Email</label>
                       <p className="text-foreground flex items-center gap-2">
-                        <Home className="h-4 w-4 text-primary" />
-                        {parentProfile?.neighborhood || <span className="text-muted-foreground italic">Not set</span>}
+                        <Mail className="h-4 w-4" />
+                        {userProfile?.email}
                       </p>
                     </div>
+                    {userProfile?.phone && (
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                        <p className="text-foreground flex items-center gap-2">
+                          <Phone className="h-4 w-4" />
+                          {userProfile.phone}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
-            </CardContent>
+                  
+                  {/* School & Neighborhood for Parents - Clickable */}
+                  {userType === "parent" && (
+                    <div className="pt-4 border-t border-border">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-muted-foreground">School</label>
+                          {parentProfile?.school_name ? (
+                            <button 
+                              onClick={handleSchoolClick}
+                              className="text-foreground flex items-center gap-2 hover:text-primary transition-colors text-left"
+                            >
+                              <GraduationCap className="h-4 w-4 text-primary" />
+                              <span className="underline decoration-dotted underline-offset-2">
+                                {parentProfile.school_name}
+                              </span>
+                            </button>
+                          ) : (
+                            <p className="text-foreground flex items-center gap-2">
+                              <GraduationCap className="h-4 w-4 text-primary" />
+                              <span className="text-muted-foreground italic">Not set</span>
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-muted-foreground">Neighborhood</label>
+                          {parentProfile?.neighborhood ? (
+                            <button 
+                              onClick={handleNeighborhoodClick}
+                              className="text-foreground flex items-center gap-2 hover:text-primary transition-colors text-left"
+                            >
+                              <Home className="h-4 w-4 text-primary" />
+                              <span className="underline decoration-dotted underline-offset-2">
+                                {parentProfile.neighborhood}
+                              </span>
+                            </button>
+                          ) : (
+                            <p className="text-foreground flex items-center gap-2">
+                              <Home className="h-4 w-4 text-primary" />
+                              <span className="text-muted-foreground italic">Not set</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Card>
 
           {/* Quick Actions Card */}
