@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Input } from '@/components/ui/input';
@@ -14,19 +14,37 @@ import ConnectionRequests from '@/components/social/ConnectionRequests';
 import { EditProfileDialog } from '@/components/profile/EditProfileDialog';
 import { toast } from '@/hooks/use-toast';
 
+interface LocationState {
+  filterType?: 'school' | 'neighborhood';
+  filterValue?: string;
+  placeId?: string;
+}
+
 const FindParents = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as LocationState | null;
+  
   const { parentProfile, refreshProfile } = useUserProfile();
   const { findPotentialConnections, sendConnectionRequest, connections, fetchPendingRequests, loading } = useSocialConnections();
   
-  const [searchType, setSearchType] = useState<'school' | 'neighborhood'>('school');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchType, setSearchType] = useState<'school' | 'neighborhood'>(locationState?.filterType || 'school');
+  const [searchTerm, setSearchTerm] = useState(locationState?.filterValue || '');
   const [potentialConnections, setPotentialConnections] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [pendingUserIds, setPendingUserIds] = useState<Set<string>>(new Set());
   const [connectedUserIds, setConnectedUserIds] = useState<Set<string>>(new Set());
   const [sentRequestUserIds, setSentRequestUserIds] = useState<Set<string>>(new Set());
+  const [hasAutoSearched, setHasAutoSearched] = useState(false);
+
+  // Auto-search if coming from dashboard with filter params
+  useEffect(() => {
+    if (locationState?.filterValue && !hasAutoSearched) {
+      setHasAutoSearched(true);
+      handleSearch(locationState.filterValue, locationState.filterType, locationState.placeId);
+    }
+  }, [locationState, hasAutoSearched]);
 
   // Load existing connections and pending requests to filter results
   useEffect(() => {
