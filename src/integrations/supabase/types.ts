@@ -523,6 +523,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      are_parents_connected: {
+        Args: { user_a: string; user_b: string }
+        Returns: boolean
+      }
       clean_expired_search_cache: { Args: never; Returns: undefined }
       get_current_user_type: { Args: never; Returns: string }
       get_public_provider_info: {
