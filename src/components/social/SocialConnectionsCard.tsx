@@ -2,26 +2,88 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, School, Home, Bell, Check, X } from 'lucide-react';
+import { Users, UserPlus, School, Home, Bell, Check, X, Sparkles, ArrowRight } from 'lucide-react';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
+interface SuggestedParent {
+  user_id: string;
+  school_name: string | null;
+  neighborhood: string | null;
+  profile?: {
+    first_name: string;
+    last_name: string;
+  };
+}
+
 export const SocialConnectionsCard = () => {
   const navigate = useNavigate();
-  const { connections, groups, loading, fetchPendingRequests, acceptConnectionRequest, declineConnectionRequest, refetch } = useSocialConnections();
+  const { parentProfile } = useUserProfile();
+  const { 
+    connections, 
+    groups, 
+    loading, 
+    fetchPendingRequests, 
+    acceptConnectionRequest, 
+    declineConnectionRequest, 
+    findPotentialConnections,
+    sendConnectionRequest,
+    refetch 
+  } = useSocialConnections();
+  
   const [pendingReceived, setPendingReceived] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(true);
+  const [suggestedParents, setSuggestedParents] = useState<SuggestedParent[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [connectingUserIds, setConnectingUserIds] = useState<Set<string>>(new Set());
+  const [sentRequestUserIds, setSentRequestUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadPendingRequests();
-  }, []);
+    loadSuggestions();
+  }, [parentProfile]);
 
   const loadPendingRequests = async () => {
     setLoadingRequests(true);
-    const { received } = await fetchPendingRequests();
+    const { received, sent } = await fetchPendingRequests();
     setPendingReceived(received);
+    setSentRequestUserIds(new Set(sent.map((r: any) => r.connected_parent_id)));
     setLoadingRequests(false);
+  };
+
+  const loadSuggestions = async () => {
+    if (!parentProfile?.school_name && !parentProfile?.neighborhood) return;
+    
+    setLoadingSuggestions(true);
+    try {
+      // Fetch suggestions based on school first, then neighborhood
+      let suggestions: SuggestedParent[] = [];
+      
+      if (parentProfile?.school_name) {
+        suggestions = await findPotentialConnections(parentProfile.school_name, undefined, parentProfile.school_place_id || undefined);
+      }
+      
+      // If not enough from school, add neighborhood matches
+      if (suggestions.length < 3 && parentProfile?.neighborhood) {
+        const neighborhoodSuggestions = await findPotentialConnections(undefined, parentProfile.neighborhood);
+        // Avoid duplicates
+        const existingIds = new Set(suggestions.map(s => s.user_id));
+        const newSuggestions = neighborhoodSuggestions.filter((s: SuggestedParent) => !existingIds.has(s.user_id));
+        suggestions = [...suggestions, ...newSuggestions];
+      }
+      
+      // Filter out already connected or pending
+      const connectedIds = new Set(connections.map(c => c.connected_parent_id === c.parent_id ? c.connected_parent_id : c.parent_id));
+      suggestions = suggestions.filter(s => !connectedIds.has(s.user_id) && !sentRequestUserIds.has(s.user_id));
+      
+      setSuggestedParents(suggestions.slice(0, 3));
+    } catch (error) {
+      console.error('Error loading suggestions:', error);
+    } finally {
+      setLoadingSuggestions(false);
+    }
   };
 
   const handleAccept = async (requestId: string) => {
@@ -29,7 +91,7 @@ export const SocialConnectionsCard = () => {
     if (error) {
       toast({ title: 'Error', description: error, variant: 'destructive' });
     } else {
-      toast({ title: 'Connection accepted!', description: 'You are now connected.' });
+      toast({ title: 'Connected!', description: 'You are now connected.' });
       loadPendingRequests();
       refetch();
     }
@@ -45,12 +107,56 @@ export const SocialConnectionsCard = () => {
     }
   };
 
+  const handleQuickConnect = async (targetUserId: string, connectionType: string) => {
+    setConnectingUserIds(prev => new Set([...prev, targetUserId]));
+    
+    const { error } = await sendConnectionRequest(targetUserId, connectionType);
+    
+    if (error) {
+      toast({ title: 'Error', description: error, variant: 'destructive' });
+    } else {
+      toast({ title: 'Request sent!', description: 'They\'ll be notified.' });
+      setSentRequestUserIds(prev => new Set([...prev, targetUserId]));
+      // Remove from suggestions
+      setSuggestedParents(prev => prev.filter(p => p.user_id !== targetUserId));
+    }
+    
+    setConnectingUserIds(prev => {
+      const next = new Set(prev);
+      next.delete(targetUserId);
+      return next;
+    });
+  };
+
+  const handleSchoolClick = () => {
+    if (parentProfile?.school_name) {
+      navigate('/find-parents', { 
+        state: { 
+          filterType: 'school', 
+          filterValue: parentProfile.school_name,
+          placeId: parentProfile.school_place_id 
+        } 
+      });
+    }
+  };
+
+  const handleNeighborhoodClick = () => {
+    if (parentProfile?.neighborhood) {
+      navigate('/find-parents', { 
+        state: { 
+          filterType: 'neighborhood', 
+          filterValue: parentProfile.neighborhood 
+        } 
+      });
+    }
+  };
+
   if (loading) {
     return (
-      <Card>
+      <Card className="border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+            <Users className="h-5 w-5 text-primary" />
             Your Network
           </CardTitle>
         </CardHeader>
@@ -67,52 +173,82 @@ export const SocialConnectionsCard = () => {
   const hasConnections = connections.length > 0;
   const hasGroups = groups.length > 0;
   const hasPendingRequests = pendingReceived.length > 0;
+  const hasSuggestions = suggestedParents.length > 0;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Your Network
-          {hasPendingRequests && (
-            <Badge variant="destructive" className="ml-2">
-              {pendingReceived.length} new
-            </Badge>
-          )}
-        </CardTitle>
-        <Button variant="outline" size="sm" onClick={() => navigate('/find-parents')}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Find Parents
-        </Button>
+    <Card className="border-primary/20 bg-gradient-to-br from-background to-primary/5">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            Your Network
+            {hasPendingRequests && (
+              <Badge variant="destructive" className="ml-1 animate-pulse">
+                {pendingReceived.length}
+              </Badge>
+            )}
+          </CardTitle>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/find-parents')}>
+            See All
+            <ArrowRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        
+        {/* Clickable filter chips */}
+        {(parentProfile?.school_name || parentProfile?.neighborhood) && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {parentProfile?.school_name && (
+              <Badge 
+                variant="outline" 
+                className="cursor-pointer hover:bg-primary/10 transition-colors flex items-center gap-1"
+                onClick={handleSchoolClick}
+              >
+                <School className="h-3 w-3" />
+                {parentProfile.school_name}
+              </Badge>
+            )}
+            {parentProfile?.neighborhood && (
+              <Badge 
+                variant="outline" 
+                className="cursor-pointer hover:bg-primary/10 transition-colors flex items-center gap-1"
+                onClick={handleNeighborhoodClick}
+              >
+                <Home className="h-3 w-3" />
+                {parentProfile.neighborhood}
+              </Badge>
+            )}
+          </div>
+        )}
       </CardHeader>
+      
       <CardContent className="space-y-4">
-        {/* Pending Requests Section */}
+        {/* Pending Requests - Priority */}
         {hasPendingRequests && (
-          <div className="pb-4 border-b">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="pb-3 border-b border-border">
+            <div className="flex items-center gap-2 mb-2">
               <Bell className="h-4 w-4 text-destructive" />
-              <h4 className="text-sm font-medium">Connection Requests</h4>
+              <span className="text-sm font-medium">Requests</span>
             </div>
             <div className="space-y-2">
-              {pendingReceived.map((request) => (
+              {pendingReceived.slice(0, 2).map((request) => (
                 <div 
                   key={request.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border"
+                  className="flex items-center justify-between p-2 rounded-lg bg-background border border-border"
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
                       {request.sender_profile?.first_name} {request.sender_profile?.last_name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      wants to connect via {request.connection_type}
+                      {request.connection_type}
                     </p>
                   </div>
-                  <div className="flex gap-2 ml-2">
-                    <Button size="sm" variant="default" onClick={() => handleAccept(request.id)}>
-                      <Check className="h-4 w-4" />
+                  <div className="flex gap-1 ml-2">
+                    <Button size="sm" variant="default" className="h-7 w-7 p-0" onClick={() => handleAccept(request.id)}>
+                      <Check className="h-3.5 w-3.5" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleDecline(request.id)}>
-                      <X className="h-4 w-4" />
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDecline(request.id)}>
+                      <X className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -121,105 +257,100 @@ export const SocialConnectionsCard = () => {
           </div>
         )}
 
-        {/* Connections Section */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-sm font-medium text-muted-foreground">Connections</h4>
-            <Badge variant="secondary">{connections.length}</Badge>
-          </div>
-          {hasConnections ? (
-            <div className="space-y-2">
-              {connections.slice(0, 3).map((connection) => (
-                <div 
-                  key={connection.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Users className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {connection.profile?.first_name} {connection.profile?.last_name}
-                    </p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {connection.connection_type} connection
-                    </p>
-                  </div>
-                </div>
-              ))}
-              {connections.length > 3 && (
-                <Button variant="ghost" size="sm" className="w-full">
-                  View all {connections.length} connections
-                </Button>
-              )}
+        {/* Discovery Suggestions - Facebook Style */}
+        {hasSuggestions && (
+          <div className="pb-3 border-b border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Parents you may know</span>
             </div>
-          ) : (
-            <div className="text-center py-6 text-sm text-muted-foreground">
-              <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No connections yet</p>
-              <p className="text-xs">Connect with parents in your area</p>
-            </div>
-          )}
-        </div>
-
-        {/* Groups Section */}
-        <div className="border-t pt-4">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-sm font-medium text-muted-foreground">Groups</h4>
-            <Badge variant="secondary">{groups.length}</Badge>
-          </div>
-          {hasGroups ? (
             <div className="space-y-2">
-              {groups.slice(0, 3).map((group) => (
+              {suggestedParents.map((parent) => (
                 <div 
-                  key={group.id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                  key={parent.user_id}
+                  className="flex items-center justify-between p-2 rounded-lg bg-background border border-border hover:border-primary/30 transition-colors"
                 >
-                  <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
-                    {group.group_type === 'school' ? (
-                      <School className="h-4 w-4 text-accent" />
-                    ) : (
-                      <Home className="h-4 w-4 text-accent" />
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Users className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {parent.profile?.first_name} {parent.profile?.last_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        {parent.school_name && parentProfile?.school_name === parent.school_name ? (
+                          <>
+                            <School className="h-3 w-3" />
+                            Same school
+                          </>
+                        ) : parent.neighborhood && parentProfile?.neighborhood === parent.neighborhood ? (
+                          <>
+                            <Home className="h-3 w-3" />
+                            Same neighborhood
+                          </>
+                        ) : (
+                          <>
+                            <School className="h-3 w-3" />
+                            {parent.school_name || parent.neighborhood}
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="h-7 px-2 ml-2 flex-shrink-0"
+                    disabled={connectingUserIds.has(parent.user_id)}
+                    onClick={() => handleQuickConnect(
+                      parent.user_id, 
+                      parent.school_name && parentProfile?.school_name === parent.school_name ? 'school' : 'neighborhood'
                     )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{group.name}</p>
-                    <p className="text-xs text-muted-foreground capitalize">
-                      {group.group_type} group
-                    </p>
-                  </div>
+                  >
+                    <UserPlus className="h-3.5 w-3.5 mr-1" />
+                    Connect
+                  </Button>
                 </div>
               ))}
-              {groups.length > 3 && (
-                <Button variant="ghost" size="sm" className="w-full">
-                  View all {groups.length} groups
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-6 text-sm text-muted-foreground">
-              <School className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No groups yet</p>
-              <p className="text-xs">Join or create groups to coordinate</p>
-            </div>
-          )}
-        </div>
-
-        {/* Quick Stats */}
-        {(hasConnections || hasGroups) && (
-          <div className="border-t pt-4">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-primary">{connections.length}</p>
-                <p className="text-xs text-muted-foreground">Parents Connected</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-accent">{groups.length}</p>
-                <p className="text-xs text-muted-foreground">Groups Joined</p>
-              </div>
             </div>
           </div>
         )}
+
+        {/* No suggestions prompt */}
+        {!hasSuggestions && !loadingSuggestions && !parentProfile?.school_name && !parentProfile?.neighborhood && (
+          <div className="text-center py-4 border-b border-border">
+            <p className="text-sm text-muted-foreground mb-2">
+              Add your school or neighborhood to discover parents nearby
+            </p>
+            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+              Complete Profile
+            </Button>
+          </div>
+        )}
+
+        {/* Quick Stats Row */}
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center gap-4">
+            <div className="text-center">
+              <p className="text-lg font-bold text-primary">{connections.length}</p>
+              <p className="text-xs text-muted-foreground">Connections</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-accent-foreground">{groups.length}</p>
+              <p className="text-xs text-muted-foreground">Groups</p>
+            </div>
+          </div>
+          
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => navigate('/find-parents')}
+          >
+            <UserPlus className="h-4 w-4 mr-1" />
+            Find More
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
