@@ -2,9 +2,12 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, ExternalLink, Sparkles, Phone } from 'lucide-react';
+import { MapPin, Star, ExternalLink, Sparkles, Phone, Bookmark, Share2, BookmarkCheck } from 'lucide-react';
 import { useProviderImage } from '@/hooks/useProviderImage';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSavedActivities } from '@/hooks/useSavedActivities';
+import { useAuth } from '@/hooks/useAuth';
+import { ShareActivityDialog } from '@/components/coordination/ShareActivityDialog';
 
 interface AIResultCardProps {
   id?: string;
@@ -46,7 +49,26 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
   image_url,
   isLoading = false,
 }) => {
+  const { user } = useAuth();
+  const { savedActivities, saveActivity, removeActivity } = useSavedActivities();
   const providerId = id || google_place_id || '';
+  
+  // Check if already saved
+  const existingSave = savedActivities.find(
+    a => a.provider_id === providerId || a.provider_name === business_name
+  );
+  const isSaved = !!existingSave;
+
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+    
+    if (isSaved && existingSave) {
+      await removeActivity(existingSave.id);
+    } else {
+      await saveActivity(providerId || null, business_name);
+    }
+  };
   
   // Show skeleton while search is loading
   if (isLoading) {
@@ -164,53 +186,83 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
         </div>
       </CardContent>
 
-      <CardFooter className="p-3 pt-0 flex gap-2">
-        {phone && (
+      <CardFooter className="p-3 pt-0 flex flex-col gap-2">
+        {/* Action buttons - Save & Share */}
+        {user && (
+          <div className="flex gap-2 w-full">
+            <Button 
+              size="sm" 
+              variant={isSaved ? "default" : "outline"}
+              className="flex-1"
+              onClick={handleSave}
+            >
+              {isSaved ? (
+                <><BookmarkCheck className="w-3 h-3 mr-1" />Saved</>
+              ) : (
+                <><Bookmark className="w-3 h-3 mr-1" />Save</>
+              )}
+            </Button>
+            <ShareActivityDialog 
+              providerId={providerId} 
+              providerName={business_name}
+            >
+              <Button size="sm" variant="outline" className="flex-1">
+                <Share2 className="w-3 h-3 mr-1" />
+                Share
+              </Button>
+            </ShareActivityDialog>
+          </div>
+        )}
+        
+        {/* Contact buttons */}
+        <div className="flex gap-2 w-full">
+          {phone && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`tel:${phone}`, '_self');
+              }}
+            >
+              <Phone className="w-3 h-3 mr-1" />
+              Call
+            </Button>
+          )}
+          {external_website && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="flex-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                try {
+                  const url = new URL(external_website);
+                  url.searchParams.append('utm_source', 'kidfun');
+                  url.searchParams.append('utm_medium', 'ai_search');
+                  url.searchParams.append('utm_campaign', 'provider_discovery');
+                  window.open(url.toString(), '_blank', 'noopener,noreferrer');
+                } catch {
+                  window.open(external_website, '_blank', 'noopener,noreferrer');
+                }
+              }}
+            >
+              <ExternalLink className="w-3 h-3 mr-1" />
+              Website
+            </Button>
+          )}
           <Button 
             size="sm" 
-            variant="outline" 
             className="flex-1"
             onClick={(e) => {
               e.stopPropagation();
-              window.open(`tel:${phone}`, '_self');
+              if (onClick) onClick();
             }}
           >
-            <Phone className="w-3 h-3 mr-1" />
-            Call
+            View Details
           </Button>
-        )}
-        {external_website && (
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="flex-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              try {
-                const url = new URL(external_website);
-                url.searchParams.append('utm_source', 'kidfun');
-                url.searchParams.append('utm_medium', 'ai_search');
-                url.searchParams.append('utm_campaign', 'provider_discovery');
-                window.open(url.toString(), '_blank', 'noopener,noreferrer');
-              } catch {
-                window.open(external_website, '_blank', 'noopener,noreferrer');
-              }
-            }}
-          >
-            <ExternalLink className="w-3 h-3 mr-1" />
-            Website
-          </Button>
-        )}
-        <Button 
-          size="sm" 
-          className="flex-1"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onClick) onClick();
-          }}
-        >
-          View Details
-        </Button>
+        </div>
       </CardFooter>
     </Card>
   );
