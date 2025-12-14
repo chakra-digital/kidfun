@@ -83,7 +83,7 @@ const Dashboard = () => {
 
         {/* Gamified Progress */}
         <div className="mb-6">
-          <GameifiedProgress progress={progress} defaultExpanded={true} />
+          <GameifiedProgress progress={progress} defaultExpanded={false} />
         </div>
 
         {/* Your Network - Primary Feature for Parents */}
@@ -98,21 +98,16 @@ const Dashboard = () => {
           <Card className="lg:col-span-2">
             <Collapsible open={profileExpanded} onOpenChange={setProfileExpanded}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CollapsibleTrigger className="flex items-center gap-2 hover:text-primary transition-colors cursor-pointer flex-1 text-left">
+                <div className="flex items-center gap-2">
                   <User className="h-5 w-5" />
                   <CardTitle className="text-lg">Profile Information</CardTitle>
-                  {profileExpanded ? (
-                    <ChevronUp className="h-4 w-4 ml-auto text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 ml-auto text-muted-foreground" />
-                  )}
-                </CollapsibleTrigger>
+                </div>
                 <EditProfileDialog />
               </CardHeader>
               
               {/* Collapsed summary - show key info */}
               {!profileExpanded && userType === "parent" && (
-                <CardContent className="pt-0 pb-4">
+                <CardContent className="pt-0 pb-2">
                   <div className="flex flex-wrap gap-2">
                     {parentProfile?.school_name && (
                       <Badge 
@@ -223,6 +218,29 @@ const Dashboard = () => {
                   )}
                 </CardContent>
               </CollapsibleContent>
+              
+              {/* Toggle button at bottom - like milestones */}
+              <CardContent className="pt-0 pb-4">
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-center gap-2"
+                  >
+                    {profileExpanded ? (
+                      <>
+                        <ChevronUp className="h-4 w-4" />
+                        Hide details
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-4 w-4" />
+                        Show details
+                      </>
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+              </CardContent>
             </Collapsible>
           </Card>
 
