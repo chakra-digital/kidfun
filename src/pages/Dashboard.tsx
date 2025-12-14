@@ -15,6 +15,8 @@ import { EditChildDialog } from "@/components/children/EditChildDialog";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 import { GameifiedProgress } from "@/components/progress/GameifiedProgress";
 import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard";
+import { SharedCalendar } from "@/components/coordination/SharedCalendar";
+import { ActivityInbox } from "@/components/coordination/ActivityInbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const Dashboard = () => {
@@ -88,8 +90,18 @@ const Dashboard = () => {
 
         {/* Your Network - Primary Feature for Parents */}
         {userType === "parent" && (
-          <div className="mb-6">
+          <div className="mb-6 space-y-6">
             <SocialConnectionsCard />
+            
+            {/* Coordination Section - Calendar + Inbox */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <SharedCalendar />
+              </div>
+              <div>
+                <ActivityInbox />
+              </div>
+            </div>
           </div>
         )}
 

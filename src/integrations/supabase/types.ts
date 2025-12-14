@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_messages: {
+        Row: {
+          activity_id: string | null
+          created_at: string
+          id: string
+          message: string
+          message_type: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          activity_id?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          message_type?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          activity_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          message_type?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_messages_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "saved_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_participants: {
         Row: {
           activity_id: string
