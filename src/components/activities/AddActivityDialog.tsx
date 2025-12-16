@@ -99,7 +99,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
 
           {/* Location - Optional */}
           <div className="space-y-2">
-            <Label htmlFor="location">Location (optional)</Label>
+            <Label htmlFor="location">Location</Label>
             <Input
               id="location"
               value={location}
@@ -110,7 +110,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
 
           {/* Date Picker */}
           <div className="space-y-2">
-            <Label>Date (optional)</Label>
+            <Label>Date</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -138,7 +138,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes (optional)</Label>
+            <Label htmlFor="notes">Notes</Label>
             <Textarea
               id="notes"
               value={notes}

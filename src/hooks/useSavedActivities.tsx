@@ -14,6 +14,8 @@ export interface SavedActivity {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  // Joined from provider_profiles
+  external_website?: string | null;
 }
 
 export interface ConnectionWithActivities {
@@ -40,12 +42,23 @@ export const useSavedActivities = () => {
     try {
       const { data, error } = await supabase
         .from('saved_activities')
-        .select('*')
+        .select(`
+          *,
+          provider_profiles:provider_id (external_website)
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setSavedActivities((data as SavedActivity[]) || []);
+      
+      // Flatten the joined data
+      const activities = (data || []).map((item: any) => ({
+        ...item,
+        external_website: item.provider_profiles?.external_website || null,
+        provider_profiles: undefined
+      })) as SavedActivity[];
+      
+      setSavedActivities(activities);
     } catch (err: any) {
       console.error('Error fetching saved activities:', err);
     } finally {

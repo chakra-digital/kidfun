@@ -15,9 +15,21 @@ const statusColors: Record<string, string> = {
   completed: 'bg-blue-100 text-blue-700',
 };
 
-// Generate a Google search URL for the provider with UTM params
-const getProviderSearchUrl = (providerName: string) => {
-  const searchQuery = encodeURIComponent(`${providerName} kids activities`);
+// Generate a provider URL with UTM params - use external_website if available, else Google search
+const getProviderUrl = (activity: { provider_name: string; external_website?: string | null }) => {
+  if (activity.external_website) {
+    try {
+      const url = new URL(activity.external_website);
+      url.searchParams.append('utm_source', 'kidfun');
+      url.searchParams.append('utm_medium', 'saved_activity');
+      url.searchParams.append('utm_campaign', 'provider_lookup');
+      return url.toString();
+    } catch {
+      return activity.external_website;
+    }
+  }
+  // Fallback to Google search
+  const searchQuery = encodeURIComponent(`${activity.provider_name} kids activities`);
   return `https://www.google.com/search?q=${searchQuery}&utm_source=kidfun&utm_medium=saved_activity&utm_campaign=provider_lookup`;
 };
 
@@ -75,11 +87,11 @@ export const SavedActivitiesSection: React.FC = () => {
         ) : (
           <div className="space-y-3">
             {savedActivities.map((activity) => {
-              // Determine the link: internal provider page or external Google search
+              // Determine the link: internal provider page or external website URL
               const hasInternalProvider = !!activity.provider_id;
               const providerUrl = hasInternalProvider 
                 ? `/provider/${activity.provider_id}`
-                : getProviderSearchUrl(activity.provider_name);
+                : getProviderUrl(activity);
               
               return (
                 <div
