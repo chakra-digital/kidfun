@@ -34,6 +34,8 @@ serve(async (req) => {
     // Support different place types
     if (type === 'school') {
       url.searchParams.append('types', 'school');
+    } else if (type === 'establishment') {
+      url.searchParams.append('types', 'establishment');
     } else {
       url.searchParams.append('types', '(cities)');
     }

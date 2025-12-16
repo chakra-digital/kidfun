@@ -62,7 +62,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
 
       try {
         const { data, error } = await supabase.functions.invoke('get-place-autocomplete', {
-          body: { input: activityName, types: 'establishment' }
+          body: { input: activityName, type: 'establishment' }
         });
 
         if (error) throw error;
@@ -126,9 +126,9 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
       const { error } = await supabase.from('saved_activities').insert({
         user_id: user.id,
         provider_name: activityName.trim(),
-        activity_name: location || null,
+        activity_name: null, // Activity type, not used for manual entries
         scheduled_date: date?.toISOString() || null,
-        notes: notes.trim() || null,
+        notes: [location, notes.trim()].filter(Boolean).join(' • ') || null,
         status: 'saved',
         provider_id: null // Manual entries don't link to provider_profiles
       });
