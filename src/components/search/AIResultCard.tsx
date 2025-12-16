@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -202,7 +203,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
 
       <CardFooter className="p-3 pt-0 flex flex-col gap-2">
         {/* Action buttons - Save & Share */}
-        {user && (
+        {user ? (
           <div className="flex gap-2 w-full">
             <Button 
               size="sm" 
@@ -225,6 +226,33 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
                 Share
               </Button>
             </ShareActivityDialog>
+          </div>
+        ) : (
+          <div className="flex gap-2 w-full">
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="flex-1"
+              asChild
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Link to="/auth">
+                <Bookmark className="w-3 h-3 mr-1" />
+                Save
+              </Link>
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="flex-1"
+              asChild
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Link to="/auth">
+                <Share2 className="w-3 h-3 mr-1" />
+                Share
+              </Link>
+            </Button>
           </div>
         )}
         
