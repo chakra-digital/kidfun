@@ -17,6 +17,7 @@ import { GameifiedProgress } from "@/components/progress/GameifiedProgress";
 import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard";
 import { SharedCalendar } from "@/components/coordination/SharedCalendar";
 import { ActivityInbox } from "@/components/coordination/ActivityInbox";
+import { SavedActivitiesSection } from "@/components/dashboard/SavedActivitiesSection";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const Dashboard = () => {
@@ -92,6 +93,9 @@ const Dashboard = () => {
         {userType === "parent" && (
           <div className="mb-6 space-y-6">
             <SocialConnectionsCard />
+            
+            {/* Saved Activities */}
+            <SavedActivitiesSection />
             
             {/* Coordination Section - Calendar + Inbox */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

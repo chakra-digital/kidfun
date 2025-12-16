@@ -1,0 +1,112 @@
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Bookmark, Calendar, ExternalLink, Trash2, MapPin } from 'lucide-react';
+import { useSavedActivities, SavedActivity } from '@/hooks/useSavedActivities';
+import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+
+const statusColors: Record<string, string> = {
+  saved: 'bg-muted text-muted-foreground',
+  interested: 'bg-primary/10 text-primary',
+  booked: 'bg-green-100 text-green-700',
+  completed: 'bg-blue-100 text-blue-700',
+};
+
+export const SavedActivitiesSection: React.FC = () => {
+  const { savedActivities, loading, removeActivity, updateActivityStatus } = useSavedActivities();
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bookmark className="h-5 w-5" />
+            Saved Activities
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-3">
+            <div className="h-20 bg-muted rounded"></div>
+            <div className="h-20 bg-muted rounded"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2">
+          <Bookmark className="h-5 w-5" />
+          Saved Activities
+          {savedActivities.length > 0 && (
+            <Badge variant="secondary" className="ml-2">
+              {savedActivities.length}
+            </Badge>
+          )}
+        </CardTitle>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/">Browse More</Link>
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {savedActivities.length === 0 ? (
+          <div className="text-center py-8">
+            <Bookmark className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium mb-2">No saved activities yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Search for activities and save them to keep track of what interests you.
+            </p>
+            <Button asChild>
+              <Link to="/">Discover Activities</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {savedActivities.map((activity) => (
+              <div
+                key={activity.id}
+                className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{activity.provider_name}</h4>
+                    {activity.activity_name && (
+                      <p className="text-sm text-muted-foreground truncate">
+                        {activity.activity_name}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <Badge className={statusColors[activity.status] || statusColors.saved}>
+                        {activity.status}
+                      </Badge>
+                      {activity.scheduled_date && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(activity.scheduled_date), 'MMM d, yyyy')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeActivity(activity.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};

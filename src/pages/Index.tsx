@@ -117,7 +117,7 @@ const Index = () => {
                   textShadow: '0 1px 3px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3)'
                 }}
               >
-                Connect with parents at your school, discover activities together, and coordinate with your network
+                Connect with parents at your school, discover and coordinate activities together
               </p>
             </div>
             
