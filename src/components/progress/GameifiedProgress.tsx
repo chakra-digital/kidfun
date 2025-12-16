@@ -89,7 +89,7 @@ export const GameifiedProgress: React.FC<GameifiedProgressProps> = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-primary">{Math.round(progressPercentage)}%</span>
-              <span className="text-sm text-muted-foreground">Complete</span>
+              <span className="text-sm text-muted-foreground">Setup complete</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Star className="h-4 w-4 text-accent" />
