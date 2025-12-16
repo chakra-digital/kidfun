@@ -23,9 +23,10 @@ export const InviteParentDialog: React.FC<InviteParentDialogProps> = ({ children
   const [copied, setCopied] = useState(false);
 
   const referralCode = parentProfile?.referral_code;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://kidfun.app';
   const inviteLink = referralCode 
-    ? `https://vjyzhgwiajobfpumeqvy.lovableproject.com/auth?ref=${referralCode}`
-    : 'https://vjyzhgwiajobfpumeqvy.lovableproject.com/auth';
+    ? `${baseUrl}/auth?ref=${referralCode}`
+    : `${baseUrl}/auth`;
 
   const inviterName = userProfile?.first_name 
     ? `${userProfile.first_name}${userProfile.last_name ? ' ' + userProfile.last_name : ''}`

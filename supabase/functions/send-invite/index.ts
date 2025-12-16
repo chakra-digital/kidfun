@@ -52,8 +52,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("User exists check:", userExists);
 
     // Build invite link
-    const baseUrl = "https://vjyzhgwiajobfpumeqvy.lovableproject.com";
-    const inviteLink = referralCode 
+    // Use the calling site's origin when available so links work in both staging and production.
+    const fallbackBaseUrl = "https://kidfun.app";
+    const origin = req.headers.get("origin");
+    const baseUrl = (origin && /^https?:\/\//.test(origin) ? origin : fallbackBaseUrl).replace(/\/$/, "");
+
+    const inviteLink = referralCode
       ? `${baseUrl}/auth?ref=${referralCode}`
       : `${baseUrl}/auth`;
 
@@ -115,11 +119,33 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "KidFun <onboarding@resend.dev>",
+      // IMPORTANT: Must be a sender on your verified domain (Resend will block resend.dev senders in production)
+      from: "KidFun <noreply@kidfun.app>",
       to: [inviteeEmail],
       subject,
       html: htmlContent,
     });
+
+    // Resend SDK may return either { id } or { data, error } depending on version.
+    const resendError = (emailResponse as any)?.error;
+    if (resendError) {
+      console.error("Resend error:", resendError);
+
+      // Record the failed invite attempt (best-effort)
+      await supabase.from('referral_invites').insert({
+        inviter_user_id: null,
+        inviter_email: inviterEmail || null,
+        invitee_email: inviteeEmail.toLowerCase(),
+        referral_code: referralCode || null,
+        invite_type: inviteType,
+        status: 'failed',
+      });
+
+      return new Response(
+        JSON.stringify({ error: resendError.message || "Failed to send email" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     console.log("Email sent:", emailResponse);
 
