@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
+import { Gift } from "lucide-react";
 
 const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -23,8 +25,9 @@ const Auth = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
-  // Get tab from URL params (signup/signin) - default to signup for better UX
+  // Get tab and referral code from URL params
   const defaultTab = searchParams.get('tab') || 'signup';
+  const referralCode = searchParams.get('ref');
 
   // Auth state management
   useEffect(() => {
@@ -167,6 +170,7 @@ const Auth = () => {
             first_name: firstName,
             last_name: lastName,
             user_type: userType,
+            referral_code: referralCode || null,
           }
         }
       });
@@ -257,6 +261,12 @@ const Auth = () => {
             <span className="text-2xl font-bold text-primary">KidFun</span>
           </Link>
           <p className="text-muted-foreground mt-2">Secure access to your account</p>
+          {referralCode && (
+            <Badge className="mt-2 bg-green-100 text-green-700 border-green-200">
+              <Gift className="w-3 h-3 mr-1" />
+              You've been invited! Sign up for bonus points
+            </Badge>
+          )}
         </div>
 
         <Card>

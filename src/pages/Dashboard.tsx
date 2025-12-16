@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar, GraduationCap, Home, ChevronDown, ChevronUp } from "lucide-react";
+import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar, GraduationCap, Home, ChevronDown, ChevronUp, UserPlus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AddChildForm from "@/components/children/AddChildForm";
 import { EditChildDialog } from "@/components/children/EditChildDialog";
@@ -18,6 +18,7 @@ import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard
 import { SharedCalendar } from "@/components/coordination/SharedCalendar";
 import { ActivityInbox } from "@/components/coordination/ActivityInbox";
 import { SavedActivitiesSection } from "@/components/dashboard/SavedActivitiesSection";
+import { InviteParentDialog } from "@/components/social/InviteParentDialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const Dashboard = () => {
@@ -292,6 +293,12 @@ const Dashboard = () => {
                       Find Parents
                     </Link>
                   </Button>
+                  <InviteParentDialog>
+                    <Button variant="outline" className="w-full justify-start">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Invite Parents
+                    </Button>
+                  </InviteParentDialog>
                 </>
               ) : (
                 <Button asChild variant="outline" className="w-full justify-start">
