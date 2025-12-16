@@ -54,7 +54,7 @@ const Navbar = () => {
                 className="rounded-full"
                 asChild
               >
-                <Link to="/auth">Log In</Link>
+                <Link to="/auth?tab=signin">Log In</Link>
               </Button>
               <Button 
                 variant="default" 
