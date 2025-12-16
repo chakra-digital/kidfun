@@ -17,6 +17,7 @@ import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 
 const Index = () => {
   const [aiResults, setAiResults] = useState<any[]>([]);
+  const [displayCount, setDisplayCount] = useState(5); // Show 5 initially
   const [showAIResults, setShowAIResults] = useState(false);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [selectedAIResult, setSelectedAIResult] = useState(null);
@@ -42,6 +43,7 @@ const Index = () => {
   const handleAIResultsUpdate = (results: any[]) => {
     console.log('AI Results received:', results);
     setAiResults(results);
+    setDisplayCount(5); // Reset to show first 5 on new search
     setIsLoadingResults(false);
     setShowAIResults(results.length > 0);
     
@@ -55,6 +57,13 @@ const Index = () => {
       }, 100);
     }
   };
+
+  const handleLoadMore = () => {
+    setDisplayCount(prev => Math.min(prev + 5, aiResults.length));
+  };
+
+  const displayedResults = aiResults.slice(0, displayCount);
+  const hasMoreResults = displayCount < aiResults.length;
 
   // Let the map component calculate its own center from providers
 
@@ -178,13 +187,26 @@ const Index = () => {
                   {isLoadingResults ? (
                     <SearchResultSkeletonList count={5} />
                   ) : (
-                    aiResults.map((result, index) => (
-                      <AIResultCard
-                        key={`${result.id || result.google_place_id || 'idx'}-${index}`}
-                        {...result}
-                        onClick={() => handleAIResultClick(result)}
-                      />
-                    ))
+                    <>
+                      {displayedResults.map((result, index) => (
+                        <AIResultCard
+                          key={`${result.id || result.google_place_id || 'idx'}-${index}`}
+                          {...result}
+                          onClick={() => handleAIResultClick(result)}
+                        />
+                      ))}
+                      
+                      {/* Load More Button */}
+                      {hasMoreResults && (
+                        <Button 
+                          variant="outline" 
+                          className="w-full py-6 text-base"
+                          onClick={handleLoadMore}
+                        >
+                          Load More ({aiResults.length - displayCount} remaining)
+                        </Button>
+                      )}
+                    </>
                   )}
                 </div>
                 
