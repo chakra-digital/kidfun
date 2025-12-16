@@ -21,6 +21,7 @@ interface ShareActivityDialogProps {
   providerId?: string;
   providerName: string;
   activityName?: string;
+  providerUrl?: string; // External website URL to store when saving
   children?: React.ReactNode;
 }
 
@@ -28,6 +29,7 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
   providerId,
   providerName,
   activityName,
+  providerUrl,
   children
 }) => {
   const { connections, loading: connectionsLoading } = useSocialConnections();
@@ -61,7 +63,7 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
       // First save the activity if not already saved
       let activityId = existingActivity?.id;
       if (!activityId) {
-        const result = await saveActivity(providerId || null, providerName, activityName);
+        const result = await saveActivity(providerId || null, providerName, activityName, 'saved', providerUrl);
         activityId = result.data?.id;
       }
 

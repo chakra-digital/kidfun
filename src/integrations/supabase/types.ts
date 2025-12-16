@@ -534,6 +534,7 @@ export type Database = {
           notes: string | null
           provider_id: string | null
           provider_name: string
+          provider_url: string | null
           scheduled_date: string | null
           status: string
           updated_at: string
@@ -546,6 +547,7 @@ export type Database = {
           notes?: string | null
           provider_id?: string | null
           provider_name: string
+          provider_url?: string | null
           scheduled_date?: string | null
           status?: string
           updated_at?: string
@@ -558,6 +560,7 @@ export type Database = {
           notes?: string | null
           provider_id?: string | null
           provider_name?: string
+          provider_url?: string | null
           scheduled_date?: string | null
           status?: string
           updated_at?: string

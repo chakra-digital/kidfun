@@ -14,8 +14,7 @@ export interface SavedActivity {
   notes: string | null;
   created_at: string;
   updated_at: string;
-  // Joined from provider_profiles
-  external_website?: string | null;
+  provider_url: string | null; // Stored external website URL
 }
 
 export interface ConnectionWithActivities {
@@ -42,23 +41,12 @@ export const useSavedActivities = () => {
     try {
       const { data, error } = await supabase
         .from('saved_activities')
-        .select(`
-          *,
-          provider_profiles:provider_id (external_website)
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      // Flatten the joined data
-      const activities = (data || []).map((item: any) => ({
-        ...item,
-        external_website: item.provider_profiles?.external_website || null,
-        provider_profiles: undefined
-      })) as SavedActivity[];
-      
-      setSavedActivities(activities);
+      setSavedActivities((data as SavedActivity[]) || []);
     } catch (err: any) {
       console.error('Error fetching saved activities:', err);
     } finally {
@@ -74,7 +62,8 @@ export const useSavedActivities = () => {
     providerId: string | null,
     providerName: string,
     activityName?: string,
-    status: 'saved' | 'interested' | 'booked' | 'completed' = 'saved'
+    status: 'saved' | 'interested' | 'booked' | 'completed' = 'saved',
+    providerUrl?: string | null
   ) => {
     if (!user) {
       console.log('saveActivity: No user found');
@@ -82,7 +71,7 @@ export const useSavedActivities = () => {
       return { error: 'Not authenticated' };
     }
 
-    console.log('saveActivity called:', { providerId, providerName, userId: user.id });
+    console.log('saveActivity called:', { providerId, providerName, providerUrl, userId: user.id });
 
     try {
       const { data, error } = await supabase
@@ -92,7 +81,8 @@ export const useSavedActivities = () => {
           provider_id: providerId || null,
           provider_name: providerName,
           activity_name: activityName || null,
-          status
+          status,
+          provider_url: providerUrl || null
         })
         .select()
         .single();

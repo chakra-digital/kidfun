@@ -65,8 +65,8 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
         toast.success('Removed from saved');
       }
     } else {
-      // Pass null for provider_id if it's an external result (no database UUID)
-      await saveActivity(dbProviderId, result.business_name);
+      // Pass external_website to store for future use
+      await saveActivity(dbProviderId, result.business_name, undefined, 'saved', result.external_website);
       toast.success('Saved to your activities');
     }
   };
@@ -176,8 +176,9 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
           
           {user && (
             <ShareActivityDialog
-              providerId={result.id}
+              providerId={dbProviderId || undefined}
               providerName={result.business_name}
+              providerUrl={result.external_website}
             >
               <Button variant="outline" className="flex-1">
                 <Share2 className="w-4 h-4 mr-2" />
