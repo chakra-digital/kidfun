@@ -6,8 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogPortal,
-  DialogOverlay,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -95,22 +93,13 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
           </Button>
         )}
       </DialogTrigger>
-      <DialogPortal>
-        <DialogOverlay className="z-[100]" />
-        <div className="fixed left-[50%] top-[50%] z-[100] grid w-full max-w-md translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg sm:rounded-lg">
-          <button
-            onClick={() => setOpen(false)}
-            className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100"
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
-          </button>
-          <DialogHeader>
-            <DialogTitle>Share Activity</DialogTitle>
-            <DialogDescription>
-              Invite your connections to {providerName}
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent className="z-[200] max-w-md" overlayClassName="z-[200]">
+        <DialogHeader>
+          <DialogTitle>Share Activity</DialogTitle>
+          <DialogDescription>
+            Invite your connections to {providerName}
+          </DialogDescription>
+        </DialogHeader>
         
         <div className="space-y-4 py-4">
           {/* Activity preview */}
@@ -195,8 +184,7 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
             {sending ? 'Sending...' : `Send to ${selectedConnections.length}`}
           </Button>
         </div>
-        </div>
-      </DialogPortal>
+      </DialogContent>
     </Dialog>
   );
 };
