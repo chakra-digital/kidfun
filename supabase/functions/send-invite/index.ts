@@ -26,10 +26,17 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { inviteeEmail, inviterName, inviterEmail, referralCode, inviteType = 'app_invite' }: InviteRequest = await req.json();
 
-    console.log("Processing invite request:", { inviteeEmail, inviterName, referralCode, inviteType });
+    const normalizedInviteeEmail = (inviteeEmail ?? "").trim().toLowerCase();
+
+    console.log("Processing invite request:", {
+      inviteeEmail: normalizedInviteeEmail,
+      inviterName,
+      referralCode,
+      inviteType,
+    });
 
     // Validate email
-    if (!inviteeEmail || !inviteeEmail.includes('@')) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedInviteeEmail)) {
       return new Response(
         JSON.stringify({ error: "Valid email address required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
@@ -45,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: existingUsers } = await supabase
       .from('profiles')
       .select('email, user_id')
-      .eq('email', inviteeEmail.toLowerCase())
+      .eq('email', normalizedInviteeEmail)
       .limit(1);
 
     const userExists = existingUsers && existingUsers.length > 0;
@@ -64,16 +71,17 @@ const handler = async (req: Request): Promise<Response> => {
     // Personalized email content
     let subject: string;
     let htmlContent: string;
+    let textContent: string;
 
     if (userExists) {
       // User already signed up - send a "your friend is on KidFun" email
-      subject = inviterName 
+      subject = inviterName
         ? `${inviterName} wants to connect with you on KidFun!`
         : "A friend invited you to connect on KidFun!";
-      
+
       htmlContent = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #6366f1; margin-bottom: 24px;">🏃‍♀️ KidFun</h1>
+          <h1 style="color: #6366f1; margin-bottom: 24px;">KidFun</h1>
           <h2 style="color: #1f2937;">You've got a connection request!</h2>
           <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
             ${inviterName ? `<strong>${inviterName}</strong>` : 'A fellow parent'} is already using KidFun and wants to coordinate activities with you!
@@ -87,24 +95,26 @@ const handler = async (req: Request): Promise<Response> => {
           </a>
         </div>
       `;
+
+      textContent = `${inviterName ? inviterName : 'A fellow parent'} wants to connect with you on KidFun.\n\nOpen: ${baseUrl}/dashboard`;
     } else {
       // New user invite
-      subject = inviterName 
+      subject = inviterName
         ? `${inviterName} invited you to join KidFun!`
         : "You're invited to join KidFun!";
-      
+
       htmlContent = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #6366f1; margin-bottom: 24px;">🏃‍♀️ KidFun</h1>
+          <h1 style="color: #6366f1; margin-bottom: 24px;">KidFun</h1>
           <h2 style="color: #1f2937;">You're invited!</h2>
           <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">
             ${inviterName ? `<strong>${inviterName}</strong>` : 'A fellow parent'} thinks you'd love KidFun - the easiest way to discover and coordinate kids' activities with other parents.
           </p>
           <ul style="color: #4b5563; font-size: 16px; line-height: 1.8;">
-            <li>🔍 Discover amazing activities for your kids</li>
-            <li>👨‍👩‍👧‍👦 Connect with parents from your school</li>
-            <li>📅 Coordinate carpools and group activities</li>
-            <li>⭐ Earn points and rewards</li>
+            <li>Discover amazing activities for your kids</li>
+            <li>Connect with parents from your school</li>
+            <li>Coordinate carpools and group activities</li>
+            <li>Earn points and rewards</li>
           </ul>
           <a href="${inviteLink}" 
              style="display: inline-block; background: #6366f1; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 16px;">
@@ -115,16 +125,21 @@ const handler = async (req: Request): Promise<Response> => {
           </p>
         </div>
       `;
+
+      textContent = `${inviterName ? inviterName : 'A fellow parent'} invited you to join KidFun.\n\nJoin: ${inviteLink}${referralCode ? `\nReferral code: ${referralCode}` : ''}`;
     }
 
     // Send email
     const emailResponse = await resend.emails.send({
       // IMPORTANT: Must be a sender on your verified domain (Resend will block resend.dev senders in production)
       from: "KidFun <noreply@kidfun.app>",
-      to: [inviteeEmail],
+      to: [normalizedInviteeEmail],
       subject,
       html: htmlContent,
+      text: textContent,
     });
+
+    const emailId = (emailResponse as any)?.data?.id ?? (emailResponse as any)?.id ?? null;
 
     // Resend SDK may return either { id } or { data, error } depending on version.
     const resendError = (emailResponse as any)?.error;
@@ -135,7 +150,7 @@ const handler = async (req: Request): Promise<Response> => {
       await supabase.from('referral_invites').insert({
         inviter_user_id: null,
         inviter_email: inviterEmail || null,
-        invitee_email: inviteeEmail.toLowerCase(),
+        invitee_email: normalizedInviteeEmail,
         referral_code: referralCode || null,
         invite_type: inviteType,
         status: 'failed',
@@ -147,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Email sent:", emailResponse);
+    console.log("Email sent:", { emailId });
 
     // Get inviter user ID from auth header if available
     let inviterUserId: string | null = null;
@@ -164,7 +179,7 @@ const handler = async (req: Request): Promise<Response> => {
       .insert({
         inviter_user_id: inviterUserId,
         inviter_email: inviterEmail || null,
-        invitee_email: inviteeEmail.toLowerCase(),
+        invitee_email: normalizedInviteeEmail,
         referral_code: referralCode || null,
         invite_type: inviteType,
         status: userExists ? 'user_exists' : 'sent',
@@ -176,8 +191,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     return new Response(
       JSON.stringify({ 
-        success: true, 
+        success: true,
         userExists,
+        emailId,
         message: userExists 
           ? "They're already on KidFun! We sent them a heads up."
           : "Invite sent! They'll get bonus points when they sign up."
