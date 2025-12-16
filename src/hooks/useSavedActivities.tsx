@@ -63,14 +63,20 @@ export const useSavedActivities = () => {
     activityName?: string,
     status: 'saved' | 'interested' | 'booked' | 'completed' = 'saved'
   ) => {
-    if (!user) return { error: 'Not authenticated' };
+    if (!user) {
+      console.log('saveActivity: No user found');
+      toast({ title: 'Please sign in', description: 'You need to be signed in to save activities.', variant: 'destructive' });
+      return { error: 'Not authenticated' };
+    }
+
+    console.log('saveActivity called:', { providerId, providerName, userId: user.id });
 
     try {
       const { data, error } = await supabase
         .from('saved_activities')
         .insert({
           user_id: user.id,
-          provider_id: providerId,
+          provider_id: providerId || null,
           provider_name: providerName,
           activity_name: activityName || null,
           status
@@ -78,13 +84,18 @@ export const useSavedActivities = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw error;
+      }
       
+      console.log('Activity saved successfully:', data);
       setSavedActivities(prev => [data as SavedActivity, ...prev]);
       toast({ title: 'Activity saved!', description: `${providerName} added to your list.` });
       return { data, error: null };
     } catch (err: any) {
       console.error('Error saving activity:', err);
+      toast({ title: 'Failed to save', description: err.message, variant: 'destructive' });
       return { data: null, error: err.message };
     }
   };

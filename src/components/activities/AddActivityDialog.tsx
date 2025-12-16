@@ -29,10 +29,10 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   
-  // Form state
+  // Form state - Location first, then activity/provider search
+  const [areaLocation, setAreaLocation] = useState('');
   const [activityName, setActivityName] = useState('');
   const [date, setDate] = useState<Date | undefined>();
-  const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
   
   // Autocomplete state
@@ -40,11 +40,12 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Fetch suggestions as user types
+  // Fetch suggestions as user types activity name
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (activityName.length < 2) {
@@ -61,8 +62,19 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
       setIsSearching(true);
 
       try {
+        // Pass location for bias if user entered one
+        const requestBody: { input: string; type: string; location?: string } = {
+          input: activityName,
+          type: 'establishment'
+        };
+        
+        // Add location bias if area is specified
+        if (areaLocation.trim()) {
+          requestBody.location = areaLocation.trim();
+        }
+
         const { data, error } = await supabase.functions.invoke('get-place-autocomplete', {
-          body: { input: activityName, type: 'establishment' }
+          body: requestBody
         });
 
         if (error) throw error;
@@ -91,7 +103,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
       clearTimeout(timer);
       abortControllerRef.current?.abort();
     };
-  }, [activityName]);
+  }, [activityName, areaLocation]);
 
   // Close suggestions on click outside
   useEffect(() => {
@@ -111,7 +123,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
 
   const handleSuggestionSelect = (suggestion: PlaceSuggestion) => {
     setActivityName(suggestion.main_text);
-    setLocation(suggestion.secondary_text);
+    setSelectedAddress(suggestion.secondary_text);
     setSelectedPlaceId(suggestion.place_id);
     setShowSuggestions(false);
     setSuggestions([]);
@@ -123,28 +135,24 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
 
     setSaving(true);
     try {
+      // Combine selected address and user's area for notes
+      const locationInfo = selectedAddress || areaLocation;
+      
       const { error } = await supabase.from('saved_activities').insert({
         user_id: user.id,
         provider_name: activityName.trim(),
-        activity_name: null, // Activity type, not used for manual entries
+        activity_name: null,
         scheduled_date: date?.toISOString() || null,
-        notes: [location, notes.trim()].filter(Boolean).join(' • ') || null,
+        notes: [locationInfo, notes.trim()].filter(Boolean).join(' • ') || null,
         status: 'saved',
-        provider_id: null // Manual entries don't link to provider_profiles
+        provider_id: null
       });
 
       if (error) throw error;
 
       toast.success('Activity added! +10 points 🎉');
-      
-      // Reset form
-      setActivityName('');
-      setDate(undefined);
-      setLocation('');
-      setNotes('');
-      setSelectedPlaceId(null);
+      resetForm();
       setOpen(false);
-      
       onActivityAdded?.();
     } catch (err) {
       console.error('Error saving activity:', err);
@@ -155,11 +163,12 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
   };
 
   const resetForm = () => {
+    setAreaLocation('');
     setActivityName('');
     setDate(undefined);
-    setLocation('');
     setNotes('');
     setSelectedPlaceId(null);
+    setSelectedAddress('');
     setSuggestions([]);
     setShowSuggestions(false);
   };
@@ -181,6 +190,20 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+          {/* Location/Area first - helps with search bias */}
+          <div className="space-y-2">
+            <Label htmlFor="area-location">Location / Area (optional)</Label>
+            <Input
+              id="area-location"
+              value={areaLocation}
+              onChange={(e) => setAreaLocation(e.target.value)}
+              placeholder="Austin, TX or Tarrytown..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Enter your area to get better activity suggestions
+            </p>
+          </div>
+
           {/* Activity Name with Autocomplete */}
           <div className="space-y-2">
             <Label htmlFor="activity-name">Activity or Place Name *</Label>
@@ -192,6 +215,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
                 onChange={(e) => {
                   setActivityName(e.target.value);
                   setSelectedPlaceId(null);
+                  setSelectedAddress('');
                 }}
                 onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                 placeholder="Soccer practice, Birthday party, Art class..."
@@ -230,7 +254,7 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
             {selectedPlaceId && (
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <ExternalLink className="h-3 w-3" />
-                Linked to Google Place
+                Linked to: {selectedAddress}
               </p>
             )}
           </div>
@@ -261,17 +285,6 @@ export const AddActivityDialog: React.FC<AddActivityDialogProps> = ({ onActivity
                 />
               </PopoverContent>
             </Popover>
-          </div>
-
-          {/* Location (auto-filled from suggestion or manual) */}
-          <div className="space-y-2">
-            <Label htmlFor="location">Location (optional)</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="Address or general area"
-            />
           </div>
 
           {/* Notes */}

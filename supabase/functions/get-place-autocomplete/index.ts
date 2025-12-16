@@ -12,7 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { input, type } = await req.json();
+    const { input, type, location } = await req.json();
+    
+    console.log('Autocomplete request:', { input, type, location });
     
     if (!input || input.length < 2) {
       return new Response(
@@ -41,6 +43,14 @@ serve(async (req) => {
     }
     
     url.searchParams.append('components', 'country:us');
+    
+    // Add location bias if provided (helps show results near user's area)
+    if (location) {
+      // Use location bias to prefer results near user's location
+      url.searchParams.append('location', location);
+      url.searchParams.append('radius', '50000'); // 50km radius
+    }
+    
     url.searchParams.append('key', GOOGLE_PLACES_API_KEY);
 
     const response = await fetch(url.toString());
