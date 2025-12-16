@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bookmark, Calendar, Trash2 } from 'lucide-react';
+import { Bookmark, Calendar, Trash2, ExternalLink } from 'lucide-react';
 import { useSavedActivities } from '@/hooks/useSavedActivities';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -13,6 +13,12 @@ const statusColors: Record<string, string> = {
   interested: 'bg-primary/10 text-primary',
   booked: 'bg-green-100 text-green-700',
   completed: 'bg-blue-100 text-blue-700',
+};
+
+// Generate a Google search URL for the provider with UTM params
+const getProviderSearchUrl = (providerName: string) => {
+  const searchQuery = encodeURIComponent(`${providerName} kids activities`);
+  return `https://www.google.com/search?q=${searchQuery}&utm_source=kidfun&utm_medium=saved_activity&utm_campaign=provider_lookup`;
 };
 
 export const SavedActivitiesSection: React.FC = () => {
@@ -68,53 +74,74 @@ export const SavedActivitiesSection: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {savedActivities.map((activity) => (
-              <div
-                key={activity.id}
-                className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    {activity.provider_id ? (
-                      <Link 
-                        to={`/provider/${activity.provider_id}`}
-                        className="font-medium truncate hover:text-primary hover:underline block"
-                      >
-                        {activity.provider_name}
-                      </Link>
-                    ) : (
-                      <h4 className="font-medium truncate">{activity.provider_name}</h4>
-                    )}
-                    {activity.activity_name && (
-                      <p className="text-sm text-muted-foreground truncate">
-                        {activity.activity_name}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <Badge className={statusColors[activity.status] || statusColors.saved}>
-                        {activity.status}
-                      </Badge>
-                      {activity.scheduled_date && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(activity.scheduled_date), 'MMM d, yyyy')}
-                        </span>
+            {savedActivities.map((activity) => {
+              // Determine the link: internal provider page or external Google search
+              const hasInternalProvider = !!activity.provider_id;
+              const providerUrl = hasInternalProvider 
+                ? `/provider/${activity.provider_id}`
+                : getProviderSearchUrl(activity.provider_name);
+              
+              return (
+                <div
+                  key={activity.id}
+                  className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      {hasInternalProvider ? (
+                        <Link 
+                          to={providerUrl}
+                          className="font-medium truncate hover:text-primary hover:underline block"
+                        >
+                          {activity.provider_name}
+                        </Link>
+                      ) : (
+                        <a 
+                          href={providerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium truncate hover:text-primary hover:underline flex items-center gap-1"
+                        >
+                          {activity.provider_name}
+                          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                        </a>
                       )}
+                      {activity.activity_name && (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {activity.activity_name}
+                        </p>
+                      )}
+                      {activity.notes && (
+                        <p className="text-xs text-muted-foreground truncate mt-1">
+                          {activity.notes}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        <Badge className={statusColors[activity.status] || statusColors.saved}>
+                          {activity.status}
+                        </Badge>
+                        {activity.scheduled_date && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {format(new Date(activity.scheduled_date), 'MMM d, yyyy')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeActivity(activity.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeActivity(activity.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>
