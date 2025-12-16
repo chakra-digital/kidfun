@@ -169,6 +169,45 @@ export const useActivityCoordination = () => {
         .update({ read_at: new Date().toISOString() })
         .eq('id', messageId);
 
+      // If accepting, save the activity to this user's account
+      if (response === 'accepted' && originalMessage.activity_id) {
+        // Fetch the original activity details
+        const { data: originalActivity, error: activityError } = await supabase
+          .from('saved_activities')
+          .select('*')
+          .eq('id', originalMessage.activity_id)
+          .single();
+
+        if (!activityError && originalActivity) {
+          // Check if user already has this activity saved (by provider_name)
+          const { data: existingActivity } = await supabase
+            .from('saved_activities')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('provider_name', originalActivity.provider_name)
+            .maybeSingle();
+
+          // Only create if not already saved
+          if (!existingActivity) {
+            const { error: saveError } = await supabase
+              .from('saved_activities')
+              .insert({
+                user_id: user.id,
+                provider_id: originalActivity.provider_id,
+                provider_name: originalActivity.provider_name,
+                activity_name: originalActivity.activity_name,
+                provider_url: originalActivity.provider_url,
+                scheduled_date: originalActivity.scheduled_date,
+                status: 'saved',
+              });
+
+            if (saveError) {
+              console.error('Error saving activity to user:', saveError);
+            }
+          }
+        }
+      }
+
       // Send response message
       const { error } = await supabase
         .from('activity_messages')
@@ -186,6 +225,7 @@ export const useActivityCoordination = () => {
       
       toast({ 
         title: response === 'accepted' ? 'Request accepted!' : 'Request declined',
+        description: response === 'accepted' ? 'Activity added to your list!' : undefined,
       });
       
       fetchMessages();
