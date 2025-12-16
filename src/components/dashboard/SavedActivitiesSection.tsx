@@ -2,10 +2,11 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bookmark, Calendar, ExternalLink, Trash2, MapPin } from 'lucide-react';
-import { useSavedActivities, SavedActivity } from '@/hooks/useSavedActivities';
+import { Bookmark, Calendar, Trash2 } from 'lucide-react';
+import { useSavedActivities } from '@/hooks/useSavedActivities';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { AddActivityDialog } from '@/components/activities/AddActivityDialog';
 
 const statusColors: Record<string, string> = {
   saved: 'bg-muted text-muted-foreground',
@@ -15,7 +16,7 @@ const statusColors: Record<string, string> = {
 };
 
 export const SavedActivitiesSection: React.FC = () => {
-  const { savedActivities, loading, removeActivity, updateActivityStatus } = useSavedActivities();
+  const { savedActivities, loading, removeActivity, refetch } = useSavedActivities();
 
   if (loading) {
     return (
@@ -23,7 +24,7 @@ export const SavedActivitiesSection: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bookmark className="h-5 w-5" />
-            Saved Activities
+            My Activities
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -41,28 +42,29 @@ export const SavedActivitiesSection: React.FC = () => {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Bookmark className="h-5 w-5" />
-          Saved Activities
+          My Activities
           {savedActivities.length > 0 && (
             <Badge variant="secondary" className="ml-2">
               {savedActivities.length}
             </Badge>
           )}
         </CardTitle>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/">Browse More</Link>
-        </Button>
+        <div className="flex gap-2">
+          <AddActivityDialog onActivityAdded={refetch} />
+          <Button asChild variant="outline" size="sm">
+            <Link to="/">Discover</Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {savedActivities.length === 0 ? (
           <div className="text-center py-8">
             <Bookmark className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-medium mb-2">No saved activities yet</h3>
+            <h3 className="text-lg font-medium mb-2">No activities yet</h3>
             <p className="text-muted-foreground mb-4">
-              Search for activities and save them to keep track of what interests you.
+              Add your kid's activities, classes, and events to keep everything in one place.
             </p>
-            <Button asChild>
-              <Link to="/">Discover Activities</Link>
-            </Button>
+            <AddActivityDialog onActivityAdded={refetch} />
           </div>
         ) : (
           <div className="space-y-3">
