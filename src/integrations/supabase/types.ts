@@ -484,6 +484,48 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_invites: {
+        Row: {
+          converted_at: string | null
+          converted_user_id: string | null
+          created_at: string
+          id: string
+          invite_type: string
+          invitee_email: string
+          inviter_email: string | null
+          inviter_user_id: string | null
+          points_awarded: boolean | null
+          referral_code: string | null
+          status: string
+        }
+        Insert: {
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          id?: string
+          invite_type?: string
+          invitee_email: string
+          inviter_email?: string | null
+          inviter_user_id?: string | null
+          points_awarded?: boolean | null
+          referral_code?: string | null
+          status?: string
+        }
+        Update: {
+          converted_at?: string | null
+          converted_user_id?: string | null
+          created_at?: string
+          id?: string
+          invite_type?: string
+          invitee_email?: string
+          inviter_email?: string | null
+          inviter_user_id?: string | null
+          points_awarded?: boolean | null
+          referral_code?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       saved_activities: {
         Row: {
           activity_name: string | null
