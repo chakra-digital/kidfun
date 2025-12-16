@@ -73,7 +73,16 @@ export const SavedActivitiesSection: React.FC = () => {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium truncate">{activity.provider_name}</h4>
+                    {activity.provider_id ? (
+                      <Link 
+                        to={`/provider/${activity.provider_id}`}
+                        className="font-medium truncate hover:text-primary hover:underline block"
+                      >
+                        {activity.provider_name}
+                      </Link>
+                    ) : (
+                      <h4 className="font-medium truncate">{activity.provider_name}</h4>
+                    )}
                     {activity.activity_name && (
                       <p className="text-sm text-muted-foreground truncate">
                         {activity.activity_name}

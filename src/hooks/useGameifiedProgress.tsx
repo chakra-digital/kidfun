@@ -25,26 +25,33 @@ export const useGameifiedProgress = () => {
   const { user } = useAuth();
   const { userProfile, parentProfile, providerProfile } = useUserProfile();
   const { children } = useChildren();
-  const [savedProviders, setSavedProviders] = useState(0);
+  const [savedActivitiesCount, setSavedActivitiesCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // Check for saved providers (placeholder - you'll implement this when provider saving is added)
+  // Check for saved activities from the saved_activities table
   useEffect(() => {
-    const checkSavedProviders = async () => {
-      if (!user) return;
+    const checkSavedActivities = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       
       try {
-        // This would be replaced with actual saved providers query
-        // For now, we'll set it to 0
-        setSavedProviders(0);
+        const { count, error } = await supabase
+          .from("saved_activities")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        
+        if (error) throw error;
+        setSavedActivitiesCount(count || 0);
       } catch (error) {
-        console.error("Error checking saved providers:", error);
+        console.error("Error checking saved activities:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    checkSavedProviders();
+    checkSavedActivities();
   }, [user]);
 
   // Check onboarding completion status based on user type
@@ -107,19 +114,19 @@ export const useGameifiedProgress = () => {
       id: "explore_activities",
       title: "Explore Activities",
       description: "Browse available activities and programs",
-      completed: false, // Will be implemented when activity browsing is tracked
+      completed: savedActivitiesCount > 0, // If they've saved something, they've explored
       icon: "Search",
       points: 10,
-      actionLink: "/activities",
+      actionLink: "/",
     },
     {
       id: "save_provider",
       title: "Save Your First Provider",
       description: "Find and save a provider you're interested in",
-      completed: savedProviders > 0,
+      completed: savedActivitiesCount > 0,
       icon: "Bookmark",
       points: 15,
-      actionLink: "/camps",
+      actionLink: "/",
     },
     {
       id: "book_activity",
@@ -128,7 +135,7 @@ export const useGameifiedProgress = () => {
       completed: false, // Will be implemented when booking system is added
       icon: "Calendar",
       points: 20,
-      actionLink: "/activities",
+      actionLink: "/",
     },
     {
       id: "leave_review",
