@@ -57,17 +57,17 @@ export const SavedActivitiesSection: React.FC = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+        <CardTitle className="flex items-center gap-2 flex-shrink-0">
           <Bookmark className="h-5 w-5" />
-          My Activities
+          <span className="whitespace-nowrap">My Activities</span>
           {savedActivities.length > 0 && (
             <Badge variant="secondary" className="ml-2">
               {savedActivities.length}
             </Badge>
           )}
         </CardTitle>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <AddActivityDialog onActivityAdded={refetch} />
           <Button asChild variant="outline" size="sm">
             <Link to="/">Discover</Link>
