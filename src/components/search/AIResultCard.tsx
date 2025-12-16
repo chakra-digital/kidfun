@@ -75,7 +75,8 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
       await removeActivity(existingSave.id);
     } else {
       // Pass null for provider_id if it's an external result (no database UUID)
-      await saveActivity(dbProviderId, business_name);
+      // Pass external_website to store for future use
+      await saveActivity(dbProviderId, business_name, undefined, 'saved', external_website);
     }
   };
   
@@ -222,8 +223,9 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
               )}
             </Button>
             <ShareActivityDialog 
-              providerId={displayId} 
+              providerId={dbProviderId || undefined} 
               providerName={business_name}
+              providerUrl={external_website}
             >
               <Button size="sm" variant="outline" className="flex-1">
                 <Share2 className="w-3 h-3 mr-1" />

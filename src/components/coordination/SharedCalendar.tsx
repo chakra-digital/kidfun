@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarDays, Users, ChevronLeft, ChevronRight, Clock, UserPlus, Loader2 } from 'lucide-react';
+import { CalendarDays, Users, ChevronLeft, ChevronRight, Clock, UserPlus, Loader2, Share2 } from 'lucide-react';
 import { format, isSameDay, addMonths, subMonths } from 'date-fns';
 import { useSavedActivities, SavedActivity } from '@/hooks/useSavedActivities';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
 import { useActivityCoordination } from '@/hooks/useActivityCoordination';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { ShareActivityDialog } from './ShareActivityDialog';
 
 interface CalendarActivity extends SavedActivity {
   isConnection?: boolean;
@@ -237,8 +238,8 @@ export const SharedCalendar = () => {
                       </p>
                     )}
                     
-                    {/* Join button for connection activities */}
-                    {activity.isConnection && (
+                    {/* Actions based on activity type */}
+                    {activity.isConnection ? (
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -252,6 +253,21 @@ export const SharedCalendar = () => {
                           <><UserPlus className="h-3 w-3 mr-1" />Ask to join</>
                         )}
                       </Button>
+                    ) : (
+                      <ShareActivityDialog
+                        providerId={activity.provider_id || undefined}
+                        providerName={activity.provider_name}
+                        activityName={activity.activity_name || undefined}
+                      >
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2 w-full text-xs"
+                        >
+                          <Share2 className="h-3 w-3 mr-1" />
+                          Invite parents
+                        </Button>
+                      </ShareActivityDialog>
                     )}
                   </div>
                 ))}

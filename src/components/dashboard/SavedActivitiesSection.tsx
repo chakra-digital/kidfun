@@ -2,11 +2,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bookmark, Calendar, Trash2, ExternalLink } from 'lucide-react';
+import { Bookmark, Calendar, Trash2, ExternalLink, Share2 } from 'lucide-react';
 import { useSavedActivities } from '@/hooks/useSavedActivities';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { AddActivityDialog } from '@/components/activities/AddActivityDialog';
+import { ShareActivityDialog } from '@/components/coordination/ShareActivityDialog';
 
 const statusColors: Record<string, string> = {
   saved: 'bg-muted text-muted-foreground',
@@ -15,22 +16,21 @@ const statusColors: Record<string, string> = {
   completed: 'bg-blue-100 text-blue-700',
 };
 
-// Generate a provider URL with UTM params - use external_website if available, else Google search
-const getProviderUrl = (activity: { provider_name: string; external_website?: string | null }) => {
-  if (activity.external_website) {
+// Generate a provider URL with UTM params - use stored provider_url if available
+const getProviderUrl = (activity: { provider_name: string; provider_url?: string | null }) => {
+  if (activity.provider_url) {
     try {
-      const url = new URL(activity.external_website);
+      const url = new URL(activity.provider_url);
       url.searchParams.append('utm_source', 'kidfun');
       url.searchParams.append('utm_medium', 'saved_activity');
       url.searchParams.append('utm_campaign', 'provider_lookup');
       return url.toString();
     } catch {
-      return activity.external_website;
+      return activity.provider_url;
     }
   }
-  // Fallback to Google search
-  const searchQuery = encodeURIComponent(`${activity.provider_name} kids activities`);
-  return `https://www.google.com/search?q=${searchQuery}&utm_source=kidfun&utm_medium=saved_activity&utm_campaign=provider_lookup`;
+  // No URL stored - return null (won't be clickable)
+  return null;
 };
 
 export const SavedActivitiesSection: React.FC = () => {
@@ -89,8 +89,8 @@ export const SavedActivitiesSection: React.FC = () => {
             {savedActivities.map((activity) => {
               // Determine the link: internal provider page or external website URL
               const hasInternalProvider = !!activity.provider_id;
-              const providerUrl = hasInternalProvider 
-                ? `/provider/${activity.provider_id}`
+              const externalUrl = hasInternalProvider 
+                ? null 
                 : getProviderUrl(activity);
               
               return (
@@ -102,14 +102,14 @@ export const SavedActivitiesSection: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       {hasInternalProvider ? (
                         <Link 
-                          to={providerUrl}
+                          to={`/provider/${activity.provider_id}`}
                           className="font-medium truncate hover:text-primary hover:underline block"
                         >
                           {activity.provider_name}
                         </Link>
-                      ) : (
+                      ) : externalUrl ? (
                         <a 
-                          href={providerUrl}
+                          href={externalUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="font-medium truncate hover:text-primary hover:underline flex items-center gap-1"
@@ -117,6 +117,10 @@ export const SavedActivitiesSection: React.FC = () => {
                           {activity.provider_name}
                           <ExternalLink className="h-3 w-3 flex-shrink-0" />
                         </a>
+                      ) : (
+                        <span className="font-medium truncate block">
+                          {activity.provider_name}
+                        </span>
                       )}
                       {activity.activity_name && (
                         <p className="text-sm text-muted-foreground truncate">
@@ -141,6 +145,19 @@ export const SavedActivitiesSection: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex gap-1">
+                      <ShareActivityDialog
+                        providerId={activity.provider_id || undefined}
+                        providerName={activity.provider_name}
+                        activityName={activity.activity_name || undefined}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      </ShareActivityDialog>
                       <Button
                         variant="ghost"
                         size="icon"
