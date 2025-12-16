@@ -3,10 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Star, ExternalLink, Sparkles, Phone, Navigation } from 'lucide-react';
+import { MapPin, Star, ExternalLink, Sparkles, Phone, Navigation, Bookmark, BookmarkCheck, Share2 } from 'lucide-react';
 import LocationMap from '@/components/maps/LocationMap';
 import { useIsMobile } from '@/hooks/use-mobile';
-
+import { useAuth } from '@/hooks/useAuth';
+import { useSavedActivities } from '@/hooks/useSavedActivities';
+import { ShareActivityDialog } from '@/components/coordination/ShareActivityDialog';
+import { toast } from 'sonner';
 export interface AIResult {
   id?: string;
   google_place_id?: string;
@@ -34,8 +37,34 @@ interface AIResultModalProps {
 
 const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }) => {
   const isMobile = useIsMobile();
+  const { user } = useAuth();
+  const { savedActivities, saveActivity, removeActivity } = useSavedActivities();
   
   if (!result) return null;
+
+  const isSaved = savedActivities.some(
+    a => a.provider_id === result.id || a.provider_name === result.business_name
+  );
+
+  const handleSave = async () => {
+    if (!user) {
+      toast.error('Please sign in to save activities');
+      return;
+    }
+    
+    if (isSaved) {
+      const savedActivity = savedActivities.find(
+        a => a.provider_id === result.id || a.provider_name === result.business_name
+      );
+      if (savedActivity) {
+        await removeActivity(savedActivity.id);
+        toast.success('Removed from saved');
+      }
+    } else {
+      await saveActivity(result.id || null, result.business_name);
+      toast.success('Saved to your activities');
+    }
+  };
 
   const handleGetDirections = () => {
     if (result.latitude && result.longitude) {
@@ -120,6 +149,39 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
 
       {/* Action Buttons */}
       <div className="space-y-3 pt-4 border-t">
+        {/* Save & Share Row */}
+        <div className="flex gap-3">
+          <Button 
+            variant={isSaved ? "secondary" : "outline"}
+            className="flex-1"
+            onClick={handleSave}
+          >
+            {isSaved ? (
+              <>
+                <BookmarkCheck className="w-4 h-4 mr-2" />
+                Saved
+              </>
+            ) : (
+              <>
+                <Bookmark className="w-4 h-4 mr-2" />
+                Save
+              </>
+            )}
+          </Button>
+          
+          {user && (
+            <ShareActivityDialog
+              providerId={result.id}
+              providerName={result.business_name}
+            >
+              <Button variant="outline" className="flex-1">
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+            </ShareActivityDialog>
+          )}
+        </div>
+
         <Button 
           className="w-full"
           size="lg"
