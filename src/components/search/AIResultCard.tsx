@@ -56,11 +56,14 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
   const { user } = useAuth();
   const { parentProfile } = useUserProfile();
   const { savedActivities, saveActivity, removeActivity } = useSavedActivities();
-  const providerId = id || google_place_id || '';
+  // Only use actual database UUID for provider_id, not Google Place ID
+  const dbProviderId = id || null;
+  // Use any available ID for display/image purposes
+  const displayId = id || google_place_id || '';
   
-  // Check if already saved
+  // Check if already saved - match by provider_name since external results won't have UUID
   const existingSave = savedActivities.find(
-    a => a.provider_id === providerId || a.provider_name === business_name
+    a => (dbProviderId && a.provider_id === dbProviderId) || a.provider_name === business_name
   );
   const isSaved = !!existingSave;
 
@@ -71,7 +74,8 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
     if (isSaved && existingSave) {
       await removeActivity(existingSave.id);
     } else {
-      await saveActivity(providerId || null, business_name);
+      // Pass null for provider_id if it's an external result (no database UUID)
+      await saveActivity(dbProviderId, business_name);
     }
   };
   
@@ -96,7 +100,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
   
   // Smart image strategy: website scraping -> placeholder -> cached
   const { imageUrl: generatedImage, loading: imageLoading } = useProviderImage({
-    providerId,
+    providerId: displayId,
     businessName: business_name,
     specialties,
     description,
@@ -218,7 +222,7 @@ const AIResultCard: React.FC<AIResultCardProps> = ({
               )}
             </Button>
             <ShareActivityDialog 
-              providerId={providerId} 
+              providerId={displayId} 
               providerName={business_name}
             >
               <Button size="sm" variant="outline" className="flex-1">

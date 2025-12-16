@@ -42,8 +42,12 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
   
   if (!result) return null;
 
+  // Only use actual database UUID for provider_id, not Google Place ID
+  const dbProviderId = result.id || null;
+  
+  // Check if already saved - match by provider_name since external results won't have UUID
   const isSaved = savedActivities.some(
-    a => a.provider_id === result.id || a.provider_name === result.business_name
+    a => (dbProviderId && a.provider_id === dbProviderId) || a.provider_name === result.business_name
   );
 
   const handleSave = async () => {
@@ -54,14 +58,15 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
     
     if (isSaved) {
       const savedActivity = savedActivities.find(
-        a => a.provider_id === result.id || a.provider_name === result.business_name
+        a => (dbProviderId && a.provider_id === dbProviderId) || a.provider_name === result.business_name
       );
       if (savedActivity) {
         await removeActivity(savedActivity.id);
         toast.success('Removed from saved');
       }
     } else {
-      await saveActivity(result.id || null, result.business_name);
+      // Pass null for provider_id if it's an external result (no database UUID)
+      await saveActivity(dbProviderId, result.business_name);
       toast.success('Saved to your activities');
     }
   };
