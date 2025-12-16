@@ -11,6 +11,7 @@ import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import CampDetail from "./pages/CampDetail";
 import ProviderProfile from "./pages/ProviderProfile";
+import ParentProfile from "./pages/ParentProfile";
 import Activities from "./pages/Activities";
 import Camps from "./pages/Camps";
 import Dashboard from "./pages/Dashboard";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/find-parents" element={<FindParents />} />
+            <Route path="/parent/:userId" element={<ParentProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

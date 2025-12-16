@@ -394,7 +394,8 @@ export const SocialConnectionsCard = () => {
                 return (
                   <div 
                     key={connection.id}
-                    className="p-3 rounded-lg bg-background border border-border hover:border-primary/30 transition-colors"
+                    className="p-3 rounded-lg bg-background border border-border hover:border-primary/30 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/parent/${connection.connected_parent_id}`)}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -402,7 +403,7 @@ export const SocialConnectionsCard = () => {
                           <Users className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">
+                          <p className="text-sm font-medium hover:text-primary transition-colors">
                             {connection.profile?.first_name} {connection.profile?.last_name}
                           </p>
                           {connection.connection_type && (
@@ -416,6 +417,7 @@ export const SocialConnectionsCard = () => {
                           )}
                         </div>
                       </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                     
                     {/* Shared activities preview */}

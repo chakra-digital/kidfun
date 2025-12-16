@@ -51,14 +51,30 @@ export const useSocialConnections = () => {
 
       if (error) throw error;
       
+      // Dedupe by connection pair and normalize to always show the "other" user
+      const seenPairs = new Set<string>();
+      const uniqueConnections: any[] = [];
+      
+      (data || []).forEach(conn => {
+        const pairKey = [conn.parent_id, conn.connected_parent_id].sort().join('-');
+        if (!seenPairs.has(pairKey)) {
+          seenPairs.add(pairKey);
+          // Normalize: always put the "other" user in connected_parent_id
+          const otherUserId = conn.parent_id === user.id ? conn.connected_parent_id : conn.parent_id;
+          uniqueConnections.push({
+            ...conn,
+            connected_parent_id: otherUserId
+          });
+        }
+      });
+      
       // Fetch profile details for each connection
       const connectionsWithProfiles = await Promise.all(
-        (data || []).map(async (conn) => {
-          const targetUserId = conn.parent_id === user.id ? conn.connected_parent_id : conn.parent_id;
+        uniqueConnections.map(async (conn) => {
           const { data: profile } = await supabase
             .from('profiles')
             .select('first_name, last_name, email')
-            .eq('user_id', targetUserId)
+            .eq('user_id', conn.connected_parent_id)
             .single();
           
           return { ...conn, profile };
