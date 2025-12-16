@@ -72,10 +72,10 @@ const Dashboard = () => {
   const userType = userProfile?.user_type || user?.user_metadata?.user_type;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       
-      <main className="container mx-auto py-8">
+      <main className="container mx-auto py-8 px-4 max-w-full">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Welcome back, {userProfile?.first_name || "User"}!

@@ -97,8 +97,8 @@
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground font-sans;
+  html, body {
+    @apply bg-background text-foreground font-sans overflow-x-hidden;
   }
 }
 

@@ -9,8 +9,8 @@ const Navbar = () => {
   const { user, signOut, loading } = useAuth();
 
   return (
-    <header className="border-b sticky top-0 z-50 bg-white">
-      <div className="container mx-auto flex items-center justify-between py-4">
+    <header className="border-b sticky top-0 z-50 bg-white overflow-hidden">
+      <div className="container mx-auto flex items-center justify-between py-4 px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
           <div className="text-2xl transform scale-x-[-1]">🏃‍♀️</div>
