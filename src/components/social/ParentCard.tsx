@@ -66,7 +66,7 @@ const ParentCard = ({ parent, onConnect, showConnectButton = true, connectionSta
     <Card className="p-4">
       <div className="flex justify-between items-start mb-3">
         <div>
-          <h4 className="font-semibold text-lg">
+          <h4 className="font-semibold text-lg text-foreground">
             {parent.profile?.first_name} {parent.profile?.last_name}
           </h4>
           <p className="text-sm text-muted-foreground">{parent.profile?.email}</p>

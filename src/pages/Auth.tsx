@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
-import { Gift } from "lucide-react";
+import { Gift, Mail, CheckCircle } from "lucide-react";
 
 const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -21,6 +21,7 @@ const Auth = () => {
   const [lastName, setLastName] = useState("");
   const [userType, setUserType] = useState<"parent" | "provider">("parent");
   const [loading, setLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
@@ -178,11 +179,12 @@ const Auth = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Clear form after successful signup
+        // Clear form and show success state
         setEmail("");
         setPassword("");
         setFirstName("");
         setLastName("");
+        setSignupSuccess(true);
         
         toast({
           title: "Account created!",
@@ -284,77 +286,102 @@ const Auth = () => {
               </TabsList>
 
               <TabsContent value="signup" className="space-y-4">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="first-name">First Name</Label>
-                      <Input
-                        id="first-name"
-                        type="text"
-                        placeholder="First name"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        required
-                      />
+                {signupSuccess ? (
+                  <div className="text-center py-8 space-y-4">
+                    <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="last-name">Last Name</Label>
-                      <Input
-                        id="last-name"
-                        type="text"
-                        placeholder="Last name"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        required
-                      />
+                    <div>
+                      <h3 className="text-xl font-semibold text-foreground">Check Your Email!</h3>
+                      <p className="text-muted-foreground mt-2">
+                        We've sent a verification link to your email address. Click the link to activate your account.
+                      </p>
                     </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>I am a:</Label>
-                    <RadioGroup
-                      value={userType}
-                      onValueChange={(value: "parent" | "provider") => setUserType(value)}
-                      className="flex space-x-6"
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                      <Mail className="w-4 h-4" />
+                      <span>Don't see it? Check your spam folder.</span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSignupSuccess(false)}
+                      className="mt-4"
                     >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="parent" id="parent" />
-                        <Label htmlFor="parent">Parent</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="provider" id="provider" />
-                        <Label htmlFor="provider">Provider</Label>
-                      </div>
-                    </RadioGroup>
+                      Back to Sign Up
+                    </Button>
                   </div>
+                ) : (
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="first-name">First Name</Label>
+                        <Input
+                          id="first-name"
+                          type="text"
+                          placeholder="First name"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="last-name">Last Name</Label>
+                        <Input
+                          id="last-name"
+                          type="text"
+                          placeholder="Last name"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="Create a password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
+                    <div className="space-y-3">
+                      <Label>I am a:</Label>
+                      <RadioGroup
+                        value={userType}
+                        onValueChange={(value: "parent" | "provider") => setUserType(value)}
+                        className="flex space-x-6"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="parent" id="parent" />
+                          <Label htmlFor="parent">Parent</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="provider" id="provider" />
+                          <Label htmlFor="provider">Provider</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="Create a password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Creating account..." : "Create Account"}
+                    </Button>
+                  </form>
+                )}
               </TabsContent>
 
               <TabsContent value="signin" className="space-y-4">
