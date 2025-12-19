@@ -69,6 +69,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [lastSearchAnalysis, setLastSearchAnalysis] = useState<any>(null);
   const [isLocationValid, setIsLocationValid] = useState(true);
+  const [showLocationError, setShowLocationError] = useState(false);
   const [isWhereOpen, setIsWhereOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -182,6 +183,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
     
     // Guard: require valid suggestion when something is typed
     if (currentLocationInput && !isLocationValid) {
+      setShowLocationError(true);
       toast({
         title: "Choose a location",
         description: "Please pick a location from the suggestions.",
@@ -470,13 +472,19 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
               </span>
               <LocationInput
                 value={locationInput}
-                onChange={(value) => setLocationInput(value)}
+                onChange={(value) => {
+                  setLocationInput(value);
+                  setShowLocationError(false);
+                }}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
                 className="h-12 md:h-14 pl-12 md:pl-16 pr-16 md:pr-20 border-0 bg-transparent text-base md:text-lg font-normal text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none shadow-none"
                 disabled={isSearching}
                 requireSelection={true}
-                onValidityChange={setIsLocationValid}
+                onValidityChange={(valid) => {
+                  setIsLocationValid(valid);
+                  if (valid) setShowLocationError(false);
+                }}
               />
             </div>
           </CardContent>
@@ -519,7 +527,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
       </div>
 
       {/* Error message popout below the card */}
-      {locationInput && !isLocationValid && (
+      {showLocationError && locationInput && !isLocationValid && (
         <div className="flex justify-center -mt-2 mb-4">
           <div className="rounded-full px-4 py-1.5 text-sm font-semibold text-primary-foreground shadow-lg bg-primary border border-primary/20 backdrop-blur">
             Please choose a location from the suggestions.
