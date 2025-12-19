@@ -283,10 +283,18 @@ export const SocialConnectionsCard = () => {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {request.sender_profile?.first_name} {request.sender_profile?.last_name}
+                      {request.sender_profile?.first_name && request.sender_profile?.last_name 
+                        ? `${request.sender_profile.first_name} ${request.sender_profile.last_name}`
+                        : 'Connection Request'}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {request.connection_type}
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      {request.connection_type === 'school' ? (
+                        <><School className="h-3 w-3" /> Same school</>
+                      ) : request.connection_type === 'neighborhood' ? (
+                        <><Home className="h-3 w-3" /> Neighbor</>
+                      ) : (
+                        request.connection_type
+                      )}
                     </p>
                   </div>
                   <div className="flex gap-1 ml-2">
