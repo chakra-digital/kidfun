@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import type { AIResult } from "@/components/search/AIResultModal";
 import { User, Calendar, Star, Heart, Shield, Lock, Users } from "lucide-react";
 import CategoryTiles from "@/components/home/CategoryTiles";
+import EmailCapture from "@/components/home/EmailCapture";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 
 // Mock data for camps
@@ -137,6 +138,11 @@ const Index = () => {
               onSearchStart={handleSearchStart}
               className=""
             />
+            
+            {/* Quick Email Capture */}
+            <div className="mt-8 md:mt-12">
+              <EmailCapture />
+            </div>
           </div>
         </section>
 
