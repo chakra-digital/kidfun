@@ -100,10 +100,10 @@ const Index = () => {
       <Navbar />
       <main className="flex-grow">
         {/* Hero Section with AI Search */}
-        <section className="relative text-white py-8 md:py-16 lg:py-24 min-h-[65vh] md:min-h-[70vh] flex items-center overflow-hidden">
+        <section className="group relative text-white py-8 md:py-16 lg:py-24 min-h-[65vh] min-h-[65svh] md:min-h-[70vh] md:min-h-[70svh] flex items-center overflow-hidden">
           {/* Fixed background image layer */}
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 will-change-transform group-focus-within:scale-[1.08]"
             style={{ backgroundImage: `url(${heroImage})` }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-blue-600/40 via-teal-500/40 to-green-500/40"></div>
