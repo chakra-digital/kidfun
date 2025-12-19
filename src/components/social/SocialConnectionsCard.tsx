@@ -283,9 +283,11 @@ export const SocialConnectionsCard = () => {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {request.sender_profile?.first_name && request.sender_profile?.last_name 
-                        ? `${request.sender_profile.first_name} ${request.sender_profile.last_name}`
-                        : 'Connection Request'}
+                      {request.sender_profile?.first_name 
+                        ? `${request.sender_profile.first_name}${request.sender_profile.last_name ? ` ${request.sender_profile.last_name}` : ''}`
+                        : 'A parent'}
+                      {' '}
+                      <span className="font-normal text-muted-foreground">wants to connect</span>
                     </p>
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                       {request.connection_type === 'school' ? (
