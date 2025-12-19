@@ -383,20 +383,27 @@ const LocationMap: React.FC<LocationMapProps> = ({ providers = [], center, onMar
     validProviders.forEach((provider) => {
       const position = { lat: provider.latitude as number, lng: provider.longitude as number };
 
-      const marker = new (window as any).google.maps.Marker({
+      // For single providers, use default red pin marker for better visibility
+      // For multiple providers, use smaller circle markers
+      const markerOptions: any = {
         position,
         map: map.current,
         title: provider.business_name,
-        // Use default red pin for better visibility
-        icon: validProviders.length === 1 ? null : {
+      };
+      
+      // Only use custom icon for multiple providers; single provider gets default red pin
+      if (validProviders.length > 1) {
+        markerOptions.icon = {
           path: (window as any).google.maps.SymbolPath.CIRCLE,
           scale: 10,
           fillColor: '#ef4444',
           fillOpacity: 1,
           strokeColor: '#ffffff',
           strokeWeight: 2,
-        }
-      });
+        };
+      }
+
+      const marker = new (window as any).google.maps.Marker(markerOptions);
       markersRef.current.push(marker);
       bounds.extend(position);
 

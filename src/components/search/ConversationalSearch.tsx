@@ -482,41 +482,41 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
           </CardContent>
         </Card>
         
-        {/* Ultra-Bright Search Button - Centered at bottom, overlapping 1/3 */}
-        <Button
-          onClick={() => handleSearch()}
-          disabled={(!query.trim() || isSearching || (locationInput && !isLocationValid))}
-          size="icon"
-          className={cn(
-            "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[84px] sm:translate-y-[88px] md:translate-y-[64px] h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 z-20",
-            "bg-gradient-to-br from-primary via-primary to-primary/90 shadow-xl",
-            "hover:shadow-glow hover:scale-110",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            isSearching && "animate-pulse"
-          )}
-          style={{
-            boxShadow: isSearching ? undefined : '0 12px 40px hsl(var(--primary) / 0.4), 0 0 0 6px hsl(var(--background)), 0 0 60px hsl(var(--primary) / 0.3)'
-          }}
-        >
-          {isSearching ? (
-            <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground animate-spin" />
-          ) : (
-            <Search className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground" />
-          )}
-        </Button>
-        
-        {/* Search progress indicator */}
-        {isSearching && searchDuration > 2 && (
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[160px] sm:translate-y-[168px] md:translate-y-[144px] z-10">
-            <div className="text-sm text-muted-foreground bg-card/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-border whitespace-nowrap">
-              Searching... {searchDuration}s
-              {searchDuration > 8 && <span className="ml-1">(Finding best matches)</span>}
+        {/* Ultra-Bright Search Button - Centered at bottom using margin instead of translate to avoid layout shifts */}
+        <div className="flex flex-col items-center mt-6 md:mt-8">
+          <Button
+            onClick={() => handleSearch()}
+            disabled={(!query.trim() || isSearching || (locationInput && !isLocationValid))}
+            size="icon"
+            className={cn(
+              "h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300",
+              "bg-gradient-to-br from-primary via-primary to-primary/90 shadow-xl",
+              "hover:shadow-glow hover:scale-110",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              isSearching && "animate-pulse"
+            )}
+            style={{
+              boxShadow: isSearching ? undefined : '0 12px 40px hsl(var(--primary) / 0.4), 0 0 0 6px hsl(var(--background)), 0 0 60px hsl(var(--primary) / 0.3)'
+            }}
+          >
+            {isSearching ? (
+              <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground animate-spin" />
+            ) : (
+              <Search className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground" />
+            )}
+          </Button>
+          
+          {/* Search progress indicator */}
+          {isSearching && searchDuration > 2 && (
+            <div className="mt-4">
+              <div className="text-sm text-muted-foreground bg-card/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-border whitespace-nowrap">
+                Searching... {searchDuration}s
+                {searchDuration > 8 && <span className="ml-1">(Finding best matches)</span>}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-      {/* Spacer to ensure the floating button does not overlap category tiles on mobile */}
-      <div aria-hidden="true" className="h-36 sm:h-40 md:h-28" />
 
       {/* Error message popout below the card */}
       {locationInput && !isLocationValid && (

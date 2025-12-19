@@ -248,7 +248,19 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
     return (
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-          <SheetHeader>
+          {/* Large, prominent close button for mobile */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-50 flex items-center justify-center w-10 h-10 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          
+          <SheetHeader className="pr-12">
             <SheetTitle className="flex items-center gap-2 text-left">
               {result.business_name}
               {result.isNewDiscovery && (
@@ -260,6 +272,17 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
             </SheetTitle>
           </SheetHeader>
           {content}
+          
+          {/* Bottom close button for easy thumb access */}
+          <div className="sticky bottom-0 left-0 right-0 pt-4 pb-6 bg-gradient-to-t from-background via-background to-transparent">
+            <Button
+              variant="outline"
+              className="w-full h-12"
+              onClick={onClose}
+            >
+              Close
+            </Button>
+          </div>
         </SheetContent>
       </Sheet>
     );
