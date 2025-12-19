@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Mail, CheckCircle, Loader2 } from "lucide-react";
+import { Mail, CheckCircle, Loader2, ArrowRight } from "lucide-react";
 
 interface EmailCaptureProps {
   className?: string;
@@ -50,16 +50,21 @@ const EmailCapture = ({ className = "" }: EmailCaptureProps) => {
 
   if (isSuccess) {
     return (
-      <div className={`flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-primary/10 border border-primary/20 ${className}`}>
-        <CheckCircle className="h-10 w-10 text-primary" />
-        <p className="text-lg font-medium text-foreground">Check your inbox!</p>
-        <p className="text-sm text-muted-foreground text-center">
-          We sent you an invite to join KidFun.
-        </p>
+      <div className={`flex flex-col items-center justify-center gap-4 p-8 rounded-2xl bg-secondary/10 border border-secondary/20 ${className}`}>
+        <div className="h-12 w-12 rounded-full bg-secondary/20 flex items-center justify-center">
+          <CheckCircle className="h-6 w-6 text-secondary" />
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-lg font-semibold text-foreground">Check your inbox!</p>
+          <p className="text-sm text-muted-foreground">
+            We sent you an invite to join KidFun.
+          </p>
+        </div>
         <Button 
           variant="ghost" 
           size="sm"
           onClick={() => setIsSuccess(false)}
+          className="mt-2"
         >
           Send to another email
         </Button>
@@ -69,15 +74,15 @@ const EmailCapture = ({ className = "" }: EmailCaptureProps) => {
 
   return (
     <div className={`${className}`}>
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
         <div className="relative flex-1">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="pl-10 h-12 bg-background/80 backdrop-blur-sm border-primary/20 focus:border-primary"
+            className="pl-12 h-12 bg-card border-border/60 focus-visible:border-primary"
             disabled={isSubmitting}
           />
         </div>
@@ -85,19 +90,22 @@ const EmailCapture = ({ className = "" }: EmailCaptureProps) => {
           type="submit" 
           size="lg"
           disabled={isSubmitting}
-          className="h-12 px-6 font-semibold"
+          className="h-12 px-6 font-semibold gap-2"
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               Sending...
             </>
           ) : (
-            "Get Started Free"
+            <>
+              Get Started Free
+              <ArrowRight className="h-4 w-4" />
+            </>
           )}
         </Button>
       </form>
-      <p className="text-xs text-muted-foreground text-center mt-3">
+      <p className="text-sm text-muted-foreground text-center mt-4">
         We'll send you an invite to create your free account
       </p>
     </div>
