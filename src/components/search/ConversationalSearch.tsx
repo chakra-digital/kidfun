@@ -355,10 +355,10 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
     <div className={`max-w-2xl mx-auto space-y-4 md:space-y-6 ${className}`}>
       {/* Redesigned Stacked Search Box */}
       <div className="relative z-[1000]">
-        <Card className="backdrop-blur-md bg-white dark:bg-white border-0 rounded-3xl" style={{ boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)' }}>
+        <Card className="backdrop-blur-xl bg-card border-0 rounded-2xl shadow-xl">
           <CardContent className="p-0">
             {/* Activity Input - Taller */}
-            <div className="relative border-b border-gray-300">
+            <div className="relative border-b border-border">
               <span className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-[22px] md:text-[28px] pointer-events-none z-10 opacity-100">
                 {currentEmoji}
               </span>
@@ -368,20 +368,20 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="What are you looking for?"
-                className="h-16 md:h-20 pl-12 md:pl-16 pr-4 md:pr-6 border-0 bg-transparent text-base md:text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-gray-600 disabled:opacity-100 rounded-none"
+                className="h-16 md:h-20 pl-12 md:pl-16 pr-4 md:pr-6 border-0 bg-transparent text-base md:text-lg font-normal text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 disabled:text-foreground disabled:opacity-100 rounded-none shadow-none"
                 disabled={isSearching}
               />
             </div>
             
             {/* Date Input - Middle */}
-            <div className="relative border-b border-gray-300">
+            <div className="relative border-b border-border">
               <span className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-[20px] md:text-[26px] pointer-events-none z-10 opacity-100">
                 {dateEmoji}
               </span>
               <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
                 <PopoverTrigger asChild>
                   <button
-                    className="w-full h-12 md:h-14 pl-12 md:pl-16 pr-4 md:pr-6 text-left border-0 bg-transparent text-base md:text-lg font-normal text-gray-600 hover:bg-gray-50/50 transition-colors focus:outline-none disabled:opacity-50"
+                    className="w-full h-12 md:h-14 pl-12 md:pl-16 pr-4 md:pr-6 text-left border-0 bg-transparent text-base md:text-lg font-normal text-foreground hover:bg-muted/50 transition-colors focus:outline-none disabled:opacity-50"
                     disabled={isSearching}
                   >
                     {dateMode === 'single' && selectedDate ? (
@@ -392,12 +392,12 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
                         {dateRange?.to && ` - ${format(dateRange?.to as Date, 'PP')}`}
                       </span>
                     ) : (
-                      <span className="text-gray-400 text-base md:text-lg">When</span>
+                      <span className="text-muted-foreground text-base md:text-lg">When</span>
                     )}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start" sideOffset={8}>
-                  <div className="p-3 border-b border-border bg-background">
+                <PopoverContent className="w-auto p-0 bg-popover border-border shadow-xl rounded-xl" align="start" sideOffset={8}>
+                  <div className="p-3 border-b border-border bg-popover rounded-t-xl">
                     <div className="flex gap-2">
                       <Button
                         variant={dateMode === 'single' ? 'default' : 'outline'}
@@ -447,7 +447,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
                       numberOfMonths={2}
                     />
                   )}
-                  <div className="p-3 border-t border-border bg-background flex justify-end gap-2">
+                  <div className="p-3 border-t border-border bg-popover rounded-b-xl flex justify-end gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -473,7 +473,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
                 onChange={(value) => setLocationInput(value)}
                 onSelect={(val) => setLocationInput(val)}
                 placeholder="Location"
-                className="h-12 md:h-14 pl-12 md:pl-16 pr-16 md:pr-20 border-0 bg-transparent text-base md:text-lg font-normal text-gray-600 placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none"
+                className="h-12 md:h-14 pl-12 md:pl-16 pr-16 md:pr-20 border-0 bg-transparent text-base md:text-lg font-normal text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none shadow-none"
                 disabled={isSearching}
                 requireSelection={true}
                 onValidityChange={setIsLocationValid}
@@ -489,26 +489,26 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
           size="icon"
           className={cn(
             "absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[84px] sm:translate-y-[88px] md:translate-y-[64px] h-16 w-16 md:h-20 md:w-20 rounded-full transition-all duration-300 z-20",
-            "bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 shadow-2xl",
-            "hover:from-yellow-300 hover:via-yellow-400 hover:to-amber-400 hover:scale-110",
-            "disabled:cursor-not-allowed",
+            "bg-gradient-to-br from-primary via-primary to-primary/90 shadow-xl",
+            "hover:shadow-glow hover:scale-110",
+            "disabled:cursor-not-allowed disabled:opacity-50",
             isSearching && "animate-pulse"
           )}
           style={{
-            boxShadow: '0 12px 56px rgba(251, 191, 36, 0.9), 0 0 0 8px rgba(255, 255, 255, 1), 0 0 80px rgba(251, 191, 36, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.4)'
+            boxShadow: isSearching ? undefined : '0 12px 40px hsl(var(--primary) / 0.4), 0 0 0 6px hsl(var(--background)), 0 0 60px hsl(var(--primary) / 0.3)'
           }}
         >
           {isSearching ? (
-            <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-gray-900 animate-spin drop-shadow-md" />
+            <Loader2 className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground animate-spin" />
           ) : (
-            <Search className="w-6 h-6 md:w-8 md:h-8 text-gray-900 drop-shadow-md" />
+            <Search className="w-6 h-6 md:w-8 md:h-8 text-primary-foreground" />
           )}
         </Button>
         
         {/* Search progress indicator */}
         {isSearching && searchDuration > 2 && (
           <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-[160px] sm:translate-y-[168px] md:translate-y-[144px] z-10">
-            <div className="text-sm text-muted-foreground bg-background/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border whitespace-nowrap">
+            <div className="text-sm text-muted-foreground bg-card/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-border whitespace-nowrap">
               Searching... {searchDuration}s
               {searchDuration > 8 && <span className="ml-1">(Finding best matches)</span>}
             </div>
@@ -521,7 +521,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
       {/* Error message popout below the card */}
       {locationInput && !isLocationValid && (
         <div className="flex justify-center -mt-2 mb-4">
-          <div className="rounded-full px-4 py-1.5 text-sm font-semibold text-gray-900 shadow-lg bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-500 border border-white/40 backdrop-blur">
+          <div className="rounded-full px-4 py-1.5 text-sm font-semibold text-primary-foreground shadow-lg bg-primary border border-primary/20 backdrop-blur">
             Please choose a location from the suggestions.
           </div>
         </div>
@@ -529,7 +529,7 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
 
       {/* Search Analysis Display - Only show if there's actual data */}
       {lastSearchAnalysis && (lastSearchAnalysis.activities?.length > 0 || lastSearchAnalysis.ageGroups?.length > 0) && (
-        <Card className="border-l-4 border-l-primary bg-muted/20">
+        <Card className="border-l-4 border-l-primary bg-muted/30 rounded-xl">
           <CardContent className="p-4">
             <div className="space-y-2">
               <div className="text-sm font-medium text-primary">Search Understanding:</div>

@@ -62,22 +62,26 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				},
-				camps: {
-					primary: '#3490dc',
-					secondary: '#38c172',
-					accent: '#f6ad55',
-					danger: '#e3342f',
-					dark: '#333333',
-					light: '#f8fafc',
-					"certified": '#38c172',
-					"badge": '#f6993f'
 				}
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				'2xl': 'var(--radius-2xl)',
+				'xl': 'var(--radius-xl)',
+				'lg': 'var(--radius-lg)',
+				'md': 'var(--radius-md)',
+				'sm': 'var(--radius-sm)',
+				DEFAULT: 'var(--radius)'
+			},
+			boxShadow: {
+				'xs': 'var(--shadow-xs)',
+				'sm': 'var(--shadow-sm)',
+				'md': 'var(--shadow-md)',
+				'lg': 'var(--shadow-lg)',
+				'xl': 'var(--shadow-xl)',
+				'2xl': 'var(--shadow-2xl)',
+				'glow': 'var(--shadow-glow)',
+				'card': 'var(--shadow-card)',
+				'card-hover': 'var(--shadow-card-hover)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -116,12 +120,22 @@ export default {
 						opacity: '1'
 					}
 				},
-				'glow': {
+				'slide-up': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(16px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'glow-pulse': {
 					'0%, 100%': {
-						boxShadow: '0 0 20px rgba(52, 144, 220, 0.3)'
+						boxShadow: '0 0 20px hsl(var(--primary) / 0.2)'
 					},
 					'50%': {
-						boxShadow: '0 0 40px rgba(52, 144, 220, 0.6)'
+						boxShadow: '0 0 40px hsl(var(--primary) / 0.4)'
 					}
 				}
 			},
@@ -130,7 +144,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.3s ease-out',
 				'scale-in': 'scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-				'glow': 'glow 2s ease-in-out infinite'
+				'slide-up': 'slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite'
 			}
 		}
 	},
