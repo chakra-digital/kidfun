@@ -694,6 +694,10 @@ export type Database = {
           years_experience: number
         }[]
       }
+      has_pending_connection_request: {
+        Args: { profile_owner_id: string; viewer_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       user_type: "parent" | "provider"
