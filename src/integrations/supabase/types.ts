@@ -100,6 +100,47 @@ export type Database = {
           },
         ]
       }
+      activity_rsvps: {
+        Row: {
+          activity_share_id: string
+          children_bringing: string[] | null
+          created_at: string
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_share_id: string
+          children_bringing?: string[] | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_share_id?: string
+          children_bringing?: string[] | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_rsvps_activity_share_id_fkey"
+            columns: ["activity_share_id"]
+            isOneToOne: false
+            referencedRelation: "activity_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_shares: {
         Row: {
           activity_name: string
@@ -661,6 +702,14 @@ export type Database = {
         Returns: boolean
       }
       clean_expired_search_cache: { Args: never; Returns: undefined }
+      get_activity_rsvp_summary: {
+        Args: { share_id: string }
+        Returns: {
+          declined_count: number
+          going_count: number
+          maybe_count: number
+        }[]
+      }
       get_current_user_type: { Args: never; Returns: string }
       get_parent_discovery_info: {
         Args: { search_neighborhood?: string; search_school?: string }

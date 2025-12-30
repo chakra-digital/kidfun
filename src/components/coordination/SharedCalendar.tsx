@@ -3,39 +3,88 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarDays, Users, ChevronLeft, ChevronRight, Clock, UserPlus, Loader2, Share2 } from 'lucide-react';
+import { CalendarDays, Users, ChevronLeft, ChevronRight, Clock, Share2, Check, HelpCircle } from 'lucide-react';
 import { format, isSameDay, addMonths, subMonths } from 'date-fns';
 import { useSavedActivities, SavedActivity } from '@/hooks/useSavedActivities';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
-import { useActivityCoordination } from '@/hooks/useActivityCoordination';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { ShareActivityDialog } from './ShareActivityDialog';
+import { RsvpButtons } from './RsvpButtons';
+import { RsvpSummaryCard } from './RsvpSummaryCard';
 
 interface CalendarActivity extends SavedActivity {
   isConnection?: boolean;
   connectionName?: string;
+  activityShareId?: string; // For RSVP tracking
+  isSharedWithMe?: boolean; // Activity was shared with current user
+  isMyShare?: boolean; // User created this share
+}
+
+interface ActivityShare {
+  id: string;
+  shared_by: string;
+  shared_with: string | null;
+  activity_name: string;
+  provider_name: string | null;
+  provider_id: string | null;
+  created_at: string;
 }
 
 export const SharedCalendar = () => {
   const { user } = useAuth();
   const { savedActivities, fetchConnectionActivities } = useSavedActivities();
   const { connections } = useSocialConnections();
-  const { sendJoinRequest } = useActivityCoordination();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [allActivities, setAllActivities] = useState<CalendarActivity[]>([]);
+  const [activityShares, setActivityShares] = useState<ActivityShare[]>([]);
   const [loading, setLoading] = useState(true);
-  const [joiningActivityId, setJoiningActivityId] = useState<string | null>(null);
+
+  // Fetch activity shares (invites sent to or from user)
+  const fetchActivityShares = async () => {
+    if (!user) return [];
+    
+    try {
+      const { data, error } = await supabase
+        .from('activity_shares')
+        .select('*')
+        .or(`shared_by.eq.${user.id},shared_with.eq.${user.id}`);
+      
+      if (error) throw error;
+      return (data || []) as ActivityShare[];
+    } catch (err) {
+      console.error('Error fetching activity shares:', err);
+      return [];
+    }
+  };
 
   useEffect(() => {
     const loadAllActivities = async () => {
       setLoading(true);
       
+      // Fetch activity shares
+      const shares = await fetchActivityShares();
+      setActivityShares(shares);
+      
       // Start with user's own activities
       const userActivities: CalendarActivity[] = savedActivities
         .filter(a => a.scheduled_date)
-        .map(a => ({ ...a, isConnection: false }));
+        .map(a => {
+          // Check if this activity has been shared by user
+          const share = shares.find(s => 
+            s.shared_by === user?.id && 
+            s.activity_name === a.activity_name &&
+            s.provider_name === a.provider_name
+          );
+          return { 
+            ...a, 
+            isConnection: false,
+            activityShareId: share?.id,
+            isMyShare: !!share
+          };
+        });
 
       // Add connection activities
       if (connections.length > 0) {
@@ -46,12 +95,20 @@ export const SharedCalendar = () => {
           .filter(a => a.scheduled_date)
           .map(a => {
             const connection = connections.find(c => c.connected_parent_id === a.user_id);
+            // Check if this activity was shared with current user
+            const share = shares.find(s => 
+              s.shared_with === user?.id &&
+              s.shared_by === a.user_id &&
+              s.activity_name === a.activity_name
+            );
             return {
               ...a,
               isConnection: true,
               connectionName: connection?.profile 
                 ? `${connection.profile.first_name} ${connection.profile.last_name}`
-                : 'Connection'
+                : 'Connection',
+              activityShareId: share?.id,
+              isSharedWithMe: !!share
             };
           });
 
@@ -64,7 +121,7 @@ export const SharedCalendar = () => {
     };
 
     loadAllActivities();
-  }, [savedActivities, connections]);
+  }, [savedActivities, connections, user]);
 
   const getActivitiesForDate = (date: Date): CalendarActivity[] => {
     return allActivities.filter(activity => {
@@ -82,21 +139,6 @@ export const SharedCalendar = () => {
   };
 
   const selectedDateActivities = selectedDate ? getActivitiesForDate(selectedDate) : [];
-
-  const handleAskToJoin = async (activity: CalendarActivity) => {
-    if (!activity.isConnection || !activity.user_id) return;
-    
-    setJoiningActivityId(activity.id);
-    try {
-      await sendJoinRequest(
-        activity.id,
-        activity.user_id,
-        `Hi! I saw you're planning to go to ${activity.provider_name}. Would love to coordinate and join with our kids!`
-      );
-    } finally {
-      setJoiningActivityId(null);
-    }
-  };
 
   return (
     <Card>
@@ -197,7 +239,7 @@ export const SharedCalendar = () => {
                 </p>
               )}
               
-              <div className="space-y-2 max-h-[250px] overflow-y-auto">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {selectedDateActivities.map((activity) => (
                   <div 
                     key={activity.id}
@@ -238,22 +280,31 @@ export const SharedCalendar = () => {
                       </p>
                     )}
                     
-                    {/* Actions based on activity type */}
-                    {activity.isConnection ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="mt-2 w-full text-xs"
-                        disabled={joiningActivityId === activity.id}
-                        onClick={() => handleAskToJoin(activity)}
-                      >
-                        {joiningActivityId === activity.id ? (
-                          <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Sending...</>
-                        ) : (
-                          <><UserPlus className="h-3 w-3 mr-1" />Ask to join</>
-                        )}
-                      </Button>
-                    ) : (
+                    {/* RSVP section for activities shared with the user */}
+                    {activity.isSharedWithMe && activity.activityShareId && (
+                      <div className="mt-3 pt-2 border-t border-border/50">
+                        <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                          <Check className="h-3 w-3" /> Invited by {activity.connectionName}
+                        </p>
+                        <RsvpButtons 
+                          activityShareId={activity.activityShareId}
+                          showSummary={false}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* RSVP summary for activities the user has shared */}
+                    {activity.isMyShare && activity.activityShareId && (
+                      <div className="mt-3">
+                        <RsvpSummaryCard 
+                          activityShareId={activity.activityShareId}
+                          className="mt-2"
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Share button for user's own unshared activities */}
+                    {!activity.isConnection && !activity.isMyShare && (
                       <ShareActivityDialog
                         providerId={activity.provider_id || undefined}
                         providerName={activity.provider_name}
@@ -268,6 +319,14 @@ export const SharedCalendar = () => {
                           Invite parents
                         </Button>
                       </ShareActivityDialog>
+                    )}
+                    
+                    {/* Connection activities without RSVP - just show info */}
+                    {activity.isConnection && !activity.isSharedWithMe && (
+                      <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
+                        <HelpCircle className="h-3 w-3" />
+                        <span>Not shared with you yet</span>
+                      </div>
                     )}
                   </div>
                 ))}
