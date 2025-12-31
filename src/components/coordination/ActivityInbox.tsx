@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,10 +33,15 @@ export const ActivityInbox = () => {
     }
   };
 
+  const [respondingTo, setRespondingTo] = useState<string | null>(null);
+
   const handleRespond = async (messageId: string, response: 'accepted' | 'declined') => {
-    // Mark as read immediately to hide buttons
-    await markAsRead(messageId);
-    await respondToRequest(messageId, response);
+    setRespondingTo(messageId);
+    const result = await respondToRequest(messageId, response);
+    if (!result.error) {
+      await markAsRead(messageId);
+    }
+    setRespondingTo(null);
   };
 
   if (loading) {
@@ -88,10 +93,10 @@ export const ActivityInbox = () => {
               {messages.map((message) => {
                 const isIncoming = message.recipient_id === user?.id;
                 const isUnread = isIncoming && !message.read_at;
-                // Allow response for invite/join_request messages that are incoming
-                // and either unread OR message_type is still invite/join_request (not responded yet)
+                // Allow response for invite/join_request messages that are incoming and unread (not responded yet)
                 const isActionableType = message.message_type === 'join_request' || message.message_type === 'invite';
-                const canRespond = isIncoming && isActionableType;
+                const canRespond = isIncoming && isActionableType && !message.read_at;
+                const isResponding = respondingTo === message.id;
 
                 return (
                   <div 
@@ -131,24 +136,26 @@ export const ActivityInbox = () => {
                           <div className="flex gap-2 mt-2">
                             <Button 
                               size="sm" 
+                              disabled={isResponding}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleRespond(message.id, 'accepted');
                               }}
                             >
                               <Check className="h-3 w-3 mr-1" />
-                              Accept
+                              {isResponding ? 'Accepting...' : 'Accept'}
                             </Button>
                             <Button 
                               size="sm" 
                               variant="outline"
+                              disabled={isResponding}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleRespond(message.id, 'declined');
                               }}
                             >
                               <X className="h-3 w-3 mr-1" />
-                              Decline
+                              {isResponding ? 'Declining...' : 'Decline'}
                             </Button>
                           </div>
                         )}

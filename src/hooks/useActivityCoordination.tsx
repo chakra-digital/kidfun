@@ -163,13 +163,7 @@ export const useActivityCoordination = () => {
       const originalMessage = messages.find(m => m.id === messageId);
       if (!originalMessage) throw new Error('Message not found');
 
-      // Mark as read
-      await supabase
-        .from('activity_messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('id', messageId);
-
-      // If accepting, save the activity to this user's account
+      // If accepting, save the activity to this user's account and create activity_share for RSVP tracking
       if (response === 'accepted' && originalMessage.activity_id) {
         // Fetch the original activity details
         const { data: originalActivity, error: activityError } = await supabase
@@ -205,8 +199,31 @@ export const useActivityCoordination = () => {
               console.error('Error saving activity to user:', saveError);
             }
           }
+
+          // Create activity_share so RSVP tracking works
+          const { data: shareData, error: shareError } = await supabase
+            .from('activity_shares')
+            .insert({
+              shared_by: originalMessage.sender_id,
+              shared_with: user.id,
+              activity_name: originalActivity.activity_name || originalActivity.provider_name,
+              provider_name: originalActivity.provider_name,
+              provider_id: originalActivity.provider_id,
+            })
+            .select()
+            .single();
+
+          if (shareError) {
+            console.error('Error creating activity share:', shareError);
+          }
         }
       }
+
+      // Mark as read
+      await supabase
+        .from('activity_messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', messageId);
 
       // Send response message
       const { error } = await supabase
