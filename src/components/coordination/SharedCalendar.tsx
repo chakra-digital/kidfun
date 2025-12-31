@@ -45,13 +45,13 @@ export const SharedCalendar = () => {
   // Fetch activity shares (invites sent to or from user)
   const fetchActivityShares = async () => {
     if (!user) return [];
-    
+
     try {
       const { data, error } = await supabase
         .from('activity_shares')
         .select('*')
         .or(`shared_by.eq.${user.id},shared_with.eq.${user.id}`);
-      
+
       if (error) throw error;
       return (data || []) as ActivityShare[];
     } catch (err) {
@@ -60,63 +60,95 @@ export const SharedCalendar = () => {
     }
   };
 
+  const normalize = (value?: string | null) => (value ?? '').trim().toLowerCase();
+
+  const shareMatchesActivity = (share: ActivityShare, activity: SavedActivity) => {
+    if (share.provider_id && activity.provider_id) return share.provider_id === activity.provider_id;
+    if (share.provider_name) return normalize(share.provider_name) === normalize(activity.provider_name);
+
+    const shareTitle = normalize(share.activity_name);
+    const activityTitle = normalize(activity.activity_name ?? activity.provider_name);
+    return Boolean(shareTitle && activityTitle && shareTitle === activityTitle);
+  };
+
+  const getConnectionNameByUserId = (userId: string) => {
+    const connection = connections.find(c => c.connected_parent_id === userId);
+    return connection?.profile
+      ? `${connection.profile.first_name} ${connection.profile.last_name}`
+      : 'Connection';
+  };
+
   useEffect(() => {
     const loadAllActivities = async () => {
       setLoading(true);
-      
+
       // Fetch activity shares
       const shares = await fetchActivityShares();
       setActivityShares(shares);
-      
+
       // Start with user's own activities
       const userActivities: CalendarActivity[] = savedActivities
         .filter(a => a.scheduled_date)
         .map(a => {
-          // Check if this activity has been shared by user
-          const share = shares.find(s => 
-            s.shared_by === user?.id && 
-            s.activity_name === a.activity_name &&
-            s.provider_name === a.provider_name
-          );
-          return { 
-            ...a, 
+          // Shares where current user is the recipient (so RSVP can show on "You" card)
+          const inviteShare = shares.find(s => s.shared_with === user?.id && shareMatchesActivity(s, a));
+
+          // Shares created by current user (for RSVP summary)
+          const myShare = shares.find(s => s.shared_by === user?.id && shareMatchesActivity(s, a));
+
+          return {
+            ...a,
             isConnection: false,
-            activityShareId: share?.id,
-            isMyShare: !!share
+            activityShareId: inviteShare?.id ?? myShare?.id,
+            isSharedWithMe: !!inviteShare,
+            connectionName: inviteShare ? getConnectionNameByUserId(inviteShare.shared_by) : undefined,
+            isMyShare: !!myShare,
           };
         });
+
+      const userActivityKeys = new Set(
+        userActivities.map(a => `${a.provider_id ?? a.provider_name}__${a.scheduled_date ?? ''}`)
+      );
 
       // Add connection activities
       if (connections.length > 0) {
         const connectionIds = connections.map(c => c.connected_parent_id);
         const connectionActs = await fetchConnectionActivities(connectionIds);
-        
+
         const connectionActivitiesWithMeta: CalendarActivity[] = connectionActs
           .filter(a => a.scheduled_date)
           .map(a => {
             const connection = connections.find(c => c.connected_parent_id === a.user_id);
+
             // Check if this activity was shared with current user
-            const share = shares.find(s => 
+            const share = shares.find(s =>
               s.shared_with === user?.id &&
               s.shared_by === a.user_id &&
-              s.activity_name === a.activity_name
+              shareMatchesActivity(s, a)
             );
+
             return {
               ...a,
               isConnection: true,
-              connectionName: connection?.profile 
+              connectionName: connection?.profile
                 ? `${connection.profile.first_name} ${connection.profile.last_name}`
                 : 'Connection',
               activityShareId: share?.id,
-              isSharedWithMe: !!share
+              isSharedWithMe: !!share,
             };
+          })
+          // If user already accepted (has a matching "You" activity), hide the duplicate connection pill.
+          .filter(a => {
+            if (!a.isSharedWithMe) return true;
+            const key = `${a.provider_id ?? a.provider_name}__${a.scheduled_date ?? ''}`;
+            return !userActivityKeys.has(key);
           });
 
         setAllActivities([...userActivities, ...connectionActivitiesWithMeta]);
       } else {
         setAllActivities(userActivities);
       }
-      
+
       setLoading(false);
     };
 
@@ -314,7 +346,7 @@ export const SharedCalendar = () => {
                     )}
                     
                     {/* Connection activities - show shared by info */}
-                    {activity.isConnection && (
+                    {activity.isConnection && !activity.isSharedWithMe && (
                       <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                         <Users className="h-3 w-3" />
                         <span>Shared by {activity.connectionName}</span>

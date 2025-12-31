@@ -173,13 +173,15 @@ export const useActivityCoordination = () => {
           .single();
 
         if (!activityError && originalActivity) {
-          // Check if user already has this activity saved (by provider_name)
-          const { data: existingActivity } = await supabase
+          // Check if user already has this activity saved
+          const activityLookup = supabase
             .from('saved_activities')
             .select('id')
-            .eq('user_id', user.id)
-            .eq('provider_name', originalActivity.provider_name)
-            .maybeSingle();
+            .eq('user_id', user.id);
+
+          const { data: existingActivity } = originalActivity.provider_id
+            ? await activityLookup.eq('provider_id', originalActivity.provider_id).maybeSingle()
+            : await activityLookup.eq('provider_name', originalActivity.provider_name).maybeSingle();
 
           // Only create if not already saved
           if (!existingActivity) {
@@ -200,30 +202,34 @@ export const useActivityCoordination = () => {
             }
           }
 
-          // Create activity_share so RSVP tracking works
-          const { data: shareData, error: shareError } = await supabase
+          // Create activity_share (only if it doesn't already exist)
+          const shareLookup = supabase
             .from('activity_shares')
-            .insert({
-              shared_by: originalMessage.sender_id,
-              shared_with: user.id,
-              activity_name: originalActivity.activity_name || originalActivity.provider_name,
-              provider_name: originalActivity.provider_name,
-              provider_id: originalActivity.provider_id,
-            })
-            .select()
-            .single();
+            .select('id')
+            .eq('shared_by', originalMessage.sender_id)
+            .eq('shared_with', user.id);
 
-          if (shareError) {
-            console.error('Error creating activity share:', shareError);
+          const { data: existingShare } = originalActivity.provider_id
+            ? await shareLookup.eq('provider_id', originalActivity.provider_id).maybeSingle()
+            : await shareLookup.eq('provider_name', originalActivity.provider_name).maybeSingle();
+
+          if (!existingShare) {
+            const { error: shareError } = await supabase
+              .from('activity_shares')
+              .insert({
+                shared_by: originalMessage.sender_id,
+                shared_with: user.id,
+                activity_name: originalActivity.activity_name || originalActivity.provider_name,
+                provider_name: originalActivity.provider_name,
+                provider_id: originalActivity.provider_id,
+              });
+
+            if (shareError) {
+              console.error('Error creating activity share:', shareError);
+            }
           }
         }
       }
-
-      // Mark as read
-      await supabase
-        .from('activity_messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('id', messageId);
 
       // Send response message
       const { error } = await supabase
@@ -232,19 +238,19 @@ export const useActivityCoordination = () => {
           activity_id: originalMessage.activity_id,
           sender_id: user.id,
           recipient_id: originalMessage.sender_id,
-          message: response === 'accepted' 
+          message: response === 'accepted'
             ? 'Great! Let\'s coordinate the details.'
             : 'Sorry, this doesn\'t work for us this time.',
           message_type: response
         });
 
       if (error) throw error;
-      
-      toast({ 
+
+      toast({
         title: response === 'accepted' ? 'Request accepted!' : 'Request declined',
         description: response === 'accepted' ? 'Activity added to your list!' : undefined,
       });
-      
+
       fetchMessages();
       return { error: null };
     } catch (err: any) {
