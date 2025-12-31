@@ -34,6 +34,8 @@ export const ActivityInbox = () => {
   };
 
   const handleRespond = async (messageId: string, response: 'accepted' | 'declined') => {
+    // Mark as read immediately to hide buttons
+    await markAsRead(messageId);
     await respondToRequest(messageId, response);
   };
 
@@ -86,9 +88,10 @@ export const ActivityInbox = () => {
               {messages.map((message) => {
                 const isIncoming = message.recipient_id === user?.id;
                 const isUnread = isIncoming && !message.read_at;
-                const canRespond = isIncoming && 
-                  (message.message_type === 'join_request' || message.message_type === 'invite') &&
-                  !message.read_at;
+                // Allow response for invite/join_request messages that are incoming
+                // and either unread OR message_type is still invite/join_request (not responded yet)
+                const isActionableType = message.message_type === 'join_request' || message.message_type === 'invite';
+                const canRespond = isIncoming && isActionableType;
 
                 return (
                   <div 
@@ -97,7 +100,6 @@ export const ActivityInbox = () => {
                       "p-3 rounded-lg border transition-colors",
                       isUnread ? "bg-primary/5 border-primary/20" : "bg-background"
                     )}
-                    onClick={() => isUnread && markAsRead(message.id)}
                   >
                     <div className="flex items-start gap-3">
                       <div className={cn(

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarDays, Users, ChevronLeft, ChevronRight, Clock, Share2, Check, HelpCircle } from 'lucide-react';
+import { CalendarDays, Users, ChevronLeft, ChevronRight, Clock, Share2, Check } from 'lucide-react';
 import { format, isSameDay, addMonths, subMonths } from 'date-fns';
 import { useSavedActivities, SavedActivity } from '@/hooks/useSavedActivities';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
@@ -190,21 +190,13 @@ export const SharedCalendar = () => {
             {/* Calendar */}
             <div>
               <Calendar
+                key={`calendar-${allActivities.length}`}
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
                 month={currentMonth}
                 onMonthChange={setCurrentMonth}
                 className="rounded-md border pointer-events-auto"
-                modifiers={{
-                  hasActivity: (date) => {
-                    const { hasOwn, hasConnection } = hasActivitiesOnDate(date);
-                    return hasOwn || hasConnection;
-                  },
-                }}
-                modifiersClassNames={{
-                  hasActivity: 'relative',
-                }}
                 components={{
                   DayContent: ({ date }) => {
                     const { hasOwn, hasConnection } = hasActivitiesOnDate(date);
@@ -321,11 +313,11 @@ export const SharedCalendar = () => {
                       </ShareActivityDialog>
                     )}
                     
-                    {/* Connection activities without RSVP - just show info */}
-                    {activity.isConnection && !activity.isSharedWithMe && (
+                    {/* Connection activities - show shared by info */}
+                    {activity.isConnection && (
                       <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
-                        <HelpCircle className="h-3 w-3" />
-                        <span>Not shared with you yet</span>
+                        <Users className="h-3 w-3" />
+                        <span>Shared by {activity.connectionName}</span>
                       </div>
                     )}
                   </div>
