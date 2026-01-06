@@ -193,7 +193,10 @@ export function useCoordinationThreads() {
       proposedDate?: Date;
     }
   ): Promise<string | null> => {
-    if (!user) return null;
+    if (!user) {
+      toast.error('You must be logged in to create a plan');
+      return null;
+    }
 
     try {
       // Create the thread
@@ -212,25 +215,36 @@ export function useCoordinationThreads() {
         .select()
         .single();
 
-      if (threadError) throw threadError;
+      if (threadError) {
+        console.error('Error creating thread:', threadError);
+        throw threadError;
+      }
 
       // Add creator as organizer participant
-      await supabase.from('thread_participants').insert({
+      const { error: participantError } = await supabase.from('thread_participants').insert({
         thread_id: thread.id,
         user_id: user.id,
         role: 'organizer',
         rsvp_status: 'going'
       });
 
+      if (participantError) {
+        console.error('Error adding creator as participant:', participantError);
+      }
+
       // Add invited participants
       if (inviteUserIds.length > 0) {
-        await supabase.from('thread_participants').insert(
+        const { error: inviteError } = await supabase.from('thread_participants').insert(
           inviteUserIds.map(uid => ({
             thread_id: thread.id,
             user_id: uid,
             role: 'invited' as const
           }))
         );
+        
+        if (inviteError) {
+          console.error('Error inviting participants:', inviteError);
+        }
       }
 
       // Log creation event
