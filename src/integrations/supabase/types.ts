@@ -227,6 +227,59 @@ export type Database = {
         }
         Relationships: []
       }
+      coordination_threads: {
+        Row: {
+          activity_name: string
+          created_at: string
+          created_by: string
+          id: string
+          location: string | null
+          notes: string | null
+          provider_id: string | null
+          provider_name: string | null
+          provider_url: string | null
+          scheduled_date: string | null
+          status: Database["public"]["Enums"]["thread_status"]
+          updated_at: string
+        }
+        Insert: {
+          activity_name: string
+          created_at?: string
+          created_by: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          provider_id?: string | null
+          provider_name?: string | null
+          provider_url?: string | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["thread_status"]
+          updated_at?: string
+        }
+        Update: {
+          activity_name?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          provider_id?: string | null
+          provider_name?: string | null
+          provider_url?: string | null
+          scheduled_date?: string | null
+          status?: Database["public"]["Enums"]["thread_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coordination_threads_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "provider_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_activities: {
         Row: {
           activity_name: string
@@ -692,6 +745,120 @@ export type Database = {
         }
         Relationships: []
       }
+      thread_events: {
+        Row: {
+          created_at: string
+          event_type: Database["public"]["Enums"]["thread_event_type"]
+          id: string
+          payload: Json | null
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: Database["public"]["Enums"]["thread_event_type"]
+          id?: string
+          payload?: Json | null
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["thread_event_type"]
+          id?: string
+          payload?: Json | null
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_events_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "coordination_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thread_participants: {
+        Row: {
+          children_bringing: string[] | null
+          id: string
+          invited_at: string
+          responded_at: string | null
+          role: Database["public"]["Enums"]["participant_role"]
+          rsvp_status: Database["public"]["Enums"]["rsvp_status"]
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          children_bringing?: string[] | null
+          id?: string
+          invited_at?: string
+          responded_at?: string | null
+          role?: Database["public"]["Enums"]["participant_role"]
+          rsvp_status?: Database["public"]["Enums"]["rsvp_status"]
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          children_bringing?: string[] | null
+          id?: string
+          invited_at?: string
+          responded_at?: string | null
+          role?: Database["public"]["Enums"]["participant_role"]
+          rsvp_status?: Database["public"]["Enums"]["rsvp_status"]
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_participants_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "coordination_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      thread_time_proposals: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          proposed_by: string
+          proposed_date: string
+          status: Database["public"]["Enums"]["proposal_status"]
+          thread_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposed_by: string
+          proposed_date: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          thread_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposed_by?: string
+          proposed_date?: string
+          status?: Database["public"]["Enums"]["proposal_status"]
+          thread_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "thread_time_proposals_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "coordination_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -747,8 +914,31 @@ export type Database = {
         Args: { profile_owner_id: string; viewer_id: string }
         Returns: boolean
       }
+      is_thread_participant: {
+        Args: { thread_uuid: string; user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      participant_role: "organizer" | "invited"
+      proposal_status: "proposed" | "accepted" | "withdrawn"
+      rsvp_status: "pending" | "going" | "maybe" | "declined"
+      thread_event_type:
+        | "created"
+        | "invited"
+        | "proposed_time"
+        | "accepted_time"
+        | "rsvp"
+        | "message"
+        | "locked"
+        | "cancelled"
+        | "completed"
+      thread_status:
+        | "idea"
+        | "proposing"
+        | "scheduled"
+        | "completed"
+        | "cancelled"
       user_type: "parent" | "provider"
     }
     CompositeTypes: {
@@ -877,6 +1067,27 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      participant_role: ["organizer", "invited"],
+      proposal_status: ["proposed", "accepted", "withdrawn"],
+      rsvp_status: ["pending", "going", "maybe", "declined"],
+      thread_event_type: [
+        "created",
+        "invited",
+        "proposed_time",
+        "accepted_time",
+        "rsvp",
+        "message",
+        "locked",
+        "cancelled",
+        "completed",
+      ],
+      thread_status: [
+        "idea",
+        "proposing",
+        "scheduled",
+        "completed",
+        "cancelled",
+      ],
       user_type: ["parent", "provider"],
     },
   },
