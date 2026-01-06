@@ -89,24 +89,8 @@ const Dashboard = () => {
           <GameifiedProgress progress={progress} defaultExpanded={false} />
         </div>
 
-        {/* Your Network - Primary Feature for Parents */}
-        {userType === "parent" && (
-          <div className="mb-6 space-y-6">
-            <SocialConnectionsCard />
-            
-            {/* Your Saved Activities */}
-            <SavedActivitiesSection />
-            
-            {/* Coordination Feed for planning with others */}
-            <Card>
-              <CardContent className="p-4 md:p-6">
-                <CoordinationFeed />
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Profile Info & Quick Actions - immediately after journey */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Profile Information Card - Collapsible */}
           <Card className="lg:col-span-2">
             <Collapsible open={profileExpanded} onOpenChange={setProfileExpanded}>
@@ -308,11 +292,38 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Your Network */}
         {userType === "parent" && (
-          <>
+          <div className="mb-6">
+            <SocialConnectionsCard />
+          </div>
+        )}
 
-            {/* Children Section */}
-            <div id="children-section" className="mt-8">
+        {/* Coordination Feed for planning with others */}
+        {userType === "parent" && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Calendar className="h-5 w-5" />
+                Coordination
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <CoordinationFeed />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* My Saved Activities */}
+        {userType === "parent" && (
+          <div className="mb-6">
+            <SavedActivitiesSection />
+          </div>
+        )}
+
+        {/* Children Profiles */}
+        {userType === "parent" && (
+          <div id="children-section">
               <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
@@ -381,7 +392,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </div>
-          </>
         )}
 
         {userType === "provider" && (
