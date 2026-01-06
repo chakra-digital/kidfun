@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { invokeEdgeFunction } from "@/lib/invokeEdgeFunction";
 
 interface LocationSuggestion {
   place_id: string;
@@ -98,16 +98,16 @@ export const LocationInput: React.FC<LocationInputProps> = ({
       setIsLoading(true);
 
       try {
-        const { data, error } = await supabase.functions.invoke('get-place-autocomplete', {
-          body: { input: inputValue }
-        });
+        const data = await invokeEdgeFunction<{ predictions: any[] }>(
+          'get-place-autocomplete',
+          { input: inputValue },
+          { signal: currentController.signal }
+        );
 
         // Check if this request was cancelled
         if (currentController.signal.aborted) {
           return;
         }
-
-        if (error) throw error;
 
         if (data?.predictions) {
           const formattedSuggestions: LocationSuggestion[] = data.predictions.map((pred: any) => ({

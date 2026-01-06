@@ -6,11 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Send, Sparkles, MapPin, Palette, Crown, ChefHat, Music, Languages, Trees, Drama, Gamepad2, FlaskConical, GraduationCap, Users, Loader2, Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { LocationInput } from '@/components/ui/location-input';
 import { searchCache } from '@/lib/searchCache';
+import { invokeEdgeFunction } from '@/lib/invokeEdgeFunction';
 import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
 
@@ -72,6 +72,8 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
   const [showLocationError, setShowLocationError] = useState(false);
   const [isWhereOpen, setIsWhereOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const activeSearchControllerRef = useRef<AbortController | null>(null);
+  const activeSearchIdRef = useRef(0);
   const { toast } = useToast();
 
   // Expose triggerSearch method via ref
@@ -234,21 +236,31 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
     console.log('Starting AI search...');
     
     try {
-      // Add timeout to prevent hanging requests when app goes to background
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Search request timed out')), 30000); // 30 second timeout
-      });
-
-      const searchPromise = supabase.functions.invoke('ai-provider-search', {
-        body: { query: enhancedQuery, location: searchLocation }
-      });
-
-      const { data, error } = await Promise.race([searchPromise, timeoutPromise]) as any;
-
-      if (error) {
-        console.error('Edge function error:', error);
-        throw new Error(error.message || 'Failed to connect to search service');
+      // Abort any previous in-flight request (e.g. a timed-out search still running)
+      if (activeSearchControllerRef.current) {
+        activeSearchControllerRef.current.abort();
       }
+
+      const controller = new AbortController();
+      activeSearchControllerRef.current = controller;
+      const searchId = ++activeSearchIdRef.current;
+
+      let timedOut = false;
+      const timeoutId = window.setTimeout(() => {
+        timedOut = true;
+        controller.abort();
+      }, 60000); // 60s timeout (Google APIs can be slow)
+
+      const data = await invokeEdgeFunction<any>(
+        'ai-provider-search',
+        { query: enhancedQuery, location: searchLocation },
+        { signal: controller.signal }
+      );
+
+      window.clearTimeout(timeoutId);
+
+      // Ignore stale results
+      if (searchId !== activeSearchIdRef.current) return;
 
       if (!data) {
         throw new Error('No data returned from search function');
@@ -283,13 +295,17 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
       });
 
     } catch (error: any) {
+      // Ignore stale searches
+      if (activeSearchIdRef.current !== activeSearchIdRef.current) return;
+
       console.error('Search error details:', error);
-      
-      // More specific error messaging
+
       let errorTitle = "Search Error";
       let errorMessage = "Failed to search providers. Please try again.";
-      
-      if (error.message?.includes('timeout')) {
+
+      if (error?.name === 'AbortError') {
+        errorMessage = "Search took too long. Please try again.";
+      } else if (error.message?.includes('timeout')) {
         errorMessage = "Search took too long. Please check your connection and try again.";
       } else if (error.message?.includes('Failed to send')) {
         errorMessage = "Network error. Please check your connection and try again.";
@@ -300,16 +316,19 @@ const ConversationalSearch = forwardRef<ConversationalSearchRef, ConversationalS
         errorTitle = "API Quota Exceeded";
         errorMessage = "Google API quota has been exceeded. Please contact support or check your Google Cloud billing.";
       }
-      
+
       toast({
         title: errorTitle,
         description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsSearching(false);
-      setSearchStartTime(null);
-      setSearchDuration(0);
+      // Only clear UI state if this is still the active search
+      if (!activeSearchControllerRef.current?.signal.aborted) {
+        setIsSearching(false);
+        setSearchStartTime(null);
+        setSearchDuration(0);
+      }
     }
   };
 
