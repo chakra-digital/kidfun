@@ -15,9 +15,7 @@ import { EditChildDialog } from "@/components/children/EditChildDialog";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
 import { GameifiedProgress } from "@/components/progress/GameifiedProgress";
 import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard";
-import { SharedCalendar } from "@/components/coordination/SharedCalendar";
-import { ActivityInbox } from "@/components/coordination/ActivityInbox";
-import { SavedActivitiesSection } from "@/components/dashboard/SavedActivitiesSection";
+import { CoordinationFeed } from "@/components/coordination/CoordinationFeed";
 import { InviteParentDialog } from "@/components/social/InviteParentDialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -95,18 +93,12 @@ const Dashboard = () => {
           <div className="mb-6 space-y-6">
             <SocialConnectionsCard />
             
-            {/* Saved Activities */}
-            <SavedActivitiesSection />
-            
-            {/* Coordination Section - Calendar + Inbox */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <SharedCalendar />
-              </div>
-              <div>
-                <ActivityInbox />
-              </div>
-            </div>
+            {/* Unified Coordination Feed */}
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <CoordinationFeed />
+              </CardContent>
+            </Card>
           </div>
         )}
 
