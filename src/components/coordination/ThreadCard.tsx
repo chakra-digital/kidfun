@@ -119,7 +119,20 @@ export function ThreadCard({
 
   const handleVisitWebsite = () => {
     if (thread.provider_url) {
-      window.open(thread.provider_url, '_blank', 'noopener,noreferrer');
+      try {
+        // Strip existing UTM params and add our own
+        const url = new URL(thread.provider_url);
+        url.searchParams.delete('utm_source');
+        url.searchParams.delete('utm_medium');
+        url.searchParams.delete('utm_campaign');
+        url.searchParams.set('utm_source', 'kidfun');
+        url.searchParams.set('utm_medium', 'coordination');
+        url.searchParams.set('utm_campaign', 'scheduled_activity');
+        window.open(url.toString(), '_blank', 'noopener,noreferrer');
+      } catch {
+        // If URL parsing fails, open as-is
+        window.open(thread.provider_url, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
