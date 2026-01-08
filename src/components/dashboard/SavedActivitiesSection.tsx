@@ -2,13 +2,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bookmark, Calendar, Trash2, ExternalLink, Share2 } from 'lucide-react';
+import { Bookmark, Calendar, Trash2, ExternalLink, Share2, CalendarPlus } from 'lucide-react';
 import { useSavedActivities } from '@/hooks/useSavedActivities';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { AddActivityDialog } from '@/components/activities/AddActivityDialog';
 import { ShareActivityDialog } from '@/components/coordination/ShareActivityDialog';
-
+import { CreateThreadDialog } from '@/components/coordination/CreateThreadDialog';
+import { useCoordinationThreads } from '@/hooks/useCoordinationThreads';
 const statusColors: Record<string, string> = {
   saved: 'bg-muted text-muted-foreground',
   interested: 'bg-primary/10 text-primary',
@@ -35,6 +36,7 @@ const getProviderUrl = (activity: { provider_name: string; provider_url?: string
 
 export const SavedActivitiesSection: React.FC = () => {
   const { savedActivities, loading, removeActivity, refetch } = useSavedActivities();
+  const { createThread } = useCoordinationThreads();
 
   if (loading) {
     return (
@@ -145,6 +147,24 @@ export const SavedActivitiesSection: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex gap-1">
+                      <CreateThreadDialog
+                        onCreateThread={createThread}
+                        prefill={{
+                          activityName: activity.activity_name || activity.provider_name,
+                          providerName: activity.provider_name,
+                          providerUrl: activity.provider_url || undefined,
+                        }}
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                            title="Create a plan with connections"
+                          >
+                            <CalendarPlus className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
                       <ShareActivityDialog
                         providerId={activity.provider_id || undefined}
                         providerName={activity.provider_name}

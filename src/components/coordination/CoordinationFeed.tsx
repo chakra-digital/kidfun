@@ -111,8 +111,8 @@ export function CoordinationFeed() {
         </div>
       )}
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="planning" className="w-full">
+      {/* Main Tabs - default to scheduled if nothing needs response and there are scheduled items */}
+      <Tabs defaultValue={scheduledThreads.length > 0 && needsResponse.length === 0 ? "scheduled" : "planning"} className="w-full">
         <TabsList className="w-full grid grid-cols-3">
           <TabsTrigger value="planning" className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
