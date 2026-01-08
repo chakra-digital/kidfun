@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,6 +8,39 @@ import { useAuth } from '@/hooks/useAuth';
 import { ThreadCard } from './ThreadCard';
 import { CreateThreadDialog } from './CreateThreadDialog';
 import { ProposeTimeDialog } from './ProposeTimeDialog';
+import { format, isToday, isTomorrow, isThisWeek, isAfter, startOfToday } from 'date-fns';
+
+// Group threads by date category
+function groupThreadsByDate(threads: ThreadWithDetails[]) {
+  const today: ThreadWithDetails[] = [];
+  const tomorrow: ThreadWithDetails[] = [];
+  const thisWeek: ThreadWithDetails[] = [];
+  const later: ThreadWithDetails[] = [];
+  const noDate: ThreadWithDetails[] = [];
+  
+  const now = startOfToday();
+  
+  threads.forEach(thread => {
+    if (!thread.scheduled_date) {
+      noDate.push(thread);
+      return;
+    }
+    
+    const date = new Date(thread.scheduled_date);
+    
+    if (isToday(date)) {
+      today.push(thread);
+    } else if (isTomorrow(date)) {
+      tomorrow.push(thread);
+    } else if (isThisWeek(date) && isAfter(date, now)) {
+      thisWeek.push(thread);
+    } else if (isAfter(date, now)) {
+      later.push(thread);
+    }
+  });
+  
+  return { today, tomorrow, thisWeek, later, noDate };
+}
 
 export function CoordinationFeed() {
   const { user } = useAuth();
@@ -31,6 +64,9 @@ export function CoordinationFeed() {
   const planningThreads = threads.filter(t => t.status === 'idea' || t.status === 'proposing');
   const scheduledThreads = threads.filter(t => t.status === 'scheduled');
   const pastThreads = threads.filter(t => t.status === 'completed' || t.status === 'cancelled');
+
+  // Group scheduled threads by date
+  const groupedScheduled = useMemo(() => groupThreadsByDate(scheduledThreads), [scheduledThreads]);
 
   // Threads needing my response
   const needsResponse = threads.filter(t => {
@@ -76,6 +112,30 @@ export function CoordinationFeed() {
       </div>
     );
   }
+
+  // Render a date group section
+  const renderDateGroup = (title: string, threads: ThreadWithDetails[], highlight?: boolean) => {
+    if (threads.length === 0) return null;
+    
+    return (
+      <div className="space-y-3">
+        <h4 className={`text-sm font-semibold ${highlight ? 'text-primary' : 'text-muted-foreground'}`}>
+          {title}
+        </h4>
+        {threads.map(thread => (
+          <ThreadCard
+            key={thread.id}
+            thread={thread}
+            currentUserId={user.id}
+            onProposeTime={handleProposeTime}
+            onAcceptProposal={acceptProposal}
+            onUpdateRsvp={updateRsvp}
+            showQuickActions={true}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -162,7 +222,7 @@ export function CoordinationFeed() {
           )}
         </TabsContent>
 
-        <TabsContent value="scheduled" className="mt-4 space-y-3">
+        <TabsContent value="scheduled" className="mt-4 space-y-6">
           {scheduledThreads.length === 0 ? (
             <div className="text-center py-8">
               <Calendar className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
@@ -172,16 +232,13 @@ export function CoordinationFeed() {
               </p>
             </div>
           ) : (
-            scheduledThreads.map(thread => (
-              <ThreadCard
-                key={thread.id}
-                thread={thread}
-                currentUserId={user.id}
-                onProposeTime={handleProposeTime}
-                onAcceptProposal={acceptProposal}
-                onUpdateRsvp={updateRsvp}
-              />
-            ))
+            <>
+              {renderDateGroup('Today', groupedScheduled.today, true)}
+              {renderDateGroup('Tomorrow', groupedScheduled.tomorrow)}
+              {renderDateGroup('This Week', groupedScheduled.thisWeek)}
+              {renderDateGroup('Upcoming', groupedScheduled.later)}
+              {renderDateGroup('To Be Scheduled', groupedScheduled.noDate)}
+            </>
           )}
         </TabsContent>
 

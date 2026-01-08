@@ -9,20 +9,21 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Share2, Users, Send, Check, X } from 'lucide-react';
+import { Share2, Users, Send, Check, CalendarPlus } from 'lucide-react';
 import { useSocialConnections } from '@/hooks/useSocialConnections';
-import { useActivityCoordination } from '@/hooks/useActivityCoordination';
-import { useSavedActivities } from '@/hooks/useSavedActivities';
+import { useCoordinationThreads } from '@/hooks/useCoordinationThreads';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface ShareActivityDialogProps {
   providerId?: string;
   providerName: string;
   activityName?: string;
-  providerUrl?: string; // External website URL to store when saving
+  providerUrl?: string;
   children?: React.ReactNode;
+  // If true, this is a "Plan with Friends" action vs simple share
+  isPlanAction?: boolean;
 }
 
 export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
@@ -30,21 +31,16 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
   providerName,
   activityName,
   providerUrl,
-  children
+  children,
+  isPlanAction = false
 }) => {
   const { connections, loading: connectionsLoading } = useSocialConnections();
-  const { sendInvite } = useActivityCoordination();
-  const { savedActivities, saveActivity } = useSavedActivities();
+  const { createThread } = useCoordinationThreads();
   
   const [open, setOpen] = useState(false);
   const [selectedConnections, setSelectedConnections] = useState<string[]>([]);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
-
-  // Check if already saved
-  const existingActivity = savedActivities.find(
-    a => a.provider_id === providerId || a.provider_name === providerName
-  );
 
   const toggleConnection = (userId: string) => {
     setSelectedConnections(prev => 
@@ -55,59 +51,82 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
   };
 
   const handleShare = async () => {
-    if (selectedConnections.length === 0) return;
+    if (selectedConnections.length === 0) {
+      toast.error('Please select at least one connection');
+      return;
+    }
     
     setSending(true);
     
     try {
-      // First save the activity if not already saved
-      let activityId = existingActivity?.id;
-      if (!activityId) {
-        const result = await saveActivity(providerId || null, providerName, activityName, 'saved', providerUrl);
-        activityId = result.data?.id;
-      }
+      // Create a coordination thread with the selected connections
+      const displayName = activityName || providerName;
+      const threadId = await createThread(
+        displayName,
+        selectedConnections,
+        {
+          providerId: providerId || undefined,
+          providerName: providerName,
+          providerUrl: providerUrl,
+          notes: message || undefined
+        }
+      );
 
-      // Send invites to selected connections
-      for (const connectionId of selectedConnections) {
-        await sendInvite(
-          activityId || null,
-          connectionId,
-          providerName,
-          message || `I thought you might be interested in ${providerName}!`
+      if (threadId) {
+        toast.success(
+          isPlanAction 
+            ? 'Plan created! Your friends will be notified.'
+            : 'Activity shared! Check Coordination to set a time.'
         );
+        setOpen(false);
+        setSelectedConnections([]);
+        setMessage('');
+      } else {
+        toast.error('Failed to create plan. Please try again.');
       }
-      
-      setOpen(false);
-      setSelectedConnections([]);
-      setMessage('');
+    } catch (error) {
+      console.error('Error sharing activity:', error);
+      toast.error('Something went wrong');
     } finally {
       setSending(false);
     }
   };
+
+  const title = isPlanAction ? 'Plan with Friends' : 'Share Activity';
+  const description = isPlanAction 
+    ? `Start coordinating ${providerName} with your connections`
+    : `Invite friends to ${providerName}`;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
           <Button variant="outline" size="sm">
-            <Share2 className="h-4 w-4 mr-1" />
-            Share
+            {isPlanAction ? (
+              <>
+                <CalendarPlus className="h-4 w-4 mr-1" />
+                Plan
+              </>
+            ) : (
+              <>
+                <Share2 className="h-4 w-4 mr-1" />
+                Share
+              </>
+            )}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="z-[200] max-w-md" overlayClassName="z-[200]">
         <DialogHeader>
-          <DialogTitle>Share Activity</DialogTitle>
-          <DialogDescription>
-            Invite your connections to {providerName}
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           {/* Activity preview */}
           <div className="p-3 rounded-lg bg-muted">
             <p className="font-medium">{providerName}</p>
-            {activityName && (
+            {activityName && activityName !== providerName && (
               <p className="text-sm text-muted-foreground">{activityName}</p>
             )}
           </div>
@@ -115,7 +134,7 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
           {/* Connection selector */}
           <div>
             <label className="text-sm font-medium mb-2 block">
-              Select connections to invite
+              Who do you want to invite?
             </label>
             {connectionsLoading ? (
               <div className="animate-pulse h-32 bg-muted rounded" />
@@ -123,6 +142,7 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
               <div className="text-center py-6 text-muted-foreground">
                 <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No connections yet</p>
+                <p className="text-xs mt-1">Connect with other parents first</p>
               </div>
             ) : (
               <ScrollArea className="h-[150px] border rounded-md p-2">
@@ -163,10 +183,10 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
           {/* Message */}
           <div>
             <label className="text-sm font-medium mb-2 block">
-              Add a message (optional)
+              Add a note (optional)
             </label>
             <Textarea
-              placeholder={`I thought you might be interested in ${providerName}!`}
+              placeholder={`What are you thinking for ${providerName}?`}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
@@ -182,8 +202,17 @@ export const ShareActivityDialog: React.FC<ShareActivityDialogProps> = ({
             onClick={handleShare}
             disabled={selectedConnections.length === 0 || sending}
           >
-            <Send className="h-4 w-4 mr-1" />
-            {sending ? 'Sending...' : `Send to ${selectedConnections.length}`}
+            {isPlanAction ? (
+              <CalendarPlus className="h-4 w-4 mr-1" />
+            ) : (
+              <Send className="h-4 w-4 mr-1" />
+            )}
+            {sending 
+              ? 'Creating...' 
+              : isPlanAction 
+                ? `Start Plan (${selectedConnections.length})`
+                : `Share (${selectedConnections.length})`
+            }
           </Button>
         </div>
       </DialogContent>

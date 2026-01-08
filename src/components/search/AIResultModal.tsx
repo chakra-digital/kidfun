@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Users } from 'lucide-react';
 import { MapPin, Star, ExternalLink, Sparkles, Phone, Navigation, Bookmark, BookmarkCheck, Share2 } from 'lucide-react';
 import LocationMap from '@/components/maps/LocationMap';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -154,6 +155,21 @@ const AIResultModal: React.FC<AIResultModalProps> = ({ result, isOpen, onClose }
 
       {/* Action Buttons */}
       <div className="space-y-3 pt-4 border-t">
+        {/* Primary CTA - Plan with Friends */}
+        {user && (
+          <ShareActivityDialog
+            providerId={dbProviderId || undefined}
+            providerName={result.business_name}
+            providerUrl={result.external_website}
+            isPlanAction={true}
+          >
+            <Button className="w-full" size="lg">
+              <Users className="w-4 h-4 mr-2" />
+              Plan with Friends
+            </Button>
+          </ShareActivityDialog>
+        )}
+
         {/* Save & Share Row */}
         <div className="flex gap-3">
           <Button 
