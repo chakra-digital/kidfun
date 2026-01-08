@@ -1,4 +1,5 @@
 # KidFun Investor Demo Flow
+
 ## The One Crisp Loop: Discovery → Save → Plan → Coordinate → Day-of
 
 **Target:** 5-minute hands-on demo on iPhone  
@@ -22,10 +23,12 @@
 ## Screen 1: Discovery (Home / Search)
 
 ### Current Implementation
+
 - **Route:** `/` (Index.tsx)
 - **Components:** `ConversationalSearch`, `AIResultCard`, `AIResultModal`, `LocationMap`
 
 ### What User Sees
+
 ```
 ┌────────────────────────────────────────┐
 │ [Hero Image - Kids Soccer]             │
@@ -35,7 +38,7 @@
 │ ┌────────────────────────────────────┐ │
 │ │ ⚽ What are you looking for?       │ │
 │ ├────────────────────────────────────┤ │
-│ │ 📍 Where (Austin, TX)              │ │
+│ │ 📍 Where            │ │
 │ ├────────────────────────────────────┤ │
 │ │ 📅 When (optional)                 │ │
 │ └────────────────────────────────────┘ │
@@ -44,20 +47,23 @@
 ```
 
 ### Data Displayed
-| Field | Source | Notes |
-|-------|--------|-------|
-| Activity query | User input | "Soccer for 6 year olds" |
-| Location | Google Places autocomplete | Validated address |
-| Date filter | Calendar picker | Optional |
+
+| Field          | Source                     | Notes                    |
+| -------------- | -------------------------- | ------------------------ |
+| Activity query | User input                 | "Soccer for 6 year olds" |
+| Location       | Google Places autocomplete | Validated address        |
+| Date filter    | Calendar picker            | Optional                 |
 
 ### Key Actions
-| Action | Result | Animation/Feedback |
-|--------|--------|-------------------|
-| Type query | Placeholder animates with emojis | ⚽🎨🎭 cycling |
-| Enter location | Autocomplete dropdown | Smooth popover |
-| Tap Search | Skeleton cards → results | Scroll to results |
+
+| Action         | Result                           | Animation/Feedback |
+| -------------- | -------------------------------- | ------------------ |
+| Type query     | Placeholder animates with emojis | ⚽🎨🎭 cycling     |
+| Enter location | Autocomplete dropdown            | Smooth popover     |
+| Tap Search     | Skeleton cards → results         | Scroll to results  |
 
 ### Results View
+
 ```
 ┌────────────────────────────────────────┐
 │ Search Results (12 found)    [Clear]   │
@@ -82,6 +88,7 @@
 ```
 
 ### Demo Script
+
 > "Watch this - I just type 'soccer for my 6 year old' and our AI finds real providers near me, ranked by relevance. See how it explains WHY each one is a good match."
 
 ---
@@ -89,10 +96,12 @@
 ## Screen 2: Save Activity (Result Modal)
 
 ### Current Implementation
+
 - **Component:** `AIResultModal.tsx`
 - **Data:** `useSavedActivities` hook → `saved_activities` table
 
 ### What User Sees (Bottom Sheet on Mobile)
+
 ```
 ┌────────────────────────────────────────┐
 │                              [X Close] │
@@ -127,23 +136,26 @@
 ```
 
 ### Data Saved to `saved_activities`
-| Column | Value | Notes |
-|--------|-------|-------|
-| `user_id` | Current user UUID | |
-| `provider_id` | UUID or null | Only if in our DB |
-| `provider_name` | "ABC Soccer Academy" | Always stored |
-| `provider_url` | "https://..." | For later reference |
-| `activity_name` | null | Optional |
-| `status` | "saved" | Default |
+
+| Column          | Value                | Notes               |
+| --------------- | -------------------- | ------------------- |
+| `user_id`       | Current user UUID    |                     |
+| `provider_id`   | UUID or null         | Only if in our DB   |
+| `provider_name` | "ABC Soccer Academy" | Always stored       |
+| `provider_url`  | "https://..."        | For later reference |
+| `activity_name` | null                 | Optional            |
+| `status`        | "saved"              | Default             |
 
 ### Key Actions
-| Action | Result | Animation/Feedback |
-|--------|--------|-------------------|
-| Tap Save | Icon changes to checkmark | `BookmarkCheck` icon, toast |
-| Tap Share | Share dialog opens | Select connections |
-| Tap Website | Opens in browser | UTM params added |
+
+| Action      | Result                    | Animation/Feedback          |
+| ----------- | ------------------------- | --------------------------- |
+| Tap Save    | Icon changes to checkmark | `BookmarkCheck` icon, toast |
+| Tap Share   | Share dialog opens        | Select connections          |
+| Tap Website | Opens in browser          | UTM params added            |
 
 ### Demo Script
+
 > "I can save this for later, or tap Share to instantly send it to another parent. One tap - it's in my list."
 
 ---
@@ -151,16 +163,19 @@
 ## Screen 3: Create Plan (Dashboard → Saved → Plan Button)
 
 ### Current Implementation
+
 - **Route:** `/dashboard`
 - **Components:** `SavedActivitiesSection`, `CreateThreadDialog`
 - **Data:** Creates `coordination_threads` + `thread_participants`
 
 ### Entry Points (3 ways to start a plan)
+
 1. **From Saved Activity** - Tap 📅 icon on saved activity card
 2. **From Dashboard** - "Create Plan" button in Coordination Feed
 3. **From Result Modal** - (MISSING) - Should add "Plan with Friends" button
 
 ### What User Sees
+
 ```
 ┌────────────────────────────────────────┐
 │            Create a Plan               │
@@ -228,6 +243,7 @@
 | `status` | "proposed" |
 
 ### Demo Script
+
 > "Now watch the magic. I tap 'Create Plan', it pre-fills from my saved activity. I pick the parents I want to invite - these are parents from my kid's school. Propose a time, and boom - they get notified."
 
 ---
@@ -235,10 +251,12 @@
 ## Screen 4: Coordinate & Confirm (Coordination Feed)
 
 ### Current Implementation
+
 - **Route:** `/dashboard` (Coordination Feed section)
 - **Components:** `CoordinationFeed`, `ThreadCard`, `ProposeTimeDialog`, `ThreadRsvpButtons`
 
 ### What Invitee Sees (Notification → Dashboard)
+
 ```
 ┌────────────────────────────────────────┐
 │ ⚡ Needs Your Response (1)             │
@@ -259,6 +277,7 @@
 ```
 
 ### Expanded Thread View
+
 ```
 ┌────────────────────────────────────────┐
 │ ┌────────────────────────────────────┐ │
@@ -276,6 +295,7 @@
 ```
 
 ### After Time Accepted (Scheduled State)
+
 ```
 ┌────────────────────────────────────────┐
 │ 📅 Scheduled                           │
@@ -297,13 +317,15 @@
 ```
 
 ### Key Actions
-| Action | Result | Animation |
-|--------|--------|-----------|
-| Tap "View proposed times" | Expands card | Slide down |
-| Tap "Accept This Time" | Thread → "scheduled" | Status badge turns green |
-| Tap RSVP button | Updates participation | Button highlight |
+
+| Action                    | Result                | Animation                |
+| ------------------------- | --------------------- | ------------------------ |
+| Tap "View proposed times" | Expands card          | Slide down               |
+| Tap "Accept This Time"    | Thread → "scheduled"  | Status badge turns green |
+| Tap RSVP button           | Updates participation | Button highlight         |
 
 ### Demo Script
+
 > "Sarah gets a notification - she sees my proposed time. She can accept it, or propose a different time. Once we agree, everyone gets the confirmed event. Simple RSVP - going, maybe, can't make it."
 
 ---
@@ -311,10 +333,12 @@
 ## Screen 5: Day-of View (Scheduled Tab)
 
 ### Current Implementation
+
 - **Route:** `/dashboard` → Coordination Feed → "Scheduled" tab
 - **Component:** `CoordinationFeed` with `ThreadCard`
 
 ### What User Sees
+
 ```
 ┌────────────────────────────────────────┐
 │ [Planning] [Needs Response] [SCHEDULED]│
@@ -340,14 +364,16 @@
 ```
 
 ### MISSING: Day-of Enhancements Needed
-| Feature | Status | Priority |
-|---------|--------|----------|
-| "Today" grouping | ❌ Missing | HIGH |
-| Quick-action buttons (Directions, Call) | ❌ Missing | HIGH |
-| Push notifications | ❌ Missing | MEDIUM |
-| Calendar sync (.ics export) | ❌ Missing | MEDIUM |
+
+| Feature                                 | Status     | Priority |
+| --------------------------------------- | ---------- | -------- |
+| "Today" grouping                        | ❌ Missing | HIGH     |
+| Quick-action buttons (Directions, Call) | ❌ Missing | HIGH     |
+| Push notifications                      | ❌ Missing | MEDIUM   |
+| Calendar sync (.ics export)             | ❌ Missing | MEDIUM   |
 
 ### Demo Script
+
 > "On the day of, I see exactly what's coming up. One tap to get directions, one tap to call if I'm running late. The other parents see the same thing - we're all synced."
 
 ---
@@ -355,40 +381,44 @@
 ## Gap Analysis: What's Working vs What Needs Work
 
 ### ✅ Working Well
-| Feature | Component | Notes |
-|---------|-----------|-------|
-| AI-powered search | `ConversationalSearch` | Good results, caching works |
-| Save to list | `useSavedActivities` | Persists correctly |
-| Create thread | `CreateThreadDialog` | Pre-fill from saved works |
-| Invite connections | `useSocialConnections` | Shows accepted connections |
-| Propose times | `ProposeTimeDialog` | Creates proposals |
-| Accept proposals | `ThreadProposals` | Updates thread status |
-| RSVP | `ThreadRsvpButtons` | Updates participant status |
+
+| Feature            | Component              | Notes                       |
+| ------------------ | ---------------------- | --------------------------- |
+| AI-powered search  | `ConversationalSearch` | Good results, caching works |
+| Save to list       | `useSavedActivities`   | Persists correctly          |
+| Create thread      | `CreateThreadDialog`   | Pre-fill from saved works   |
+| Invite connections | `useSocialConnections` | Shows accepted connections  |
+| Propose times      | `ProposeTimeDialog`    | Creates proposals           |
+| Accept proposals   | `ThreadProposals`      | Updates thread status       |
+| RSVP               | `ThreadRsvpButtons`    | Updates participant status  |
 
 ### ⚠️ Needs Improvement (UX Polish)
-| Issue | Current State | Target State |
-|-------|---------------|--------------|
-| Result card → Plan | Must save first, go to dashboard | One-tap "Plan with Friends" in modal |
-| Thread card density | Too much text, not swipeable | Card-based, swipe to RSVP |
-| Scheduled view | Basic list | Grouped by date, quick actions |
-| Tab default logic | Complex logic | Smart: today's events first |
-| Mobile navigation | Web-style tabs | Bottom nav with badge counts |
+
+| Issue               | Current State                    | Target State                         |
+| ------------------- | -------------------------------- | ------------------------------------ |
+| Result card → Plan  | Must save first, go to dashboard | One-tap "Plan with Friends" in modal |
+| Thread card density | Too much text, not swipeable     | Card-based, swipe to RSVP            |
+| Scheduled view      | Basic list                       | Grouped by date, quick actions       |
+| Tab default logic   | Complex logic                    | Smart: today's events first          |
+| Mobile navigation   | Web-style tabs                   | Bottom nav with badge counts         |
 
 ### ❌ Missing for Demo
-| Feature | Priority | Effort | Notes |
-|---------|----------|--------|-------|
-| Push notifications | HIGH | Medium | Need Expo for native |
-| Bottom sheet navigation | HIGH | Medium | React Native pattern |
-| Swipe gestures | HIGH | Medium | framer-motion or native |
-| "Plan" button in result modal | MEDIUM | Low | Easy add |
-| Day-of quick actions | MEDIUM | Low | Directions, call buttons |
-| Badge counts on tabs | LOW | Low | Unread count |
+
+| Feature                       | Priority | Effort | Notes                    |
+| ----------------------------- | -------- | ------ | ------------------------ |
+| Push notifications            | HIGH     | Medium | Need Expo for native     |
+| Bottom sheet navigation       | HIGH     | Medium | React Native pattern     |
+| Swipe gestures                | HIGH     | Medium | framer-motion or native  |
+| "Plan" button in result modal | MEDIUM   | Low    | Easy add                 |
+| Day-of quick actions          | MEDIUM   | Low    | Directions, call buttons |
+| Badge counts on tabs          | LOW      | Low    | Unread count             |
 
 ---
 
 ## Recommended Next Steps
 
 ### If staying in Lovable (1 week):
+
 1. Add "Plan with Friends" button to `AIResultModal`
 2. Improve `ThreadCard` with better mobile layout
 3. Add Today/Upcoming grouping to Scheduled tab
@@ -396,6 +426,7 @@
 5. Polish animations with framer-motion
 
 ### If exporting to React Native (2 weeks):
+
 1. Export GitHub repo
 2. Set up Expo with Supabase client (same backend)
 3. Rebuild screens using React Native Paper or NativeBase
@@ -443,5 +474,5 @@ saved_activities
 
 ---
 
-*Last updated: January 2025*
-*Version: 1.0*
+_Last updated: January 2025_
+_Version: 1.0_
