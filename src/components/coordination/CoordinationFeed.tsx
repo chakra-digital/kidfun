@@ -52,6 +52,37 @@ export function CoordinationFeed() {
     activityName: string;
   }>({ open: false, threadId: '', activityName: '' });
 
+  // Categorize threads - must be before any returns
+  const planningThreads = threads.filter(t => t.status === 'idea' || t.status === 'proposing');
+  const scheduledThreads = threads.filter(t => t.status === 'scheduled');
+  const pastThreads = threads.filter(t => t.status === 'completed' || t.status === 'cancelled');
+
+  // Group scheduled threads by date - must be before any returns
+  const groupedScheduled = useMemo(() => groupThreadsByDate(scheduledThreads), [scheduledThreads]);
+
+  // Threads needing my response
+  const needsResponse = useMemo(() => {
+    if (!user) return [];
+    return threads.filter(t => {
+      const myParticipation = t.participants.find(p => p.user_id === user.id);
+      if (!myParticipation) return false;
+      
+      // I was invited but haven't responded yet
+      if (myParticipation.role === 'invited' && myParticipation.rsvp_status === 'pending') {
+        return true;
+      }
+      
+      // There are proposals I haven't acted on
+      if (t.status === 'proposing') {
+        const hasMyProposal = t.proposals.some(p => p.proposed_by === user.id && p.status === 'proposed');
+        const hasOthersProposal = t.proposals.some(p => p.proposed_by !== user.id && p.status === 'proposed');
+        return hasOthersProposal && !hasMyProposal;
+      }
+      
+      return false;
+    });
+  }, [threads, user]);
+
   if (!user) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -59,34 +90,6 @@ export function CoordinationFeed() {
       </div>
     );
   }
-
-  // Categorize threads
-  const planningThreads = threads.filter(t => t.status === 'idea' || t.status === 'proposing');
-  const scheduledThreads = threads.filter(t => t.status === 'scheduled');
-  const pastThreads = threads.filter(t => t.status === 'completed' || t.status === 'cancelled');
-
-  // Group scheduled threads by date
-  const groupedScheduled = useMemo(() => groupThreadsByDate(scheduledThreads), [scheduledThreads]);
-
-  // Threads needing my response
-  const needsResponse = threads.filter(t => {
-    const myParticipation = t.participants.find(p => p.user_id === user.id);
-    if (!myParticipation) return false;
-    
-    // I was invited but haven't responded yet
-    if (myParticipation.role === 'invited' && myParticipation.rsvp_status === 'pending') {
-      return true;
-    }
-    
-    // There are proposals I haven't acted on
-    if (t.status === 'proposing') {
-      const hasMyProposal = t.proposals.some(p => p.proposed_by === user.id && p.status === 'proposed');
-      const hasOthersProposal = t.proposals.some(p => p.proposed_by !== user.id && p.status === 'proposed');
-      return hasOthersProposal && !hasMyProposal;
-    }
-    
-    return false;
-  });
 
   const handleProposeTime = (threadId: string) => {
     const thread = threads.find(t => t.id === threadId);
