@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, isToday } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,11 +10,13 @@ import {
   Users, 
   MapPin, 
   Check, 
-  HelpCircle,
   X,
   ChevronDown,
   ChevronUp,
-  MessageCircle
+  MessageCircle,
+  Navigation,
+  Phone,
+  ExternalLink
 } from 'lucide-react';
 import { 
   ThreadWithDetails, 
@@ -32,6 +34,7 @@ interface ThreadCardProps {
   onAcceptProposal: (proposalId: string) => void;
   onUpdateRsvp: (threadId: string, status: RsvpStatus) => void;
   compact?: boolean;
+  showQuickActions?: boolean;
 }
 
 const statusConfig: Record<ThreadStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -68,7 +71,8 @@ export function ThreadCard({
   onProposeTime,
   onAcceptProposal,
   onUpdateRsvp,
-  compact = false
+  compact = false,
+  showQuickActions = false
 }: ThreadCardProps) {
   const [expanded, setExpanded] = useState(false);
   
@@ -84,6 +88,9 @@ export function ThreadCard({
   const goingCount = thread.participants.filter(p => p.rsvp_status === 'going').length;
   const maybeCount = thread.participants.filter(p => p.rsvp_status === 'maybe').length;
 
+  // Check if this is a "today" event for highlighting
+  const isEventToday = thread.scheduled_date && isToday(new Date(thread.scheduled_date));
+
   const getParticipantInitials = (participant: typeof thread.participants[0]) => {
     const profile = participant.profile;
     if (profile?.first_name) {
@@ -92,12 +99,46 @@ export function ThreadCard({
     return '?';
   };
 
+  const handleGetDirections = () => {
+    if (thread.location) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(thread.location)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else if (thread.provider_name) {
+      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(thread.provider_name)}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleCall = () => {
+    // For now, open Google search for the provider's phone
+    if (thread.provider_name) {
+      const url = `https://www.google.com/search?q=${encodeURIComponent(thread.provider_name + ' phone number')}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleVisitWebsite = () => {
+    if (thread.provider_url) {
+      window.open(thread.provider_url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <Card className={cn(
       "overflow-hidden transition-all hover:shadow-md",
-      thread.status === 'scheduled' && "border-l-4 border-l-green-500"
+      thread.status === 'scheduled' && "border-l-4 border-l-green-500",
+      isEventToday && "ring-2 ring-primary/20 bg-primary/5"
     )}>
       <CardContent className={cn("p-4", compact && "p-3")}>
+        {/* Today badge */}
+        {isEventToday && (
+          <div className="mb-2">
+            <Badge className="bg-primary text-primary-foreground">
+              🎉 Today!
+            </Badge>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -173,6 +214,41 @@ export function ThreadCard({
             </span>
           </div>
         </div>
+
+        {/* Quick Actions for scheduled threads */}
+        {showQuickActions && thread.status === 'scheduled' && (
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={handleGetDirections}
+            >
+              <Navigation className="h-4 w-4 mr-1" />
+              Directions
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={handleCall}
+            >
+              <Phone className="h-4 w-4 mr-1" />
+              Call
+            </Button>
+            {thread.provider_url && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={handleVisitWebsite}
+              >
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Website
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* RSVP section for scheduled threads */}
         {thread.status === 'scheduled' && myParticipation && (
