@@ -9,9 +9,10 @@ import LocationMap from "@/components/maps/LocationMap";
 import { SearchResultSkeletonList } from "@/components/search/SearchResultSkeleton";
 import { Button } from "@/components/ui/button";
 import type { AIResult } from "@/components/search/AIResultModal";
-import { User, Calendar, Star, Heart, Shield, Lock, Users } from "lucide-react";
+import { Heart, Shield, Lock, Users } from "lucide-react";
 import CategoryTiles from "@/components/home/CategoryTiles";
 import EmailCapture from "@/components/home/EmailCapture";
+import CoordinationTeaser from "@/components/home/CoordinationTeaser";
 import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
 
 // Mock data for camps
@@ -243,6 +244,11 @@ const Index = () => {
           </section>
         )}
 
+
+        {/* My Circle / Coordination Teaser - Always visible when no search results */}
+        {!showAIResults && (
+          <CoordinationTeaser />
+        )}
 
         {/* Categories Section - Only show when no AI results */}
         {!showAIResults && (
