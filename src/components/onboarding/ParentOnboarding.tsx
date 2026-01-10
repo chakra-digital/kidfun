@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, X, MapPin, DollarSign, Clock, User, Users } from "lucide-react";
 import { LocationInput } from "@/components/ui/location-input";
@@ -208,38 +207,59 @@ export const ParentOnboarding: React.FC<ParentOnboardingProps> = ({
                 </div>
 
                 <div>
-                  <Label>Budget Range (per week)</Label>
-                  <div className="mt-2">
-                    <Slider
-                      value={budgetRange}
-                      onValueChange={setBudgetRange}
-                      max={500}
-                      min={0}
-                      step={25}
-                      className="w-full"
-                      defaultValue={[0, 200]}
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>${budgetRange[0]}</span>
-                      <span>${budgetRange[1]}</span>
+                  <Label>Weekly Budget Range</Label>
+                  <div className="grid grid-cols-2 gap-3 mt-2">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Minimum ($)</Label>
+                      <div className="relative mt-1">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          min={0}
+                          max={500}
+                          step={25}
+                          value={budgetRange[0]}
+                          onChange={(e) => setBudgetRange([parseInt(e.target.value) || 0, budgetRange[1]])}
+                          className="pl-9"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Maximum ($)</Label>
+                      <div className="relative mt-1">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          type="number"
+                          min={0}
+                          max={500}
+                          step={25}
+                          value={budgetRange[1]}
+                          onChange={(e) => setBudgetRange([budgetRange[0], parseInt(e.target.value) || 200])}
+                          className="pl-9"
+                          placeholder="200"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <Label>Preferred Travel Distance (miles)</Label>
-                  <div className="mt-2">
-                    <Slider
-                      value={preferredRadius}
-                      onValueChange={setPreferredRadius}
-                      max={50}
+                  <Label>Preferred Travel Distance</Label>
+                  <div className="relative mt-2">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
                       min={1}
-                      step={1}
-                      className="w-full"
+                      max={50}
+                      value={preferredRadius[0]}
+                      onChange={(e) => setPreferredRadius([parseInt(e.target.value) || 10])}
+                      className="pl-9 pr-16"
+                      placeholder="10"
                     />
-                    <div className="text-center text-sm text-muted-foreground mt-1">
-                      {preferredRadius[0]} miles
-                    </div>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                      miles
+                    </span>
                   </div>
                 </div>
               </div>

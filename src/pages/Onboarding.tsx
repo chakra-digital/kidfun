@@ -91,7 +91,7 @@ const Onboarding = () => {
       
       toast({
         title: "Welcome to KidFun!",
-        description: "Your profile has been set up successfully. Check your email for next steps!",
+        description: "Your profile is set up. Let's get started!",
       });
     } catch (error) {
       console.error('Error sending welcome email:', error);
@@ -100,7 +100,8 @@ const Onboarding = () => {
         description: "Your profile has been set up successfully.",
       });
     }
-    navigate("/");
+    // Redirect to dashboard after onboarding completion
+    navigate("/dashboard?onboarding=complete");
   };
 
   const handleSkip = () => {

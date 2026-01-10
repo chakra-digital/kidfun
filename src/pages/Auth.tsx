@@ -160,7 +160,8 @@ const Auth = () => {
         console.log("Sign out error (continuing):", err);
       }
 
-      const redirectUrl = `${window.location.origin}/`;
+      // Redirect to onboarding after email verification
+      const redirectUrl = `${window.location.origin}/onboarding?type=${userType}`;
 
       const { data, error } = await supabase.auth.signUp({
         email,
