@@ -3,13 +3,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useChildren } from "@/hooks/useChildren";
 import { useGameifiedProgress } from "@/hooks/useGameifiedProgress";
+import { useSocialConnections } from "@/hooks/useSocialConnections";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar, GraduationCap, Home, ChevronDown, ChevronUp, UserPlus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { User, MapPin, Phone, Mail, Users, Edit, Plus, Calendar, GraduationCap, Home, ChevronDown, ChevronUp, UserPlus, Search, Sparkles, X } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AddChildForm from "@/components/children/AddChildForm";
 import { EditChildDialog } from "@/components/children/EditChildDialog";
 import { EditProfileDialog } from "@/components/profile/EditProfileDialog";
@@ -25,7 +26,16 @@ const Dashboard = () => {
   const { userProfile, parentProfile, loading } = useUserProfile();
   const { children, loading: childrenLoading, refetch: refetchChildren } = useChildren();
   const { progress } = useGameifiedProgress();
+  const { connections } = useSocialConnections();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Welcome banner for newly onboarded users
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(() => {
+    const isNewOnboarding = searchParams.get('onboarding') === 'complete';
+    const dismissed = localStorage.getItem('welcome_banner_dismissed');
+    return isNewOnboarding || (!dismissed && !loading);
+  });
   
   // Profile section collapsed state with localStorage persistence
   const [profileExpanded, setProfileExpanded] = useState(() => {
@@ -36,6 +46,12 @@ const Dashboard = () => {
   useEffect(() => {
     localStorage.setItem('dashboard_profile_expanded', JSON.stringify(profileExpanded));
   }, [profileExpanded]);
+  
+  // Dismiss welcome banner
+  const dismissWelcomeBanner = () => {
+    setShowWelcomeBanner(false);
+    localStorage.setItem('welcome_banner_dismissed', 'true');
+  };
 
   const handleSchoolClick = () => {
     if (parentProfile?.school_name) {
@@ -75,6 +91,53 @@ const Dashboard = () => {
       <Navbar />
       
       <main className="container mx-auto py-8 px-4 max-w-full">
+        {/* Welcome Banner for New Users */}
+        {showWelcomeBanner && userType === "parent" && connections.length === 0 && (
+          <Card className="mb-6 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/5 border-primary/20">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-lg">Welcome to KidFun!</h3>
+                  </div>
+                  <p className="text-muted-foreground mb-4">
+                    You're all set up! Here's what you can do next to get the most out of KidFun:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Button asChild size="sm" className="justify-start">
+                      <Link to="/">
+                        <Search className="h-4 w-4 mr-2" />
+                        Find Activities
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm" className="justify-start">
+                      <Link to="/find-parents">
+                        <Users className="h-4 w-4 mr-2" />
+                        Connect with Parents
+                      </Link>
+                    </Button>
+                    <InviteParentDialog>
+                      <Button variant="outline" size="sm" className="justify-start w-full">
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Invite Friends
+                      </Button>
+                    </InviteParentDialog>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
+                  onClick={dismissWelcomeBanner}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Welcome back, {userProfile?.first_name || "User"}!
