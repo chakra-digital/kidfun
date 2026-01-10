@@ -13,7 +13,7 @@ import { Heart, Shield, Lock, Users } from "lucide-react";
 import CategoryTiles from "@/components/home/CategoryTiles";
 import EmailCapture from "@/components/home/EmailCapture";
 import CoordinationTeaser from "@/components/home/CoordinationTeaser";
-import heroImage from "@/assets/kids-soccer-hero-bright.jpg";
+
 
 // Mock data for camps
 
@@ -102,12 +102,19 @@ const Index = () => {
       <main className="flex-grow">
         {/* Hero Section with AI Search */}
         <section className="relative text-white py-8 md:py-16 lg:py-24 min-h-[65svh] md:min-h-[70svh] flex items-center overflow-hidden">
-          {/* Fixed background image layer */}
+          {/* Apple-inspired gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+          {/* Subtle warm accent gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-transparent to-rose-500/10" />
+          {/* Noise texture overlay for depth */}
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url(${heroImage})` }}
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-600/40 via-teal-500/40 to-green-500/40"></div>
+          {/* Subtle radial glow in center */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent" />
           
           <div className="container mx-auto px-3 md:px-4 relative z-10 w-full">
             <div className="max-w-4xl mx-auto text-center mb-6 md:mb-12">
