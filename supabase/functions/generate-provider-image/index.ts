@@ -68,22 +68,24 @@ Background should be a solid vibrant color or simple gradient.`;
     const data = await response.json();
     console.log('Google AI response structure:', JSON.stringify(data, null, 2));
     
-    // Try multiple possible response formats
-    let imageData = data.candidates?.[0]?.content?.parts?.[0]?.inline_data;
+    // Try multiple possible response formats (Google uses camelCase: inlineData)
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    let imageData = null;
     
-    // Alternative format: sometimes it's directly in parts
-    if (!imageData) {
-      const parts = data.candidates?.[0]?.content?.parts || [];
-      for (const part of parts) {
-        if (part.inline_data || part.inlineData) {
-          imageData = part.inline_data || part.inlineData;
-          break;
-        }
+    for (const part of parts) {
+      // Check both camelCase and snake_case formats
+      if (part.inlineData) {
+        imageData = part.inlineData;
+        break;
+      }
+      if (part.inline_data) {
+        imageData = part.inline_data;
+        break;
       }
     }
     
     if (!imageData?.data) {
-      console.error('Failed to find image in response. Full response:', JSON.stringify(data, null, 2));
+      console.error('Failed to find image in response. Parts found:', JSON.stringify(parts, null, 2));
       throw new Error('No image data returned from AI. Check logs for response structure.');
     }
 
