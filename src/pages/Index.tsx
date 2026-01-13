@@ -345,25 +345,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Trust Indicators */}
-        <section className="py-12 border-t">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 text-muted-foreground">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">500+</p>
-                <p className="text-sm">Verified Providers</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">1,000+</p>
-                <p className="text-sm">Active Families</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-foreground">50+</p>
-                <p className="text-sm">Schools Connected</p>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
