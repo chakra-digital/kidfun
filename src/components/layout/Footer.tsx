@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
+import { Download } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -24,11 +25,16 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h3 className="font-bold text-lg mb-4">Hosting</h3>
+            <h3 className="font-bold text-lg mb-4">Get the App</h3>
             <ul className="space-y-2">
-              <li><span className="text-gray-600 cursor-default">Become a Host</span></li>
-              <li><span className="text-gray-600 cursor-default">Host Resources</span></li>
-              <li><span className="text-gray-600 cursor-default">Get Certified</span></li>
+              <li>
+                <Link to="/install" className="text-gray-600 hover:text-primary transition-colors flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  Install KidFun
+                </Link>
+              </li>
+              <li><span className="text-gray-600 cursor-default">iOS & Android</span></li>
+              <li><span className="text-gray-600 cursor-default">Works Offline</span></li>
             </ul>
           </div>
           <div>
