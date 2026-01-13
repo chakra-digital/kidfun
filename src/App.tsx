@@ -18,6 +18,7 @@ import Camps from "./pages/Camps";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import FindParents from "./pages/FindParents";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/find-parents" element={<FindParents />} />
             <Route path="/parent/:userId" element={<ParentProfile />} />
+            <Route path="/install" element={<Install />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
