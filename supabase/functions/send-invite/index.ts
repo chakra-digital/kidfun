@@ -17,6 +17,28 @@ interface InviteRequest {
   inviteType?: 'app_invite' | 'notify_me';
 }
 
+// Simple in-memory rate limiting for invite spam protection
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 5; // 5 invites per minute per IP (strict for email)
+const RATE_LIMIT_WINDOW = 60000;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -24,24 +46,45 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { inviteeEmail, inviterName, inviterEmail, referralCode, inviteType = 'app_invite' }: InviteRequest = await req.json();
+    // Rate limiting
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'anonymous';
+    
+    if (!checkRateLimit(clientIp)) {
+      return new Response(
+        JSON.stringify({ error: "Too many invite requests. Please wait a minute." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
-    const normalizedInviteeEmail = (inviteeEmail ?? "").trim().toLowerCase();
+    const body = await req.json();
+    
+    // Validate and sanitize all inputs with length limits
+    const inviteeEmail = typeof body.inviteeEmail === 'string' ? body.inviteeEmail.trim().toLowerCase().slice(0, 254) : '';
+    const inviterName = typeof body.inviterName === 'string' ? body.inviterName.trim().slice(0, 100) : undefined;
+    const inviterEmail = typeof body.inviterEmail === 'string' ? body.inviterEmail.trim().toLowerCase().slice(0, 254) : undefined;
+    const referralCode = typeof body.referralCode === 'string' ? body.referralCode.trim().slice(0, 50) : undefined;
+    const inviteType = body.inviteType === 'notify_me' ? 'notify_me' : 'app_invite';
 
     console.log("Processing invite request:", {
-      inviteeEmail: normalizedInviteeEmail,
-      inviterName,
+      inviteeEmail,
+      inviterName: inviterName?.slice(0, 20),
       referralCode,
       inviteType,
+      clientIp,
     });
 
-    // Validate email
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedInviteeEmail)) {
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteeEmail)) {
       return new Response(
         JSON.stringify({ error: "Valid email address required" }),
         { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
       );
     }
+
+    // Use sanitized variable name
+    const normalizedInviteeEmail = inviteeEmail;
 
     // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

@@ -12,15 +12,85 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
+// Simple in-memory rate limiting (resets on cold start, but provides basic protection)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10; // requests per minute per IP
+const RATE_LIMIT_WINDOW = 60000; // 1 minute in ms
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { query, location = "Austin, TX" } = await req.json();
+    // Rate limiting by IP
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'anonymous';
     
-    console.log("AI Provider Search request:", { query, location });
+    if (!checkRateLimit(clientIp)) {
+      console.log(`Rate limit exceeded for IP: ${clientIp}`);
+      return new Response(JSON.stringify({ 
+        error: 'Too many requests. Please wait a moment and try again.',
+        results: [],
+        searchAnalysis: null,
+        newProvidersFound: 0
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Parse and validate input
+    const body = await req.json();
+    
+    // Validate query
+    if (!body.query || typeof body.query !== 'string') {
+      return new Response(JSON.stringify({ 
+        error: 'Query is required and must be a string',
+        results: [],
+        searchAnalysis: null,
+        newProvidersFound: 0
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Trim and limit input lengths
+    const query = body.query.trim().slice(0, 500); // Max 500 chars
+    const location = (typeof body.location === 'string' ? body.location.trim() : 'Austin, TX').slice(0, 200); // Max 200 chars
+    
+    if (query.length < 2) {
+      return new Response(JSON.stringify({ 
+        error: 'Query must be at least 2 characters',
+        results: [],
+        searchAnalysis: null,
+        newProvidersFound: 0
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    console.log("AI Provider Search request:", { query: query.slice(0, 100), location, clientIp });
 
     // Create a hash for caching (simple hash: query + location)
     const cacheKey = `${query.toLowerCase().trim()}_${location.toLowerCase().trim()}`;
