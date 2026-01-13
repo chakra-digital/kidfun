@@ -82,12 +82,12 @@ const Install = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-background">
       <div className="container mx-auto px-4 py-12 max-w-lg">
         {/* Hero */}
         <div className="text-center mb-8">
-          <div className="w-24 h-24 bg-gradient-to-br from-primary to-primary/80 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <span className="text-4xl">🎈</span>
+          <div className="w-24 h-24 bg-gradient-to-br from-orange-100 to-orange-50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-orange-200/50">
+            <span className="text-5xl transform scale-x-[-1]">🏃‍♀️</span>
           </div>
           <h1 className="text-3xl font-bold mb-3">Install KidFun</h1>
           <p className="text-muted-foreground text-lg">
