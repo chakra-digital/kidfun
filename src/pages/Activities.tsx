@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNav from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Loader2, Map, Grid3X3, ArrowLeft } from "lucide-react";
+import { Loader2, Map, Grid3X3, Home, Users, Calendar } from "lucide-react";
 import ConversationalSearch, { ConversationalSearchRef } from "@/components/search/ConversationalSearch";
 import AIResultCard from "@/components/search/AIResultCard";
 import AIResultModal from "@/components/search/AIResultModal";
@@ -12,9 +12,13 @@ import LocationMap from "@/components/maps/LocationMap";
 import CategoryTiles from "@/components/home/CategoryTiles";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const Activities = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
   const searchRef = useRef<ConversationalSearchRef>(null);
   const [aiResults, setAiResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -86,27 +90,75 @@ const Activities = () => {
 
   const totalResults = aiResults.filter(r => !r.isLoading).length;
 
+  const handleNavClick = (target: string) => {
+    if (target === 'home') {
+      navigate('/');
+    } else if (target === 'circle') {
+      if (isLoggedIn) {
+        navigate('/dashboard', { state: { scrollTo: 'connections' } });
+      } else {
+        navigate('/', { state: { scrollTo: 'circle-preview' } });
+      }
+    } else if (target === 'plan') {
+      if (isLoggedIn) {
+        navigate('/dashboard', { state: { scrollTo: 'coordination' } });
+      } else {
+        navigate('/', { state: { scrollTo: 'plan-preview' } });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
+      {/* Sticky Quick Nav - Airbnb style */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center gap-1 py-2 overflow-x-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleNavClick('home')}
+              className="flex items-center gap-2 shrink-0 rounded-full"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Home</span>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex items-center gap-2 shrink-0 rounded-full font-medium"
+              disabled
+            >
+              Discover
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleNavClick('circle')}
+              className="flex items-center gap-2 shrink-0 rounded-full"
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Circle</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleNavClick('plan')}
+              className="flex items-center gap-2 shrink-0 rounded-full"
+            >
+              <Calendar className="h-4 w-4" />
+              <span className="hidden sm:inline">Plan</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+      
       <main className="flex-grow pb-20 md:pb-0">
         {/* Search Header */}
-        <section className="sticky top-0 z-40 bg-gradient-to-b from-primary/5 to-background border-b backdrop-blur-sm">
+        <section className="bg-gradient-to-b from-primary/5 to-background border-b">
           <div className="container mx-auto px-4 py-6">
-            {/* Back button when results showing */}
-            {showResults && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearResults}
-                className="mb-4 -ml-2"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                New Search
-              </Button>
-            )}
-            
             <div className="text-center mb-6">
               <h1 className="text-2xl md:text-3xl font-bold mb-2">Discover Activities</h1>
               <p className="text-muted-foreground">
