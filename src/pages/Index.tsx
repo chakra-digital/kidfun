@@ -219,8 +219,16 @@ const Index = () => {
             <div className="max-w-4xl mx-auto mb-12">
               <ConversationalSearch 
                 ref={searchRef}
-                onResultsUpdate={() => {}}
-                onSearchStart={() => navigate('/activities')}
+                onResultsUpdate={(results) => {
+                  // When results come in, navigate to Activities with them
+                  if (results.length > 0 && !(results[0] as any)?.isLoading) {
+                    navigate('/activities', { state: { searchResults: results } });
+                  }
+                }}
+                onSearchStart={() => {
+                  // Navigate immediately to Activities page to show loading state there
+                  navigate('/activities');
+                }}
                 className=""
               />
             </div>

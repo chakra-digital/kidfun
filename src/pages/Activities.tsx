@@ -1,217 +1,276 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import CampCard from "@/components/camps/CampCard";
+import BottomNav from "@/components/layout/BottomNav";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { usePublicProviderProfiles } from "@/hooks/useProviderProfiles";
-import ConversationalSearch from "@/components/search/ConversationalSearch";
+import { Loader2, Map, Grid3X3, ArrowLeft } from "lucide-react";
+import ConversationalSearch, { ConversationalSearchRef } from "@/components/search/ConversationalSearch";
 import AIResultCard from "@/components/search/AIResultCard";
 import AIResultModal from "@/components/search/AIResultModal";
+import LocationMap from "@/components/maps/LocationMap";
+import CategoryTiles from "@/components/home/CategoryTiles";
 import { Badge } from "@/components/ui/badge";
-import { generateProviderIcon } from "@/lib/imageUtils";
-
+import { cn } from "@/lib/utils";
 
 const Activities = () => {
+  const location = useLocation();
+  const searchRef = useRef<ConversationalSearchRef>(null);
   const [aiResults, setAiResults] = useState<any[]>([]);
-  const [showAIResults, setShowAIResults] = useState(false);
-  const { profiles: providers, loading, error } = usePublicProviderProfiles();
+  const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [viewMode, setViewMode] = useState<'split' | 'list' | 'map'>('split');
+  const [selectedAIResult, setSelectedAIResult] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Handle incoming search query or results from homepage navigation
+  useEffect(() => {
+    const state = location.state as { searchQuery?: string; searchResults?: any[] } | null;
+    
+    if (state?.searchResults && state.searchResults.length > 0) {
+      // Results passed from homepage search
+      setAiResults(state.searchResults);
+      setShowResults(true);
+      setIsSearching(false);
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    } else if (state?.searchQuery && searchRef.current) {
+      // Query passed to trigger search here
+      searchRef.current.triggerSearch(state.searchQuery);
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleAIResultsUpdate = (results: any[]) => {
     setAiResults(results);
-    setShowAIResults(results.length > 0);
+    // Show results section once we have results (even loading skeletons)
+    setShowResults(true);
+    // Check if these are skeleton/loading results
+    const isLoading = results.length > 0 && results[0]?.isLoading;
+    setIsSearching(isLoading);
   };
 
-  const handleClearAIResults = () => {
+  const handleSearchStart = () => {
+    setIsSearching(true);
+    setShowResults(true);
+  };
+
+  const handleClearResults = () => {
     setAiResults([]);
-    setShowAIResults(false);
+    setShowResults(false);
+    setIsSearching(false);
   };
-
-  const [selectedAIResult, setSelectedAIResult] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAIResultClick = (result: any) => {
     setSelectedAIResult(result);
     setIsModalOpen(true);
   };
 
-  // Transform provider profiles to activity card format
-  const transformedProviders = !showAIResults ? providers.map(provider => ({
-    id: provider.id,
-    title: provider.business_name,
-    image: generateProviderIcon(provider.business_name, provider.specialties, provider.id),
-    location: provider.location,
-    price: provider.base_price || 25,
-    priceUnit: "session" as const,
-    rating: provider.google_rating || 4.5,
-    reviewCount: provider.google_reviews_count || 0,
-    dates: "Ongoing",
-    availability: "Contact for schedule",
-    type: "activity" as const,
-    distance: "Austin area",
-    age: provider.age_groups?.join(", ") || "All ages",
-    external_website: provider.external_website
-  })) : [];
+  const handleCategoryClick = (query: string) => {
+    if (searchRef.current) {
+      searchRef.current.triggerSearch(query);
+    }
+  };
 
-  const allResults = showAIResults ? aiResults : transformedProviders;
-  const totalResults = allResults.length;
+  const handleMarkerClick = (provider: { id: string; business_name: string }) => {
+    const result = aiResults.find(r => r.id === provider.id || r.business_name === provider.business_name);
+    if (result) {
+      handleAIResultClick(result);
+    }
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <Loader2 className="mx-auto h-8 w-8 animate-spin mb-4" />
-            <p>Loading activities...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+  // Get valid providers with coordinates for the map
+  const mappableResults = aiResults.filter(r => 
+    r.latitude && r.longitude && !r.isLoading
+  );
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-red-600 mb-4">Error loading activities: {error}</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
+  const totalResults = aiResults.filter(r => !r.isLoading).length;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="flex-grow">
-        {/* Header */}
-        <section className="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-12">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold mb-4">Activities & Classes</h1>
-              <p className="text-xl mb-8">Find enriching activities and ongoing classes for your kids</p>
+      
+      <main className="flex-grow pb-20 md:pb-0">
+        {/* Search Header */}
+        <section className="sticky top-0 z-40 bg-gradient-to-b from-primary/5 to-background border-b backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-6">
+            {/* Back button when results showing */}
+            {showResults && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearResults}
+                className="mb-4 -ml-2"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                New Search
+              </Button>
+            )}
+            
+            <div className="text-center mb-6">
+              <h1 className="text-2xl md:text-3xl font-bold mb-2">Discover Activities</h1>
+              <p className="text-muted-foreground">
+                Find classes, camps, and enrichment programs near you
+              </p>
             </div>
             
-            {/* AI Conversational Search */}
-            <div className="mb-8">
+            {/* Search Component */}
+            <div className="max-w-3xl mx-auto">
               <ConversationalSearch 
+                ref={searchRef}
                 onResultsUpdate={handleAIResultsUpdate}
+                onSearchStart={handleSearchStart}
                 className=""
               />
             </div>
-
-            {showAIResults && (
-              <div className="text-center mt-4">
-                <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
-                  {totalResults} results from AI search
-                </Badge>
-              </div>
-            )}
           </div>
         </section>
-        
-        {/* AI Results Header */}
-        {showAIResults && aiResults.length > 0 && (
-          <div className="border-b bg-primary/5">
-            <div className="container mx-auto py-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">AI-Powered Search Results</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Found {aiResults.length} relevant providers ranked by AI relevance
-                  </p>
+
+        {/* Results Section */}
+        {showResults ? (
+          <section className="flex-1">
+            {/* Results Header */}
+            <div className="border-b bg-muted/30">
+              <div className="container mx-auto px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {isSearching ? (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Searching...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <h2 className="font-semibold">Search Results</h2>
+                        <Badge variant="secondary">{totalResults} found</Badge>
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* View Mode Toggle - Desktop only */}
+                  <div className="hidden md:flex items-center gap-1 bg-muted rounded-lg p-1">
+                    <Button
+                      variant={viewMode === 'split' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('split')}
+                      className="h-8"
+                    >
+                      Split
+                    </Button>
+                    <Button
+                      variant={viewMode === 'list' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('list')}
+                      className="h-8"
+                    >
+                      <Grid3X3 className="h-4 w-4 mr-1" />
+                      List
+                    </Button>
+                    <Button
+                      variant={viewMode === 'map' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setViewMode('map')}
+                      className="h-8"
+                    >
+                      <Map className="h-4 w-4 mr-1" />
+                      Map
+                    </Button>
+                  </div>
                 </div>
-                <Button variant="outline" onClick={handleClearAIResults}>
-                  Back to Browse All
-                </Button>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Main Content */}
-        <section className="py-12">
-          <div className="container mx-auto px-4">
-            {totalResults === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-600 text-lg mb-4">
-                  {showAIResults ? "No AI results found. Try a different search." : "No activities found."}
-                </p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    if (showAIResults) {
-                      handleClearAIResults();
-                    }
-                  }}
-                >
-                  {showAIResults ? "Back to Browse All" : "Refresh"}
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold">
-                    {showAIResults ? "AI Search Results" : "All Activities"}
-                  </h2>
-                  <p className="text-gray-600 mt-1">
-                    {totalResults} {totalResults === 1 ? 'result' : 'results'}
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {showAIResults ? (
-                    // Render AI Results
-                    allResults.map((result, index) => (
-                      <AIResultCard
-                        key={result.id || result.google_place_id || index}
-                        {...result}
-                        onClick={() => handleAIResultClick(result)}
-                      />
-                    ))
+            {/* Split View Container */}
+            <div className={cn(
+              "flex-1",
+              viewMode === 'split' && "md:flex md:h-[calc(100vh-280px)]"
+            )}>
+              {/* Results List */}
+              <div className={cn(
+                "overflow-y-auto",
+                viewMode === 'map' && "hidden",
+                viewMode === 'split' && "md:w-1/2 md:border-r",
+                viewMode === 'list' && "w-full"
+              )}>
+                <div className="container mx-auto px-4 py-6 md:container-none md:px-4">
+                  {totalResults === 0 && !isSearching ? (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground mb-4">
+                        No results found. Try a different search.
+                      </p>
+                    </div>
                   ) : (
-                    // Render Traditional Activity Cards
-                    allResults.map((result) => (
-                      <div key={result.id} className="relative">
-                        <div 
-                          className="cursor-pointer"
-                          onClick={() => window.location.href = `/provider/${result.id}`}
-                        >
-                          <CampCard {...result} />
-                        </div>
-                        {result.external_website && (
-                          <div className="mt-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="w-full"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                window.open(`${result.external_website}?utm_source=kidfun&utm_medium=activities_page&utm_campaign=provider_referral`, '_blank');
-                              }}
-                            >
-                              Visit Website
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    ))
+                    <div className={cn(
+                      "grid gap-4",
+                      viewMode === 'list' ? "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
+                    )}>
+                      {aiResults.map((result, index) => (
+                        <AIResultCard
+                          key={result.id || result.google_place_id || index}
+                          {...result}
+                          onClick={() => handleAIResultClick(result)}
+                        />
+                      ))}
+                    </div>
                   )}
                 </div>
-              </>
-            )}
-          </div>
-        </section>
+              </div>
+
+              {/* Map View */}
+              <div className={cn(
+                "bg-muted/20",
+                viewMode === 'list' && "hidden",
+                viewMode === 'map' && "h-[calc(100vh-280px)]",
+                viewMode === 'split' && "hidden md:block md:w-1/2 md:h-full"
+              )}>
+                <LocationMap
+                  providers={mappableResults}
+                  onMarkerClick={handleMarkerClick}
+                  isSearching={isSearching}
+                  className="h-full w-full"
+                />
+              </div>
+            </div>
+
+            {/* Mobile Map Toggle */}
+            <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-30 md:hidden">
+              <Button
+                onClick={() => setViewMode(viewMode === 'map' ? 'list' : 'map')}
+                className="rounded-full shadow-lg"
+              >
+                {viewMode === 'map' ? (
+                  <>
+                    <Grid3X3 className="h-4 w-4 mr-2" />
+                    Show List
+                  </>
+                ) : (
+                  <>
+                    <Map className="h-4 w-4 mr-2" />
+                    Show Map
+                  </>
+                )}
+              </Button>
+            </div>
+          </section>
+        ) : (
+          /* Browse Categories - When no search active */
+          <section className="py-12">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-8">
+                <h2 className="text-xl font-semibold mb-2">Browse by Category</h2>
+                <p className="text-muted-foreground">
+                  Explore popular activity categories
+                </p>
+              </div>
+              <CategoryTiles onCategoryClick={handleCategoryClick} />
+            </div>
+          </section>
+        )}
       </main>
+
       <Footer />
-      
+      <BottomNav />
+
       {/* AI Result Modal */}
       <AIResultModal
         result={selectedAIResult}
