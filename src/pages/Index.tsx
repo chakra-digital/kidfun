@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useRef, useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import ConversationalSearch from "@/components/search/ConversationalSearch";
 import CoordinationTeaser from "@/components/home/CoordinationTeaser";
 import CategoryTiles from "@/components/home/CategoryTiles";
+import { SocialConnectionsCard } from "@/components/social/SocialConnectionsCard";
 
 type PathMode = "circle" | "discover" | "plan";
 
@@ -38,7 +39,7 @@ const pathCards = [
     description: "Connect with families at your school. Coordinate playdates, carpools, and activities together.",
     cta: "Find Parents",
     ctaLoggedIn: "My Circle",
-    pathLoggedOut: "/find-parents",
+    pathLoggedOut: "#circle-preview",
     pathLoggedIn: "/dashboard#connections",
     accentClass: "from-rose-500 to-orange-400",
     bgClass: "bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-950/30 dark:to-orange-950/30",
@@ -75,10 +76,26 @@ const pathCards = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const isLoggedIn = !!user;
   const searchRef = useRef<{ triggerSearch: (query: string) => void }>(null);
   const [showSearch, setShowSearch] = useState(false);
+
+  // Handle scroll-to from BottomNav navigation
+  useEffect(() => {
+    const state = location.state as { scrollTo?: string } | null;
+    if (state?.scrollTo) {
+      setTimeout(() => {
+        const element = document.getElementById(state.scrollTo!);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleCardClick = (card: typeof pathCards[0]) => {
     const path = isLoggedIn ? card.pathLoggedIn : card.pathLoggedOut;
@@ -87,7 +104,7 @@ const Index = () => {
       // Always scroll to search section for discover
       setShowSearch(true);
       setTimeout(() => {
-        document.getElementById('discover-section')?.scrollIntoView({ 
+        document.getElementById('discover')?.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'start' 
         });
@@ -101,7 +118,7 @@ const Index = () => {
       });
     } else if (path.includes('#')) {
       // Navigate to page with hash
-      navigate(path.split('#')[0]);
+      navigate(path.split('#')[0], { state: { scrollTo: path.split('#')[1] } });
     } else {
       navigate(path);
     }
@@ -189,7 +206,7 @@ const Index = () => {
         </section>
 
         {/* Discover Section - Search + Categories */}
-        <section id="discover-section" className="py-16 bg-gradient-to-b from-muted/30 to-background scroll-mt-20">
+        <section id="discover" className="py-16 bg-gradient-to-b from-muted/30 to-background scroll-mt-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-10">
               <h2 className="text-3xl md:text-4xl font-bold mb-3">Discover Activities</h2>
@@ -213,7 +230,80 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Circle + Plan Preview Section */}
+        {/* Circle Preview Section - For logged out users */}
+        <section id="circle-preview" className="py-16 bg-gradient-to-b from-background to-muted/30 scroll-mt-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-sm font-medium mb-4">
+                  <Users className="h-4 w-4" />
+                  Parent Network
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-3">Your Trusted Circle</h2>
+                <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+                  Connect with families at your child's school. Share recommendations, coordinate carpools, and plan activities together.
+                </p>
+              </div>
+              
+              {/* Visual preview of connections */}
+              <div className="relative">
+                {/* Connection visualization */}
+                <div className="flex justify-center items-center gap-4 mb-8">
+                  <div className="flex -space-x-3">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div 
+                        key={i} 
+                        className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-400 to-orange-300 border-2 border-background flex items-center justify-center text-white font-semibold text-sm shadow-md"
+                      >
+                        {String.fromCharCode(64 + i)}
+                      </div>
+                    ))}
+                  </div>
+                  <span className="text-muted-foreground">+50 more parents</span>
+                </div>
+
+                {/* Feature highlights */}
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="text-center p-6 rounded-2xl bg-background border shadow-sm">
+                    <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
+                      <Search className="h-6 w-6 text-rose-500" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Find Parents</h3>
+                    <p className="text-sm text-muted-foreground">Connect with families at your school or in your neighborhood</p>
+                  </div>
+                  <div className="text-center p-6 rounded-2xl bg-background border shadow-sm">
+                    <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-4">
+                      <Heart className="h-6 w-6 text-orange-500" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Share Recommendations</h3>
+                    <p className="text-sm text-muted-foreground">See what activities other parents love and trust</p>
+                  </div>
+                  <div className="text-center p-6 rounded-2xl bg-background border shadow-sm">
+                    <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+                      <CalendarDays className="h-6 w-6 text-amber-500" />
+                    </div>
+                    <h3 className="font-semibold mb-2">Coordinate Together</h3>
+                    <p className="text-sm text-muted-foreground">Plan group activities and share schedules</p>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center mt-10">
+                  <Button 
+                    size="lg" 
+                    onClick={() => navigate('/auth')}
+                    className="bg-gradient-to-r from-rose-500 to-orange-400 hover:from-rose-600 hover:to-orange-500"
+                  >
+                    Join Your Circle
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Plan Preview Section */}
         <section id="plan-preview" className="scroll-mt-20">
           <CoordinationTeaser />
         </section>
