@@ -5,6 +5,31 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Simple in-memory rate limiting
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 30; // Higher limit for autocomplete (per keystroke)
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
+// Allowed types for autocomplete
+const ALLOWED_TYPES = ['school', 'establishment', 'cities', undefined];
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -12,9 +37,26 @@ serve(async (req) => {
   }
 
   try {
-    const { input, type, location } = await req.json();
+    // Rate limiting
+    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+                     req.headers.get('x-real-ip') || 
+                     'anonymous';
     
-    console.log('Autocomplete request:', { input, type, location });
+    if (!checkRateLimit(clientIp)) {
+      return new Response(
+        JSON.stringify({ error: 'Too many requests', predictions: [] }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const body = await req.json();
+    
+    // Validate and sanitize input
+    const input = typeof body.input === 'string' ? body.input.trim().slice(0, 200) : '';
+    const type = ALLOWED_TYPES.includes(body.type) ? body.type : undefined;
+    const location = typeof body.location === 'string' ? body.location.trim().slice(0, 100) : undefined;
+    
+    console.log('Autocomplete request:', { input: input.slice(0, 50), type, clientIp });
     
     if (!input || input.length < 2) {
       return new Response(
