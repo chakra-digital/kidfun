@@ -6,6 +6,7 @@ import { useGameifiedProgress } from "@/hooks/useGameifiedProgress";
 import { useSocialConnections } from "@/hooks/useSocialConnections";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import BottomNav from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -357,14 +358,14 @@ const Dashboard = () => {
 
         {/* Your Network */}
         {userType === "parent" && (
-          <div className="mb-6">
+          <div id="connections-section" className="mb-6">
             <SocialConnectionsCard />
           </div>
         )}
 
         {/* Coordination Feed for planning with others */}
         {userType === "parent" && (
-          <Card className="mb-6">
+          <Card id="coordination-section" className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Calendar className="h-5 w-5" />
@@ -485,6 +486,7 @@ const Dashboard = () => {
       </main>
 
       <Footer />
+      <BottomNav />
     </div>
   );
 };
