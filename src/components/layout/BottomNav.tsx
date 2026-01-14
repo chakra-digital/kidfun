@@ -16,8 +16,23 @@ const BottomNav = () => {
   const { user } = useAuth();
   const isLoggedIn = !!user;
 
-  const scrollToSection = (sectionId: string) => {
-    if (location.pathname !== "/") {
+
+  const scrollToSection = (sectionId: string, dashboardSection?: boolean) => {
+    if (dashboardSection && location.pathname !== "/dashboard") {
+      navigate("/dashboard");
+      // Use setTimeout to scroll after navigation
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    } else if (location.pathname === "/dashboard") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else if (location.pathname !== "/") {
       navigate("/", { state: { scrollTo: sectionId } });
     } else {
       const element = document.getElementById(sectionId);
@@ -38,46 +53,83 @@ const BottomNav = () => {
           navigate("/");
         }
       },
-      isActive: location.pathname === "/" && !location.hash,
+      isActive: location.pathname === "/",
     },
     {
       icon: Users,
       label: "Circle",
       action: () => {
         if (isLoggedIn) {
-          navigate("/dashboard", { state: { scrollTo: "connections" } });
+          if (location.pathname === "/dashboard") {
+            const element = document.getElementById("connections-section");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          } else {
+            navigate("/find-parents");
+          }
         } else {
           scrollToSection("circle-preview");
         }
       },
-      isActive: location.pathname === "/find-parents" || location.hash === "#connections",
+      isActive: location.pathname === "/find-parents",
     },
     {
       icon: Search,
       label: "Discover",
       action: () => {
-        scrollToSection("discover");
+        if (location.pathname !== "/") {
+          navigate("/");
+          setTimeout(() => {
+            const element = document.getElementById("discover");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          }, 100);
+        } else {
+          const element = document.getElementById("discover");
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }
       },
-      isActive: location.hash === "#discover" || location.pathname === "/activities",
+      isActive: location.pathname === "/activities",
     },
     {
       icon: Calendar,
       label: "Plan",
       action: () => {
         if (isLoggedIn) {
-          navigate("/dashboard", { state: { scrollTo: "coordination" } });
+          if (location.pathname === "/dashboard") {
+            const element = document.getElementById("coordination-section");
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
+            }
+          } else {
+            navigate("/dashboard");
+            setTimeout(() => {
+              const element = document.getElementById("coordination-section");
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+              }
+            }, 100);
+          }
         } else {
           scrollToSection("plan-preview");
         }
       },
-      isActive: location.hash === "#plan-preview" || location.hash === "#coordination",
+      isActive: false,
     },
     {
       icon: User,
       label: "Profile",
       action: () => {
         if (isLoggedIn) {
-          navigate("/dashboard");
+          if (location.pathname !== "/dashboard") {
+            navigate("/dashboard");
+          } else {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
         } else {
           navigate("/auth");
         }
