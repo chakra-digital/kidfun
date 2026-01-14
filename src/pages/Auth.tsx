@@ -227,8 +227,8 @@ const Auth = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Force page reload for clean state
-        window.location.href = '/';
+        // Force page reload for clean state - go to dashboard
+        window.location.href = '/dashboard';
       }
     } catch (error: any) {
       toast({

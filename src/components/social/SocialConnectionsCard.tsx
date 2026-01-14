@@ -321,7 +321,9 @@ export const SocialConnectionsCard = () => {
               <span className="text-sm font-medium">Parents you may know</span>
             </div>
             <div className="space-y-2">
-              {suggestedParents.map((parent) => (
+              {suggestedParents
+                .filter(parent => parent.profile?.first_name) // Only show parents with names
+                .map((parent) => (
                 <div 
                   key={parent.user_id}
                   className="flex items-center justify-between p-2 rounded-lg bg-background border border-border hover:border-primary/30 transition-colors"
@@ -373,15 +375,34 @@ export const SocialConnectionsCard = () => {
           </div>
         )}
 
-        {/* No suggestions prompt */}
-        {!hasSuggestions && !loadingSuggestions && !parentProfile?.school_name && !parentProfile?.neighborhood && (
-          <div className="text-center py-4 border-b border-border">
-            <p className="text-sm text-muted-foreground mb-2">
-              Add your school or neighborhood to discover parents nearby
-            </p>
-            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
-              Complete Profile
-            </Button>
+        {/* No suggestions or empty suggestions prompt */}
+        {(!hasSuggestions || suggestedParents.filter(p => p.profile?.first_name).length === 0) && !loadingSuggestions && (
+          <div className="text-center py-6 border-b border-border">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <UserPlus className="h-6 w-6 text-primary" />
+            </div>
+            {!parentProfile?.school_name && !parentProfile?.neighborhood ? (
+              <>
+                <p className="font-medium text-foreground mb-1">Build Your Network</p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Add your school or neighborhood to discover parents nearby
+                </p>
+                <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+                  Complete Profile
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="font-medium text-foreground mb-1">Grow Your Circle</p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Search for parents at your school or in your area
+                </p>
+                <Button variant="default" size="sm" onClick={() => navigate('/find-parents')}>
+                  <UserPlus className="h-4 w-4 mr-1" />
+                  Find Parents
+                </Button>
+              </>
+            )}
           </div>
         )}
 
