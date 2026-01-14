@@ -143,8 +143,7 @@ export function CoordinationFeed() {
   return (
     <div className="space-y-4">
       {/* Header with create button */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Coordination</h2>
+      <div className="flex items-center justify-end">
         <CreateThreadDialog onCreateThread={createThread} />
       </div>
 
