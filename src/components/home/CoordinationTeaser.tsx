@@ -355,14 +355,16 @@ const CoordinationTeaser = ({ className }: CoordinationTeaserProps) => {
             </div>
 
             {/* Stats card */}
-            <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-secondary/5 rounded-xl p-5 text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3">
-                <Clock className="h-6 w-6 text-primary" />
+            <div className="bg-muted/50 rounded-xl p-4 border border-border">
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-secondary/10">
+                  <Clock className="h-5 w-5 text-secondary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-lg font-semibold text-foreground">2.5 hrs saved</p>
+                  <p className="text-xs text-muted-foreground">weekly by coordinating together</p>
+                </div>
               </div>
-              <p className="text-3xl font-bold text-foreground mb-1">2.5 hrs</p>
-              <p className="text-sm text-muted-foreground">
-                Saved weekly by coordinating with other parents
-              </p>
             </div>
           </div>
         </div>

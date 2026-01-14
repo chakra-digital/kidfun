@@ -317,11 +317,11 @@ const Index = () => {
         </section>
 
         {/* FunFund Section */}
-        <section className="py-16 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
+        <section className="py-16 bg-gradient-to-r from-rose-50 via-amber-50/50 to-rose-50 dark:from-rose-950/20 dark:via-amber-950/10 dark:to-rose-950/20">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mb-6">
-                <Heart className="h-8 w-8 text-primary" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rose-500/10 mb-6">
+                <Heart className="h-8 w-8 text-rose-500" />
               </div>
               <h2 className="text-3xl font-bold mb-4">KidFun FunFund</h2>
               <p className="text-lg text-muted-foreground mb-6">
@@ -330,11 +330,11 @@ const Index = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <div className="px-6 py-3 rounded-xl bg-background border shadow-sm">
-                  <p className="text-2xl font-bold text-primary">$0</p>
+                  <p className="text-2xl font-bold text-rose-500">$1,200</p>
                   <p className="text-sm text-muted-foreground">Raised so far</p>
                 </div>
                 <div className="px-6 py-3 rounded-xl bg-background border shadow-sm">
-                  <p className="text-2xl font-bold text-primary">0</p>
+                  <p className="text-2xl font-bold text-rose-500">5</p>
                   <p className="text-sm text-muted-foreground">Kids funded</p>
                 </div>
               </div>
