@@ -296,14 +296,16 @@ const CoordinationTeaser = ({ className }: CoordinationTeaserProps) => {
               />
             ))}
 
-            <Button 
-              onClick={handleStartPlan}
-              className="w-full btn-glow"
-              size="lg"
-            >
-              {isLoggedIn ? 'Start a Plan with Friends' : 'Sign Up to Start Planning'}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <div className="flex justify-center">
+              <Button 
+                onClick={handleStartPlan}
+                className="btn-glow"
+                size="lg"
+              >
+                {isLoggedIn ? 'Start a Plan with Friends' : 'Sign Up to Start Planning'}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Sidebar */}
