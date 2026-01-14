@@ -63,41 +63,31 @@ const ParentCard = ({ parent, onConnect, showConnectButton = true, connectionSta
   };
 
   return (
-    <Card className="p-4">
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <h4 className="font-semibold text-lg text-foreground">
-            {parent.profile?.first_name} {parent.profile?.last_name}
-          </h4>
-          <p className="text-sm text-muted-foreground">{parent.profile?.email}</p>
+    <Card className="p-5 rounded-2xl border-border/50 hover:border-border hover:shadow-md transition-all duration-200">
+      <div className="flex justify-between items-start gap-3 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-400 to-orange-300 flex items-center justify-center text-white font-semibold text-lg shadow-md">
+            {parent.profile?.first_name?.charAt(0) || '?'}
+          </div>
+          <div>
+            <h4 className="font-semibold text-base text-foreground">
+              {parent.profile?.first_name} {parent.profile?.last_name}
+            </h4>
+            <p className="text-sm text-muted-foreground">{parent.profile?.email}</p>
+          </div>
         </div>
         {renderActionButton()}
       </div>
 
-      <div className="space-y-2">
+      <div className="flex gap-2 flex-wrap">
         {parent.school_name && (
-          <div className="flex items-center text-sm">
-            <School className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>{parent.school_name}</span>
-          </div>
-        )}
-        {parent.neighborhood && (
-          <div className="flex items-center text-sm">
-            <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-            <span>{parent.neighborhood}</span>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-3 flex gap-2 flex-wrap">
-        {parent.school_name && (
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className="text-xs rounded-full px-3 py-1 bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300">
             <School className="h-3 w-3 mr-1" />
             {parent.school_name}
           </Badge>
         )}
         {parent.neighborhood && (
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs rounded-full px-3 py-1">
             <MapPin className="h-3 w-3 mr-1" />
             {parent.neighborhood}
           </Badge>
