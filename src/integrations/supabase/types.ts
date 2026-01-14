@@ -869,6 +869,7 @@ export type Database = {
         Returns: boolean
       }
       clean_expired_search_cache: { Args: never; Returns: undefined }
+      escape_ilike_pattern: { Args: { pattern: string }; Returns: string }
       get_activity_rsvp_summary: {
         Args: { share_id: string }
         Returns: {
